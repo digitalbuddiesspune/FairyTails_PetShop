@@ -7,10 +7,10 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-[#1a1a1a] text-white">
+    <footer className="bg-[#1a1a1a] text-white w-full">
       {/* Newsletter Section */}
-      <div className="bg-[#a3e635] py-8">
-        <div className="container mx-auto px-4">
+      <div className="bg-[#a3e635] py-8 w-full">
+        <div className="w-full px-4 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-center md:text-left">
               <h3 className="text-xl font-bold text-gray-900">Join the FairyTails Family!</h3>
@@ -31,15 +31,16 @@ const Footer = () => {
       </div>
 
       {/* Main Footer Content */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="w-full px-4 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
-            <a href="/" className="flex items-center gap-2 mb-4">
-              <span className="text-3xl">🧚</span>
-              <span className="text-2xl font-bold text-[#a3e635]">
-                fairy<span className="text-white">tails</span>
-              </span>
+            <a href="/" className="inline-block mb-4 bg-white rounded-lg p-2">
+              <img 
+                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770283258/Untitled_design_nk8nhh.svg" 
+                alt="FairyTails Pet Shop" 
+                className="h-14 w-auto object-contain"
+              />
             </a>
             <p className="text-gray-400 text-sm mb-4">
               Your one-stop shop for all things pets. Quality products, expert advice, and endless love for your furry friends.
@@ -109,8 +110,8 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-800">
-        <div className="container mx-auto px-4 py-4">
+      <div className="border-t border-gray-800 w-full">
+        <div className="w-full px-4 lg:px-8 py-4">
           <p className="text-center text-gray-500 text-sm">
             © 2026 FairyTails Pet Shop. All rights reserved. Made with 💚 for pets everywhere.
           </p>

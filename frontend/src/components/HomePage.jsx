@@ -1,3 +1,5 @@
+import HeroBanner from './HeroBanner';
+
 const HomePage = () => {
   const categories = [
     { name: 'Dogs', icon: '🐕', color: 'bg-amber-100' },
@@ -24,44 +26,8 @@ const HomePage = () => {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-[#a3e635] to-[#84cc16] overflow-hidden">
-        <div className="container mx-auto px-4 py-16 md:py-24">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-center md:text-left max-w-xl">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4">
-                Everything Your Pet Needs
-              </h1>
-              <p className="text-lg md:text-xl text-gray-800 mb-8">
-                Premium food, toys, accessories & healthcare products for your furry, feathery, and scaly friends.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <a
-                  href="#shop"
-                  className="bg-[#1a1a1a] text-white px-8 py-4 rounded-full font-semibold hover:bg-[#2d2d2d] transition-colors"
-                >
-                  Shop Now
-                </a>
-                <a
-                  href="#consult"
-                  className="bg-white text-gray-900 px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-                >
-                  Consult a Vet
-                </a>
-              </div>
-            </div>
-            <div className="text-[150px] md:text-[200px] leading-none">
-              🐕‍🦺
-            </div>
-          </div>
-        </div>
-        {/* Decorative wave */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#f9fafb"/>
-          </svg>
-        </div>
-      </section>
+      {/* Hero Banner Carousel */}
+      <HeroBanner />
 
       {/* Services Bar */}
       <section className="bg-white border-b">

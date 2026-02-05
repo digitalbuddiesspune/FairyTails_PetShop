@@ -16,30 +16,31 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-50 w-full">
       {/* Top Bar */}
-      <div className="bg-[#1a1a1a] text-white">
-        <div className="container mx-auto px-4 py-3">
+      <div className="bg-[#1a1a1a] text-white w-full">
+        <div className="w-full px-4 lg:px-8 py-2">
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
-            <a href="/" className="flex items-center gap-2 shrink-0">
-              <span className="text-3xl">🧚</span>
-              <span className="text-2xl font-bold text-[#a3e635]">
-                fairy<span className="text-white">tails</span>
-              </span>
+            <a href="/" className="flex items-center shrink-0">
+              <img 
+                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770283258/Untitled_design_nk8nhh.svg" 
+                alt="FairyTails Pet Shop" 
+                className="h-14 md:h-16 w-auto object-contain"
+              />
             </a>
 
             {/* Search Bar */}
             <div className="flex-1 max-w-xl">
-              <div className="flex">
+              <div className="flex border border-gray-300 rounded-md overflow-hidden">
                 <input
                   type="text"
                   placeholder="Search for pet food, toys, accessories..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-l-md text-gray-800 focus:outline-none"
+                  className="w-full px-4 py-2.5 bg-white text-gray-800 focus:outline-none placeholder-gray-500"
                 />
-                <button className="bg-[#a3e635] px-4 py-2.5 rounded-r-md hover:bg-[#84cc16] transition-colors">
+                <button className="bg-[#a3e635] px-4 py-2.5 hover:bg-[#84cc16] transition-colors">
                   <SearchIcon />
                 </button>
               </div>
@@ -76,30 +77,30 @@ const Navbar = () => {
       </div>
 
       {/* Navigation Bar */}
-      <nav className="bg-[#2d2d2d] text-white">
-        <div className="container mx-auto px-4">
-          <ul className="flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide">
+      <nav className="bg-white text-gray-900 w-full border-b border-gray-200">
+        <div className="w-full px-4 lg:px-8">
+          <ul className="flex items-center justify-center gap-1">
             {categories.map((category, index) => (
               <li
                 key={index}
-                className="relative"
+                className="relative group"
                 onMouseEnter={() => category.hasDropdown && setActiveDropdown(index)}
                 onMouseLeave={() => setActiveDropdown(null)}
               >
                 <a
                   href={`#${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="flex items-center gap-1 px-4 py-3 text-sm font-medium hover:text-[#a3e635] transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1 px-4 py-3 text-sm font-medium text-gray-800 hover:text-[#65a30d] transition-colors whitespace-nowrap"
                 >
                   {category.name}
                   {category.hasDropdown && <ChevronDownIcon />}
                 </a>
                 
-                {/* Dropdown placeholder */}
+                {/* Dropdown */}
                 {category.hasDropdown && activeDropdown === index && (
-                  <div className="absolute top-full left-0 bg-white text-gray-800 rounded-md shadow-lg py-2 min-w-[200px] z-50">
-                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">View All {category.name}</a>
-                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">Popular Items</a>
-                    <a href="#" className="block px-4 py-2 hover:bg-gray-100">New Arrivals</a>
+                  <div className="absolute left-0 mt-0 bg-white text-gray-800 rounded-b-md shadow-lg py-2 min-w-[200px] z-[60] border border-gray-100">
+                    <a href="#" className="block px-4 py-2 hover:bg-gray-100 transition-colors">View All {category.name}</a>
+                    <a href="#" className="block px-4 py-2 hover:bg-gray-100 transition-colors">Popular Items</a>
+                    <a href="#" className="block px-4 py-2 hover:bg-gray-100 transition-colors">New Arrivals</a>
                   </div>
                 )}
               </li>
@@ -144,7 +145,7 @@ const CartIcon = () => (
 );
 
 const ChevronDownIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
   </svg>
 );
