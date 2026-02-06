@@ -2,12 +2,12 @@ import HeroBanner from './HeroBanner';
 
 const HomePage = () => {
   const categories = [
-    { name: 'Dogs', icon: '🐕', color: 'bg-amber-100' },
-    { name: 'Cats', icon: '🐈', color: 'bg-purple-100' },
-    { name: 'Birds', icon: '🐦', color: 'bg-blue-100' },
-    { name: 'Fish', icon: '🐠', color: 'bg-cyan-100' },
-    { name: 'Small Pets', icon: '🐹', color: 'bg-pink-100' },
-    { name: 'Reptiles', icon: '🦎', color: 'bg-green-100' },
+    { name: 'Clothes', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770287327/Untitled_design_1_kjwduy.svg', color: 'bg-amber-100' },
+    { name: 'Food', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770287785/Untitled_design_2_xnht2p.svg', color: 'bg-purple-100' },
+    { name: 'Toys', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770288630/Untitled_design_asmctz.png', color: 'bg-blue-100' },
+    { name: 'Skin Care', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289192/Untitled_design_3_fzqdjq.svg', color: 'bg-cyan-100' },
+    { name: 'House', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289385/Untitled_design_4_tpstae.svg', color: 'bg-pink-100' },
+    { name: 'Belt', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289827/Untitled_design_5_uondnk.svg', color: 'bg-green-100' },
   ];
 
   const featuredProducts = [
@@ -46,11 +46,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Shop by Pet Category */}
+      {/* Shop by Category */}
       <section className="py-12 md:py-16">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-8">
-            Shop by Pet
+            Shop by Category
           </h2>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
             {categories.map((category, index) => (
@@ -59,9 +59,17 @@ const HomePage = () => {
                 href={`#${category.name.toLowerCase()}`}
                 className={`${category.color} rounded-2xl p-6 text-center hover:shadow-lg transition-shadow group`}
               >
-                <span className="text-5xl md:text-6xl block mb-3 group-hover:scale-110 transition-transform">
-                  {category.icon}
-                </span>
+                {category.image ? (
+                  <img 
+                    src={category.image} 
+                    alt={category.name}
+                    className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-3 object-contain group-hover:scale-110 transition-transform"
+                  />
+                ) : (
+                  <span className="text-6xl md:text-8xl block mb-3 group-hover:scale-110 transition-transform">
+                    {category.icon}
+                  </span>
+                )}
                 <span className="font-semibold text-gray-900">{category.name}</span>
               </a>
             ))}
