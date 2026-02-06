@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
-app.use('/api/v1', authRoutes);
+app.use('/api/auth', authRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
