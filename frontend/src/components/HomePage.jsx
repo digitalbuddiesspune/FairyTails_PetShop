@@ -24,6 +24,87 @@ const HomePage = () => {
     { title: 'Secure Payment', description: '100% secure checkout', icon: '🔒' },
   ];
 
+  const categorySections = [
+    {
+      id: 'clothes',
+      name: 'Pets Clothes',
+      title: 'Dress Your Pet in Style',
+      description: 'Explore our adorable collection of pet clothing designed for comfort and fashion. From cozy sweaters to raincoats, we have everything to keep your furry friend looking fabulous in every season.',
+      features: ['Premium quality fabrics', 'Comfortable fit for all breeds', 'Seasonal collections', 'Easy to wash & maintain'],
+      color: 'bg-amber-50',
+      accentColor: 'bg-amber-500',
+      textColor: 'text-amber-600',
+      images: [
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360022/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1000_x_600_px_jssuuh.svg',
+      ]
+    },
+    {
+      id: 'food',
+      name: 'Pets Food',
+      title: 'Nutritious Meals for Happy Pets',
+      description: 'Give your pets the nutrition they deserve with our premium selection of pet food. We offer balanced diets for dogs, cats, birds, and more from trusted brands worldwide.',
+      features: ['Vet-approved formulas', 'Natural ingredients', 'Age-specific nutrition', 'Grain-free options available'],
+      color: 'bg-purple-50',
+      accentColor: 'bg-purple-500',
+      textColor: 'text-purple-600',
+      images: [
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360339/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_a7yk4z.svg',
+      ]
+    },
+    {
+      id: 'toys',
+      name: 'Pets Toys',
+      title: 'Endless Fun & Entertainment',
+      description: 'Keep your pets active and entertained with our exciting range of toys. From interactive puzzles to squeaky toys, we have something to delight every pet personality.',
+      features: ['Safe & durable materials', 'Interactive designs', 'Mental stimulation toys', 'Variety for all pet sizes'],
+      color: 'bg-blue-50',
+      accentColor: 'bg-blue-500',
+      textColor: 'text-blue-600',
+      images: [
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360630/Untitled_1000_x_600_px_t5visg.svg',
+      ]
+    },
+    {
+      id: 'skin-care',
+      name: 'Pets Skin Care',
+      title: 'Healthy Skin, Happy Pet',
+      description: 'Pamper your pets with our specialized skin care products. From gentle shampoos to moisturizing treatments, keep your pet\'s coat shiny and skin healthy.',
+      features: ['Dermatologist tested', 'Natural & organic options', 'Anti-itch formulas', 'Coat conditioning treatments'],
+      color: 'bg-cyan-50',
+      accentColor: 'bg-cyan-500',
+      textColor: 'text-cyan-600',
+      images: [
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770362158/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_900_x_600_px_xjzgei.svg',
+      ]
+    },
+    {
+      id: 'house',
+      name: 'Pets House',
+      title: 'Cozy Homes for Your Companions',
+      description: 'Create the perfect space for your pets with our comfortable beds, houses, and crates. Give them a place they can call their own for rest and relaxation.',
+      features: ['Orthopedic options', 'Easy to clean', 'Multiple sizes available', 'Stylish designs'],
+      color: 'bg-pink-50',
+      accentColor: 'bg-pink-500',
+      textColor: 'text-pink-600',
+      images: [
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289385/Untitled_design_4_tpstae.svg',
+      ]
+    },
+    {
+      id: 'belt',
+      name: 'Pets Belt & Leashes',
+      title: 'Walk with Confidence',
+      description: 'Explore our collection of premium leashes, harnesses, and collars. Designed for safety and comfort, perfect for daily walks and outdoor adventures.',
+      features: ['Adjustable & secure', 'Reflective for night walks', 'Padded for comfort', 'Durable hardware'],
+      color: 'bg-green-50',
+      accentColor: 'bg-green-500',
+      textColor: 'text-green-600',
+      images: [
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289827/Untitled_design_5_uondnk.svg',
+      ]
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Hero Banner Carousel */}
@@ -57,19 +138,24 @@ const HomePage = () => {
               <a
                 key={index}
                 href={`#${category.name.toLowerCase()}`}
-                className={`${category.color} rounded-2xl p-6 text-center hover:shadow-lg transition-shadow group`}
+                className="text-center group cursor-pointer"
               >
-                {category.image ? (
-                  <img 
-                    src={category.image} 
-                    alt={category.name}
-                    className="w-24 h-24 md:w-32 md:h-32 mx-auto mb-3 object-contain group-hover:scale-110 transition-transform"
-                  />
-                ) : (
-                  <span className="text-6xl md:text-8xl block mb-3 group-hover:scale-110 transition-transform">
-                    {category.icon}
-                  </span>
-                )}
+                <div className="relative flex items-center justify-center mb-4">
+                  {/* Circle background */}
+                  <div className={`${category.color} w-28 h-28 md:w-36 md:h-36 rounded-full shadow-md group-hover:shadow-xl transition-shadow`}></div>
+                  {/* Image/Icon positioned to pop out */}
+                  {category.image ? (
+                    <img 
+                      src={category.image} 
+                      alt={category.name}
+                      className="absolute w-32 h-32 md:w-40 md:h-40 object-contain -top-4 group-hover:scale-110 group-hover:-top-6 transition-all duration-300 drop-shadow-lg"
+                    />
+                  ) : (
+                    <span className="absolute text-7xl md:text-8xl -top-2 group-hover:scale-110 group-hover:-top-4 transition-all duration-300 drop-shadow-lg">
+                      {category.icon}
+                    </span>
+                  )}
+                </div>
                 <span className="font-semibold text-gray-900">{category.name}</span>
               </a>
             ))}
@@ -116,6 +202,71 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Category Detail Sections */}
+      {categorySections.map((section, index) => (
+        <section 
+          key={section.id} 
+          id={section.id}
+          className={`py-16 md:py-24 ${section.color}`}
+        >
+          <div className="container mx-auto px-4">
+            <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-8 md:gap-16`}>
+              {/* Info Side */}
+              <div className="flex-1 space-y-6">
+                <span className={`inline-block px-4 py-1 rounded-full text-sm font-semibold ${section.accentColor} text-white`}>
+                  {section.name}
+                </span>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                  {section.title}
+                </h2>
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  {section.description}
+                </p>
+                <ul className="space-y-3">
+                  {section.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-center gap-3">
+                      <span className={`w-6 h-6 rounded-full ${section.accentColor} flex items-center justify-center`}>
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                      <span className="text-gray-700">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a 
+                  href={`#shop-${section.id}`}
+                  className={`inline-block px-8 py-3 rounded-full font-semibold ${section.accentColor} text-white hover:opacity-90 transition-opacity shadow-lg`}
+                >
+                  Shop {section.name} →
+                </a>
+              </div>
+
+              {/* Images Side */}
+              <div className="flex-1 relative">
+                <div className="relative">
+                  {/* Decorative circle background */}
+                  <div className={`absolute inset-0 ${section.accentColor} opacity-10 rounded-full transform scale-75`}></div>
+                  
+                  {/* Main image */}
+                  <div className="relative z-10 flex items-center justify-center">
+                    <img 
+                      src={section.images[0]} 
+                      alt={section.name}
+                      className="w-72 h-72 md:w-96 md:h-96 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+
+                  {/* Floating decorative elements */}
+                  <div className={`absolute top-4 right-4 w-16 h-16 ${section.accentColor} opacity-20 rounded-full animate-pulse`}></div>
+                  <div className={`absolute bottom-8 left-4 w-12 h-12 ${section.accentColor} opacity-30 rounded-full animate-pulse`} style={{ animationDelay: '0.5s' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      ))}
 
       {/* Banner Section */}
       <section className="py-12 md:py-16">
