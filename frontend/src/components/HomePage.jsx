@@ -61,7 +61,7 @@ const HomePage = () => {
       accentColor: 'bg-blue-500',
       textColor: 'text-blue-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360630/Untitled_1000_x_600_px_t5visg.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770375875/Untitled_160_x_90_px_1_ocqzja.svg',
       ]
     },
     {
@@ -74,7 +74,7 @@ const HomePage = () => {
       accentColor: 'bg-cyan-500',
       textColor: 'text-cyan-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770362158/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_900_x_600_px_xjzgei.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770365101/Untitled_160_x_90_px_600_x_1000_px_600_x_800_px_znz6aj.svg',
       ]
     },
     {
@@ -87,7 +87,7 @@ const HomePage = () => {
       accentColor: 'bg-pink-500',
       textColor: 'text-pink-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289385/Untitled_design_4_tpstae.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770364698/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_2_blykem.svg',
       ]
     },
     {
@@ -100,7 +100,7 @@ const HomePage = () => {
       accentColor: 'bg-green-500',
       textColor: 'text-green-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289827/Untitled_design_5_uondnk.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770371876/Untitled_160_x_90_px_600_x_1000_px_600_x_800_px_1_ec1tsb.svg',
       ]
     },
   ];
@@ -109,23 +109,6 @@ const HomePage = () => {
     <main className="min-h-screen bg-gray-50">
       {/* Hero Banner Carousel */}
       <HeroBanner />
-
-      {/* Services Bar */}
-      <section className="bg-white border-b">
-        <div className="container mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {services.map((service, index) => (
-              <div key={index} className="flex items-center gap-3 justify-center md:justify-start">
-                <span className="text-2xl">{service.icon}</span>
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-sm">{service.title}</h4>
-                  <p className="text-gray-500 text-xs">{service.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Shop by Category */}
       <section className="py-12 md:py-16">
@@ -327,6 +310,34 @@ const HomePage = () => {
               <h3 className="text-xl font-bold text-gray-900 mb-2">Expert Support</h3>
               <p className="text-gray-600">Our team of pet experts and vets are always here to help you make informed decisions.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Services */}
+      <section className="py-16 md:py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-black mb-4">
+              Our Promise to You
+            </h2>
+            <p className="text-black max-w-2xl mx-auto">
+              We're committed to providing the best shopping experience for you and your furry friends
+            </p>
+          </div>
+          <div className="grid grid-cols-2  md:grid-cols-4 gap-6">
+            {services.map((service, index) => (
+              <div 
+                key={index} 
+                className="bg-gray-100 backdrop-blur-sm rounded-2xl p-6 text-center hover:bg-gray-200 transition-all duration-300 hover:scale-105 group"
+              >
+                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-shadow">
+                  <span className="text-3xl">{service.icon}</span>
+                </div>
+                <h4 className="font-bold text-black text-lg mb-2">{service.title}</h4>
+                <p className="text-black text-sm">{service.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
