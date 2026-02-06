@@ -130,79 +130,78 @@ const Profile = () => {
 
       case 'settings':
         return (
-          <div className="animate-fadeIn h-full flex flex-col justify-center items-center py-10">
-            {/* Redundant H2 removed */}
+          <div className="animate-fadeIn h-full flex flex-col justify-center items-center py-4">
 
             {updateSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-600 px-6 py-3 rounded-xl mb-6 flex items-center justify-center gap-3 text-lg max-w-xl mx-auto w-full">
+              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-2 rounded-xl mb-4 flex items-center justify-center gap-2 text-base max-w-lg mx-auto w-full">
                 <span>✓</span> {updateSuccess}
               </div>
             )}
 
             {updateError && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-3 rounded-xl mb-6 flex items-center justify-center gap-3 text-lg max-w-xl mx-auto w-full">
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-xl mb-4 flex items-center justify-center gap-2 text-base max-w-lg mx-auto w-full">
                 <span>✕</span> {updateError}
               </div>
             )}
 
             <div className="w-full flex items-center justify-center">
-              <div className="max-w-xl w-full bg-white/60 backdrop-blur-sm border border-white/80 p-8 sm:p-10 rounded-3xl shadow-sm">
+              <div className="max-w-lg w-full bg-white/60 backdrop-blur-sm border border-white/80 p-6 sm:p-8 rounded-3xl shadow-sm">
                 {!isEditing ? (
-                  <div className="space-y-6">
-                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
-                      <label className="text-sm text-gray-500 uppercase font-bold tracking-wide">Full Name</label>
-                      <p className="text-gray-900 font-bold text-xl mt-1">{user?.name || 'Not set'}</p>
+                  <div className="space-y-4">
+                    <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                      <label className="text-xs text-gray-500 uppercase font-bold tracking-wide">Full Name</label>
+                      <p className="text-gray-900 font-bold text-lg mt-0.5">{user?.name || 'Not set'}</p>
                     </div>
-                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
-                      <label className="text-sm text-gray-500 uppercase font-bold tracking-wide">Email Address</label>
-                      <p className="text-gray-900 font-bold text-xl mt-1 break-all">{user?.email || 'Not set'}</p>
+                    <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                      <label className="text-xs text-gray-500 uppercase font-bold tracking-wide">Email Address</label>
+                      <p className="text-gray-900 font-bold text-lg mt-0.5 break-all">{user?.email || 'Not set'}</p>
                     </div>
-                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
-                      <label className="text-sm text-gray-500 uppercase font-bold tracking-wide">Phone Number</label>
-                      <p className="text-gray-900 font-bold text-xl mt-1">{user?.phone || 'Not set'}</p>
+                    <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                      <label className="text-xs text-gray-500 uppercase font-bold tracking-wide">Phone Number</label>
+                      <p className="text-gray-900 font-bold text-lg mt-0.5">{user?.phone || 'Not set'}</p>
                     </div>
-                    <div className="text-center pt-4">
+                    <div className="text-center pt-2">
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3 rounded-xl transition-colors font-bold text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                       >
                         ✏️ Edit Profile
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <form onSubmit={handleUpdateProfile} className="space-y-5">
+                  <form onSubmit={handleUpdateProfile} className="space-y-3">
                     <div>
-                      <label className="block text-base font-bold text-gray-700 mb-2">Full Name</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Full Name</label>
                       <input
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-5 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-lg transition-all"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-base transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-base font-bold text-gray-700 mb-2">Email Address</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Email Address</label>
                       <input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-5 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-lg transition-all"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-base transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-base font-bold text-gray-700 mb-2">Phone Number</label>
+                      <label className="block text-sm font-bold text-gray-700 mb-1">Phone Number</label>
                       <input
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full px-5 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-lg transition-all"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-base transition-all"
                       />
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-3 justify-center">
                       <button
                         type="submit"
-                        className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3 rounded-xl transition-colors font-bold text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                       >
                         Save
                       </button>
@@ -212,7 +211,7 @@ const Profile = () => {
                           setIsEditing(false);
                           setUpdateError('');
                         }}
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-xl transition-colors font-bold text-lg"
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl transition-colors font-bold text-base"
                       >
                         Cancel
                       </button>
