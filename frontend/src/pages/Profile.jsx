@@ -40,10 +40,10 @@ const Profile = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setUpdateError('');
-    
+
     try {
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch('http://localhost:3000/api/auth/update', {
         method: 'PUT',
         headers: {
@@ -95,121 +95,132 @@ const Profile = () => {
     switch (activeTab) {
       case 'orders':
         return (
-          <div className="animate-fadeIn">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Your Orders</h2>
-            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 sm:p-6 text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl sm:text-3xl">📦</span>
+          <div className="animate-fadeIn h-full flex flex-col">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10">Your Orders</h2>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 sm:p-12 text-center max-w-lg w-full shadow-sm">
+                <div className="w-28 h-28 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-6xl">📦</span>
+                </div>
+                <p className="text-blue-600 font-bold mb-6 text-xl">No orders available</p>
+                <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                  Start Shopping
+                </button>
               </div>
-              <p className="text-blue-600 font-medium mb-3 text-sm sm:text-base">No orders available</p>
-              <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-4 sm:px-5 py-2 rounded-lg transition-colors font-medium text-xs sm:text-sm">
-                Start Shopping
-              </button>
             </div>
           </div>
         );
       case 'address':
         return (
-          <div className="animate-fadeIn">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Your Addresses</h2>
-            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 sm:p-6 text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl sm:text-3xl">📍</span>
+          <div className="animate-fadeIn h-full flex flex-col">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10">Your Addresses</h2>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 sm:p-12 text-center max-w-lg w-full shadow-sm">
+                <div className="w-28 h-28 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-6xl">📍</span>
+                </div>
+                <p className="text-gray-500 font-medium mb-6 text-xl">No addresses saved</p>
+                <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                  + Add New Address
+                </button>
               </div>
-              <p className="text-gray-500 mb-3 text-sm sm:text-base">No addresses saved</p>
-              <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-4 sm:px-5 py-2 rounded-lg transition-colors font-medium text-xs sm:text-sm">
-                + Add New Address
-              </button>
             </div>
           </div>
         );
+
       case 'settings':
         return (
-          <div className="animate-fadeIn">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4">Account Settings</h2>
-            
+          <div className="animate-fadeIn h-full flex flex-col justify-center items-center py-10">
+            {/* Redundant H2 removed */}
+
             {updateSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-600 px-3 sm:px-4 py-2 rounded-lg mb-3 flex items-center gap-2 text-xs sm:text-sm">
+              <div className="bg-green-50 border border-green-200 text-green-600 px-6 py-3 rounded-xl mb-6 flex items-center justify-center gap-3 text-lg max-w-xl mx-auto w-full">
                 <span>✓</span> {updateSuccess}
               </div>
             )}
-            
+
             {updateError && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-3 sm:px-4 py-2 rounded-lg mb-3 flex items-center gap-2 text-xs sm:text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-3 rounded-xl mb-6 flex items-center justify-center gap-3 text-lg max-w-xl mx-auto w-full">
                 <span>✕</span> {updateError}
               </div>
             )}
 
-            {!isEditing ? (
-              <div className="space-y-2">
-                <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-                  <label className="text-xs text-gray-500 uppercase font-medium">Full Name</label>
-                  <p className="text-gray-900 font-semibold text-sm sm:text-base">{user?.name || 'Not set'}</p>
-                </div>
-                <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-                  <label className="text-xs text-gray-500 uppercase font-medium">Email Address</label>
-                  <p className="text-gray-900 font-semibold text-sm sm:text-base break-all">{user?.email || 'Not set'}</p>
-                </div>
-                <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-                  <label className="text-xs text-gray-500 uppercase font-medium">Phone Number</label>
-                  <p className="text-gray-900 font-semibold text-sm sm:text-base">{user?.phone || 'Not set'}</p>
-                </div>
-                <button 
-                  onClick={() => setIsEditing(true)}
-                  className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-5 sm:px-6 py-2 rounded-lg transition-colors font-semibold text-xs sm:text-sm mt-3"
-                >
-                  ✏️ Edit Profile
-                </button>
+            <div className="w-full flex items-center justify-center">
+              <div className="max-w-xl w-full bg-white/60 backdrop-blur-sm border border-white/80 p-8 sm:p-10 rounded-3xl shadow-sm">
+                {!isEditing ? (
+                  <div className="space-y-6">
+                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
+                      <label className="text-sm text-gray-500 uppercase font-bold tracking-wide">Full Name</label>
+                      <p className="text-gray-900 font-bold text-xl mt-1">{user?.name || 'Not set'}</p>
+                    </div>
+                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
+                      <label className="text-sm text-gray-500 uppercase font-bold tracking-wide">Email Address</label>
+                      <p className="text-gray-900 font-bold text-xl mt-1 break-all">{user?.email || 'Not set'}</p>
+                    </div>
+                    <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">
+                      <label className="text-sm text-gray-500 uppercase font-bold tracking-wide">Phone Number</label>
+                      <p className="text-gray-900 font-bold text-xl mt-1">{user?.phone || 'Not set'}</p>
+                    </div>
+                    <div className="text-center pt-4">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3 rounded-xl transition-colors font-bold text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                      >
+                        ✏️ Edit Profile
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleUpdateProfile} className="space-y-5">
+                    <div>
+                      <label className="block text-base font-bold text-gray-700 mb-2">Full Name</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-5 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-lg transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-base font-bold text-gray-700 mb-2">Email Address</label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full px-5 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-lg transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-base font-bold text-gray-700 mb-2">Phone Number</label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="w-full px-5 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-lg transition-all"
+                      />
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center">
+                      <button
+                        type="submit"
+                        className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3 rounded-xl transition-colors font-bold text-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditing(false);
+                          setUpdateError('');
+                        }}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-8 py-3 rounded-xl transition-colors font-bold text-lg"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
-            ) : (
-              <form onSubmit={handleUpdateProfile} className="space-y-3">
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none text-sm"
-                  />
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                  <button 
-                    type="submit"
-                    className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-5 py-2 rounded-lg transition-colors font-semibold text-xs sm:text-sm"
-                  >
-                    Save Changes
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      setIsEditing(false);
-                      setUpdateError('');
-                    }}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded-lg transition-colors font-semibold text-xs sm:text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
+            </div>
           </div>
         );
       default:
@@ -220,97 +231,94 @@ const Profile = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 md:py-10">
-      <div className="container mx-auto px-3 sm:px-4">
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
-          {/* Left Sidebar */}
-          <div className="w-full lg:w-64 xl:w-72 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
-            {/* User Greeting - Inside Sidebar */}
-            <div className="p-3 sm:p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-white">
-              <h1 className="text-base sm:text-lg font-bold text-gray-900">Hi {user.name} 👋</h1>
-            </div>
-            
-            {/* Menu Items - Desktop */}
-            <div className="hidden lg:block">
-              {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleMenuClick(item.id)}
-                  className={`w-full flex items-center justify-between px-3 sm:px-4 py-3 border-b border-gray-100 transition-all ${
-                    activeTab === item.id 
-                      ? 'bg-blue-100/60 border-l-4 border-l-blue-500 text-blue-700' 
-                      : 'hover:bg-gray-50 text-gray-700'
-                  } ${item.id === 'logout' ? 'text-red-500 hover:bg-red-50' : ''}`}
-                >
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <span className={`${activeTab === item.id ? 'text-blue-500' : item.id === 'logout' ? 'text-red-500' : 'text-gray-500'}`}>
-                      {item.icon}
-                    </span>
-                    <span className="font-medium text-xs sm:text-sm">{item.label}</span>
+    <div className="min-h-screen bg-[#fff7ed] py-4 relative overflow-hidden font-sans">
+
+      <div className="w-full px-4 relative z-10">
+        <div className="flex flex-col lg:flex-row gap-6">
+
+          {/* Left Sidebar - Profile Navigation */}
+          <div className="w-full lg:w-72 flex-shrink-0">
+            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-orange-100/50 border border-white/50 overflow-hidden">
+              {/* User Header */}
+              {/* User Header - Compact */}
+              <div className="p-5 text-center bg-gradient-to-b from-white to-[#fefce8]">
+                <div className="w-16 h-16 mx-auto mb-3 relative">
+                  <div className="absolute inset-0 bg-[#fcd34d] rounded-full blur-md opacity-50"></div>
+                  <div className="relative bg-white rounded-full w-full h-full flex items-center justify-center border-2 border-[#fff7ed] shadow-inner text-2xl">
+                    {user.name ? user.name.charAt(0).toUpperCase() : '👤'}
                   </div>
-                  <ChevronRightIcon />
-                </button>
-              ))}
-            </div>
-
-            {/* Mobile Menu Toggle */}
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden w-full flex items-center justify-between px-3 sm:px-4 py-3 text-gray-700"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-gray-500">
-                  {menuItems.find(m => m.id === activeTab)?.icon}
-                </span>
-                <span className="font-medium text-xs sm:text-sm">{menuItems.find(m => m.id === activeTab)?.label}</span>
+                  <div className="absolute bottom-0 right-0 bg-[#65a30d] w-4 h-4 rounded-full border border-white"></div>
+                </div>
+                <h1 className="text-lg font-bold text-gray-800 mb-0.5">Hi, {user.name}</h1>
+                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Pet Lover</p>
               </div>
-              <ChevronDownIcon className={`transition-transform ${mobileMenuOpen ? 'rotate-180' : ''}`} />
-            </button>
 
-            {/* Mobile Menu Dropdown - Inline */}
-            {mobileMenuOpen && (
-              <div className="lg:hidden border-t border-gray-100 animate-slideDown">
+              {/* Navigation Menu */}
+              <div className="p-4 space-y-2">
                 {menuItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => handleMenuClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3 sm:px-4 py-3 border-b border-gray-100 transition-all ${
-                      activeTab === item.id 
-                        ? 'bg-blue-100/60 text-blue-700' 
-                        : 'hover:bg-gray-50 text-gray-700'
-                    } ${item.id === 'logout' ? 'text-red-500 hover:bg-red-50' : ''}`}
+                    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 ${activeTab === item.id
+                      ? 'bg-[#65a30d] text-white shadow-lg shadow-[#65a30d]/30 scale-100'
+                      : 'text-gray-600 hover:bg-[#fefce8] hover:text-[#65a30d]'
+                      } ${item.id === 'logout' ? 'mt-4 !text-red-500 hover:bg-red-50 hover:!text-red-600' : ''}`}
                   >
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <span className={`${activeTab === item.id ? 'text-blue-500' : item.id === 'logout' ? 'text-red-500' : 'text-gray-500'}`}>
-                        {item.icon}
-                      </span>
-                      <span className="font-medium text-xs sm:text-sm">{item.label}</span>
-                    </div>
-                    {activeTab === item.id && <span className="text-blue-500 text-sm">✓</span>}
+                    <span className={`p-2 rounded-xl ${activeTab === item.id ? 'bg-white/20' : 'bg-transparent'}`}>
+                      {item.icon}
+                    </span>
+                    <span className="font-semibold text-sm">{item.label}</span>
+                    {activeTab === item.id && <ChevronRightIcon className="ml-auto w-4 h-4 text-white/80" />}
                   </button>
                 ))}
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Right Content with Dog Image */}
-          <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden min-h-[300px] sm:min-h-[350px]">
-            <div className="flex h-full">
-              {/* Content Area */}
-              <div className="flex-1 p-3 sm:p-4 md:p-5">
+          {/* Right Content Area */}
+          <div className="flex-1">
+            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl shadow-orange-100/50 border border-white/50 min-h-[80vh] relative overflow-hidden flex flex-col">
+
+              {/* Internal Background Decor - Pet Themed Patterns */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-[#fcd34d]/20 to-transparent rounded-full blur-3xl -mr-20 -mt-20" />
+                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-[#86efac]/20 to-transparent rounded-full blur-3xl -ml-20 -mb-20" />
+
+                {/* Floating Paw Prints (Moved Inside) */}
+                <PawPrint className="absolute top-10 right-10 text-[#fcd34d]/30 w-14 h-14 rotate-12 animate-float" />
+                <PawPrint className="absolute bottom-20 left-10 text-[#86efac]/30 w-20 h-20 -rotate-12 animate-float-delayed" />
+                <BoneIcon className="absolute top-1/2 left-[10%] text-[#fdba74]/20 w-10 h-10 rotate-45 animate-pulse-slow" />
+              </div>
+              {/* Content Header Image/Banner */}
+              <div className="h-32 bg-gradient-to-r from-[#fefce8] to-[#fff7ed] relative overflow-hidden">
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#fde047]/20 rounded-full blur-2xl"></div>
+                <div className="absolute top-0 left-0 w-full h-full opacity-30" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%23fcd34d\" fill-opacity=\"0.4\" fill-rule=\"evenodd\"%3E%3Ccircle cx=\"3\" cy=\"3\" r=\"3\"/%3E%3Ccircle cx=\"13\" cy=\"13\" r=\"3\"/%3E%3C/g%3E%3C/svg%3E')" }}></div>
+                {/* Dynamic Header Title based on Tab */}
+                <div className="absolute bottom-0 left-0 p-8">
+                  <h2 className="text-3xl font-bold text-gray-800 capitalize tracking-tight">
+                    {menuItems.find(m => m.id === activeTab)?.label}
+                  </h2>
+                </div>
+              </div>
+
+              {/* Main Content */}
+              <div className="p-8 flex-1 relative z-10">
                 {renderContent()}
               </div>
-              
-              {/* Dog Image - Right Side */}
-              <div className="hidden lg:flex items-end justify-center px-2 sm:px-4 pb-4 bg-gradient-to-t from-blue-50/30 to-transparent">
-                <img 
-                  src={dogImage} 
-                  alt="Cute Dog" 
-                  className="w-32 xl:w-40 h-auto object-contain opacity-90"
+
+              {/* Cute decoration at the bottom right */}
+              {/* Cute decoration at the bottom right */}
+              <div className="absolute bottom-0 right-0 pointer-events-none opacity-90 transition-opacity duration-500">
+                <img
+                  src={dogImage}
+                  alt="Happy Dog"
+                  className="w-48 h-auto object-contain -mb-4 -mr-4"
+                  style={{ maskImage: 'linear-gradient(to top, black 80%, transparent 100%)' }}
                 />
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -319,46 +327,79 @@ const Profile = () => {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes slideDown {
-          from { opacity: 0; max-height: 0; }
-          to { opacity: 1; max-height: 500px; }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(12deg); }
+          50% { transform: translateY(-20px) rotate(12deg); }
         }
-        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-        .animate-slideDown { animation: slideDown 0.3s ease-out; }
+        @keyframes float-delayed {
+          0%, 100% { transform: translateY(0) rotate(-12deg); }
+          50% { transform: translateY(-15px) rotate(-12deg); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float-delayed { animation: float-delayed 7s ease-in-out infinite; }
+        .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
       `}</style>
     </div>
   );
 };
 
-// Icons
+// --- Custom Icons ---
+
+const PawPrint = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M12 2C10.5 2 9.5 3.5 9.5 5C9.5 6.5 10.5 8 12 8C13.5 8 14.5 6.5 14.5 5C14.5 3.5 13.5 2 12 2Z" />
+    <path d="M4.5 6C3 6 2 7.5 2 9C2 10.5 3 12 4.5 12C6 12 7 10.5 7 9C7 7.5 6 6 4.5 6Z" />
+    <path d="M19.5 6C18 6 17 7.5 17 9C17 10.5 18 12 19.5 12C21 12 22 10.5 22 9C22 7.5 21 6 19.5 6Z" />
+    <path d="M6 14.5C6 12.567 8.68615 11 12 11C15.3138 11 18 12.567 18 14.5C18 16.433 15.3138 22 12 22C8.68615 22 6 16.433 6 14.5Z" />
+  </svg>
+);
+
+const BoneIcon = ({ className }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M17.7,6.3c-1.6,0-3,1-3.7,2.4c-0.7-1.4-2.1-2.4-3.7-2.4C8.2,6.3,6.5,8,6.5,10c0,1,0.4,1.9,1.1,2.5l-3,3c-1,1-1,2.6,0,3.5c1,1,2.6,1,3.5,0l3-3c0.6,0.7,1.5,1.1,2.5,1.1c2,0,3.7-1.7,3.7-3.7c0-1.6-1-3-2.4-3.7c1.4-0.7,2.4-2.1,2.4-3.7C19.8,8,19,7.1,17.7,6.3z" />
+  </svg>
+);
+
 const OrdersIcon = () => (
-  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
   </svg>
 );
 
 const AddressIcon = () => (
-  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+  </svg>
+);
+
+const SubscriptionIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const InviteIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
   </svg>
 );
 
 const SettingsIcon = () => (
-  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
 const LogoutIcon = () => (
-  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
   </svg>
 );
 
-const ChevronRightIcon = () => (
-  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+const ChevronRightIcon = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
   </svg>
 );

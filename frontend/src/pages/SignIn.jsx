@@ -62,13 +62,13 @@ const SignIn = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
       {/* Blurred Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat blur-xs scale-105"
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat  scale-105"
         style={{
-          backgroundImage: `url('https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770376479/Untitled_160_x_90_px_1920_x_1100_px_1_kjja8q.png')`
+          backgroundImage: `url('https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770381893/ChatGPT_Image_Feb_6_2026_06_13_42_PM_z4quyf.png')`
         }}
       />
-      
+
       {/* Overlay for better contrast */}
       <div className="absolute inset-0 bg-black/20" />
 
@@ -76,9 +76,9 @@ const SignIn = () => {
       <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
         {/* Logo/Header */}
         <div className="text-center mb-8">
-          
+
           <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-          
+
         </div>
 
         {/* Error */}
