@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import loginImage from '../assets/login.png';
 
 const SignIn = () => {
+  const baseUrl = import.meta.env.VITE_BACKEND_API;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -32,7 +33,7 @@ const SignIn = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/signin', {
+      const response = await fetch(`${baseUrl}/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

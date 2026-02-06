@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
     try {
-        const mongoURI = process.env.DBURL;
+        const mongoURI = process.env.MONGODB_URI;
         
         if (!mongoURI) {
             console.error('❌ DBURL is not defined in .env file');
