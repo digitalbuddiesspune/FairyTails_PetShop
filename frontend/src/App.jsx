@@ -4,6 +4,9 @@ import HomePage from './components/HomePage';
 import Footer from './components/Footer';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
+import Profile from './pages/Profile';
+import Contact from './pages/Contact';
+import About from './pages/About';
 import './App.css';
 
 // Layout component for pages with Navbar and Footer
@@ -36,6 +39,21 @@ function App() {
         <Route path="/home" element={
           <MainLayout>
             <HomePage />
+          </MainLayout>
+        } />
+        <Route path="/profile" element={
+          <MainLayout>
+            <Profile />
+          </MainLayout>
+        } />
+        <Route path="/contact" element={
+          <MainLayout>
+            <Contact />
+          </MainLayout>
+        } />
+        <Route path="/about" element={
+          <MainLayout>
+            <About />
           </MainLayout>
         } />
       </Routes>
