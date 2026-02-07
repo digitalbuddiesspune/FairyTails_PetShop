@@ -1,9 +1,35 @@
+import { Link } from 'react-router-dom';
+
 const Footer = () => {
   const footerLinks = {
-    'Shop by Pet': ['Dogs', 'Cats', 'Birds', 'Fish', 'Small Pets', 'Reptiles'],
-    'Help & Support': ['Contact Us', 'FAQs', 'Shipping Info', 'Returns & Refunds', 'Track Order', 'Store Locator'],
-    'About FairyTails': ['Our Story', 'Careers', 'Press', 'Blog', 'Partnerships', 'Affiliate Program'],
-    'Policies': ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Accessibility'],
+    'Shop by Category': [
+      { name: 'Dogs', path: '#dogs' },
+      { name: 'Cats', path: '#cats' },
+      { name: 'Toys', path: '#toys' },
+      { name: 'Accessories', path: '#accessories' },
+      { name: 'Grooming & Essential', path: '#grooming-essential' },
+      { name: 'Health & Supplement', path: '#health-supplement' },
+      { name: 'Beds & House', path: '#beds-house' },
+    ],
+    'Help & Support': [
+      { name: 'Contact Us', path: '/contact' },
+      { name: 'FAQs', path: '#faqs' },
+      { name: 'Shipping Info', path: '#shipping-info' },
+      { name: 'Returns & Refunds', path: '#returns-refunds' },
+      { name: 'Track Order', path: '#track-order' },
+    ],
+    'About FairyTails': [
+      { name: 'Our Story', path: '/about' },
+      { name: 'Careers', path: '#careers' },
+      { name: 'Blog', path: '#blog' },
+      { name: 'Partnerships', path: '#partnerships' },
+    ],
+    'Policies': [
+      { name: 'Privacy Policy', path: '/privacy-policy' },
+      { name: 'Terms of Service', path: '/terms-of-service' },
+      { name: 'Cookie Policy', path: '/cookie-policy' },
+      { name: 'Accessibility', path: '/accessibility' },
+    ],
   };
 
   return (
@@ -37,7 +63,7 @@ const Footer = () => {
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <a href="/" className="inline-block mb-4 bg-white rounded-lg p-2">
               <img 
-                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770283258/Untitled_design_nk8nhh.svg" 
+                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770288839/LOGO-2_l5wmxs.png" 
                 alt="FairyTails Pet Shop" 
                 className="h-14 w-auto object-contain"
               />
@@ -68,13 +94,22 @@ const Footer = () => {
               <h4 className="font-semibold text-white mb-4">{title}</h4>
               <ul className="space-y-2">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href={`#${link.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="text-gray-400 text-sm hover:text-[#a3e635] transition-colors"
-                    >
-                      {link}
-                    </a>
+                  <li key={link.name}>
+                    {link.path.startsWith('/') ? (
+                      <Link
+                        to={link.path}
+                        className="text-gray-400 text-sm hover:text-[#a3e635] transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.path}
+                        className="text-gray-400 text-sm hover:text-[#a3e635] transition-colors"
+                      >
+                        {link.name}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

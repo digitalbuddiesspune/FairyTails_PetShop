@@ -1,18 +1,153 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+
+// Icon mapping for subcategory names in the dropdown
+// Items with a `src` key render as images; others render as emoji text
+const subIconMap = {
+  'Dry Food': '🥫', 'Wet Food': '🍖', 'Dog Clothes': '👕', 'Cat Clothes': '👗',
+  'Treats': '🦴',
+  'Dogs': { src: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457891/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_vzgzug.svg', alt: 'Dogs' },
+  'Cats': { src: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457890/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_1_q3xxat.svg', alt: 'Cats' },
+};
+
+// Helper to render a subcategory icon (image or emoji)
+const SubIcon = ({ name }) => {
+  const icon = subIconMap[name];
+  if (icon && typeof icon === 'object' && icon.src) {
+    return <img src={icon.src} alt={icon.alt || name} className="w-6 h-6 object-contain" />;
+  }
+  return <span className="text-xl">{icon || '📦'}</span>;
+};
+
+// Map category slug → Food model category value for product links
+const slugToFoodCategory = {
+  'dogs': 'Dog',
+  'cats': 'Cat',
+};
+
+// SubCategory names that exist in the Food collection
+const foodSubCategories = ['Dry Food', 'Wet Food', 'Treats'];
+
+// Build the product link for a subcategory
+const getSubcategoryLink = (categorySlug, subName) => {
+  const foodCategory = slugToFoodCategory[categorySlug];
+  if (foodCategory && foodSubCategories.includes(subName)) {
+    return `/products?category=${foodCategory}&subCategory=${encodeURIComponent(subName)}`;
+  }
+  // For non-food subcategories, link to the category page
+  return `/category/${categorySlug}`;
+};
+
+// Dropdown component rendered outside overflow container
+const DropdownMenu = ({ category, index, onClose }) => {
+  const [position, setPosition] = useState({ left: 0 });
+
+  useEffect(() => {
+    const btn = document.querySelector(`[data-idx="${index}"]`);
+    if (btn) {
+      const rect = btn.getBoundingClientRect();
+      const navRect = btn.closest('nav').getBoundingClientRect();
+      setPosition({ left: rect.left - navRect.left });
+    }
+  }, [index]);
+
+  return (
+    <div
+      className="absolute top-full bg-white text-gray-800 rounded-b-lg shadow-xl py-2 min-w-[220px] z-[60] border border-gray-100"
+      style={{ left: position.left }}
+    >
+      {category.subcategories.map((sub, subIdx) => (
+        <div key={subIdx}>
+          <Link
+            to={getSubcategoryLink(category.slug, sub.name)}
+            onClick={onClose}
+            className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6EFD8] transition-colors"
+          >
+            <SubIcon name={sub.name} />
+            <span className="font-medium">{sub.name}</span>
+          </Link>
+          {/* Sub-subcategories (e.g., Treats -> Dental, Biscuits, Healthy) */}
+          {sub.subSubCategories?.length > 0 && (
+            <div className="pl-12 pb-1">
+              {sub.subSubCategories.map((subSub, ssIdx) => (
+                <Link
+                  key={ssIdx}
+                  to={getSubcategoryLink(category.slug, sub.name)}
+                  onClick={onClose}
+                  className="block px-3 py-1.5 text-sm text-gray-500 hover:text-[#65a30d] transition-colors"
+                >
+                  {subSub}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const Navbar = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
 
-  const categories = [
-    { name: 'Toys', hasDropdown: true },
-    { name: 'Clothes', hasDropdown: true },
-    { name: 'House', hasDropdown: true },
-    { name: 'Petscare', hasDropdown: true },
-    { name: 'Pet Food', hasDropdown: true },
-  ];
+  // Fetch categories from backend API on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/categories');
+        const data = await res.json();
+        if (data.success && data.data.length > 0) {
+          setCategories(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Fetch cart & wishlist counts for logged-in users
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setCartCount(0);
+      setWishlistCount(0);
+      return;
+    }
+    const headers = { Authorization: `Bearer ${token}` };
+
+    const fetchCounts = async () => {
+      try {
+        const [cartRes, wishRes] = await Promise.all([
+          fetch('http://localhost:3000/api/cart', { headers }),
+          fetch('http://localhost:3000/api/wishlist', { headers }),
+        ]);
+        const cartData = await cartRes.json();
+        const wishData = await wishRes.json();
+        if (cartData.success) setCartCount(cartData.data?.items?.length || 0);
+        if (wishData.success) setWishlistCount(wishData.data?.items?.length || 0);
+      } catch (err) {
+        // silently fail
+      }
+    };
+    fetchCounts();
+
+    // Re-check counts when the page regains focus (e.g. after adding to cart)
+    const onFocus = () => fetchCounts();
+    window.addEventListener('focus', onFocus);
+    // Listen to a custom event for instant updates from same tab
+    const onCountUpdate = () => fetchCounts();
+    window.addEventListener('cart-wishlist-update', onCountUpdate);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('cart-wishlist-update', onCountUpdate);
+    };
+  }, []);
 
   const handleCategoryClick = (index) => {
     if (activeDropdown === index) {
@@ -73,24 +208,33 @@ const Navbar = () => {
                 <span>Contact</span>
               </Link>
 
-              {/* About Us */}
+              {/* About Us - text only, no icon */}
               <Link 
                 to="/about" 
-                className="hidden lg:flex items-center gap-1 text-gray-800 hover:text-black font-medium text-sm transition-colors"
+                className="hidden lg:flex items-center text-gray-800 hover:text-black font-medium text-sm transition-colors"
               >
-                <InfoIcon />
-                <span>About</span>
+                About
               </Link>
 
-              {/* Location */}
-              <button className="text-gray-800 hover:text-black transition-colors" title="Location">
-                <LocationIcon />
-              </button>
+              {/* Wishlist */}
+              <Link to="/wishlist" className="text-gray-800 hover:text-black transition-colors relative" title="Wishlist">
+                <HeartIcon />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </span>
+                )}
+              </Link>
 
               {/* Cart */}
-              <button className="text-gray-800 hover:text-black transition-colors" title="Cart">
+              <Link to="/cart" className="text-gray-800 hover:text-black transition-colors relative" title="Cart">
                 <CartIcon />
-              </button>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </Link>
 
               {/* Profile */}
               <button 
@@ -121,37 +265,24 @@ const Navbar = () => {
         </div>
       </div>
 
-      <nav className="bg-black text-white w-full border-b border-gray-800">
+      <nav className="bg-black text-white w-full border-b border-gray-800 relative">
         <div className="w-full px-4 lg:px-8">
           <ul className="flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide">
             {categories.map((category, index) => (
-              <li key={index} className="relative">
-                <button
-                  onClick={() => handleCategoryClick(index)}
-                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-white hover:text-[#a3e635] hover:bg-gray-900 transition-colors whitespace-nowrap"
+              <li key={category._id || index} className="relative flex items-center" data-idx={index}>
+                <Link
+                  to={`/category/${category.slug}`}
+                  className="px-3 md:px-4 py-3 text-sm font-medium text-white hover:text-[#a3e635] hover:bg-gray-900 transition-colors whitespace-nowrap"
                 >
                   {category.name}
-                  <ChevronDownIcon isOpen={activeDropdown === index} />
-                </button>
-
-                {activeDropdown === index && (
-                  <div className="absolute left-0 mt-0 bg-white text-gray-800 rounded-b-lg shadow-xl py-2 min-w-[180px] z-[60] border border-gray-100">
-                    <a
-                      href={`#${category.name.toLowerCase()}-dogs`}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6EFD8] transition-colors"
-                    >
-                      <span className="text-xl">🐕</span>
-                      <span className="font-medium">Dogs</span>
-                    </a>
-
-                    <a
-                      href={`#${category.name.toLowerCase()}-cats`}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6EFD8] transition-colors"
-                    >
-                      <span className="text-xl">🐱</span>
-                      <span className="font-medium">Cats</span>
-                    </a>
-                  </div>
+                </Link>
+                {category.subcategories?.length > 0 && (
+                  <button
+                    onClick={() => handleCategoryClick(index)}
+                    className="py-3 pr-2 text-white hover:text-[#a3e635] transition-colors"
+                  >
+                    <ChevronDownIcon isOpen={activeDropdown === index} />
+                  </button>
                 )}
               </li>
             ))}
@@ -169,6 +300,15 @@ const Navbar = () => {
             </li>
           </ul>
         </div>
+
+        {/* Dropdown rendered OUTSIDE the overflow container */}
+        {activeDropdown !== null && categories[activeDropdown]?.subcategories?.length > 0 && (
+          <DropdownMenu 
+            category={categories[activeDropdown]} 
+            index={activeDropdown}
+            onClose={() => setActiveDropdown(null)}
+          />
+        )}
       </nav>
 
       {/* Click outside to close dropdown */}
@@ -186,13 +326,6 @@ const Navbar = () => {
 const SearchIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-  </svg>
-);
-
-const LocationIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
 
@@ -214,9 +347,9 @@ const PhoneIcon = () => (
   </svg>
 );
 
-const InfoIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+const HeartIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
   </svg>
 );
 

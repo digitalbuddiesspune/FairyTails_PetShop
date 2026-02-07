@@ -40,7 +40,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Our Location</h3>
-                    <p className="text-gray-600 text-sm">123 Pet Street, Animal City, Maharashtra 400001, India</p>
+                    <p className="text-gray-600 text-sm">DSK Vidyanagari Sus, Sus-road ,pashan, Baner, Pune, Maharashtra 411045</p>
                   </div>
                 </div>
 
@@ -50,8 +50,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Phone Number</h3>
-                    <p className="text-gray-600 text-sm">+91 98765 43210</p>
-                    <p className="text-gray-600 text-sm">+91 98765 43211</p>
+                    <p className="text-gray-600 text-sm">+91 90217 85257</p> 
                   </div>
                 </div>
 
@@ -167,6 +166,48 @@ const Contact = () => {
                 Send Message
               </button>
             </form>
+          </div>
+        </div>
+
+        {/* Google Map */}
+        <div className="max-w-6xl mx-auto mt-8 md:mt-12">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6 pb-4">
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <span className="w-10 h-10 bg-[#D6EFD8] rounded-xl flex items-center justify-center text-lg">📍</span>
+                Find Us Here
+              </h2>
+              <p className="text-gray-500 text-sm mt-1 ml-12">DSK Vidyanagari Sus, Sus-road, Pashan, Baner, Pune, Maharashtra 411045</p>
+            </div>
+            <div className="px-6 pb-6">
+              <div className="rounded-xl overflow-hidden border border-gray-200">
+                <iframe
+                  title="FairyTails Pet Shop Location"
+                  src="https://maps.google.com/maps?q=18.5273,73.7803&z=17&ie=UTF8&iwloc=B&output=embed"
+                  width="100%"
+                  height="400"
+                  style={{ border: 0 }}
+                  allowFullScreen=""
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full"
+                />
+              </div>
+              <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <p className="text-xs text-gray-400">Click the map to interact, zoom, and get directions.</p>
+                <a
+                  href="https://maps.app.goo.gl/H7kAH4feAhcVoZM58"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-[#65a30d] hover:text-[#4d7c0f] transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open in Google Maps
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>

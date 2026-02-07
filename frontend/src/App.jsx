@@ -7,6 +7,11 @@ import SignIn from './pages/SignIn';
 import Profile from './pages/Profile';
 import Contact from './pages/Contact';
 import About from './pages/About';
+import CategoryPage from './pages/CategoryPage';
+import CategoryProducts from './pages/CategoryProducts';
+import ProductDetail from './pages/ProductDetail';
+import CartPage from './pages/CartPage';
+import WishlistPage from './pages/WishlistPage';
 import './App.css';
 
 // Layout component for pages with Navbar and Footer
@@ -54,6 +59,31 @@ function App() {
         <Route path="/about" element={
           <MainLayout>
             <About />
+          </MainLayout>
+        } />
+        <Route path="/category/:slug" element={
+          <MainLayout>
+            <CategoryPage />
+          </MainLayout>
+        } />
+        <Route path="/products" element={
+          <MainLayout>
+            <CategoryProducts />
+          </MainLayout>
+        } />
+        <Route path="/product/:id" element={
+          <MainLayout>
+            <ProductDetail />
+          </MainLayout>
+        } />
+        <Route path="/cart" element={
+          <MainLayout>
+            <CartPage />
+          </MainLayout>
+        } />
+        <Route path="/wishlist" element={
+          <MainLayout>
+            <WishlistPage />
           </MainLayout>
         } />
       </Routes>

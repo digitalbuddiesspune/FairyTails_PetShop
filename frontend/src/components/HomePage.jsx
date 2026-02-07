@@ -1,14 +1,36 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import HeroBanner from './HeroBanner';
 
+// Color mapping for category circle backgrounds
+const categoryColors = {
+  'dogs': 'bg-amber-100',
+  'cats': 'bg-purple-100',
+  'toys': 'bg-blue-100',
+  'accessories': 'bg-rose-100',
+  'grooming-and-essential': 'bg-cyan-100',
+  'health-and-supplement': 'bg-green-100',
+  'beds-and-house': 'bg-pink-100',
+};
+
 const HomePage = () => {
-  const categories = [
-    { name: 'Clothes', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770287327/Untitled_design_1_kjwduy.svg', color: 'bg-amber-100' },
-    { name: 'Food', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770287785/Untitled_design_2_xnht2p.svg', color: 'bg-purple-100' },
-    { name: 'Toys', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770288630/Untitled_design_asmctz.png', color: 'bg-blue-100' },
-    { name: 'Skin Care', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289192/Untitled_design_3_fzqdjq.svg', color: 'bg-cyan-100' },
-    { name: 'House', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289385/Untitled_design_4_tpstae.svg', color: 'bg-pink-100' },
-    { name: 'Belt', image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770289827/Untitled_design_5_uondnk.svg', color: 'bg-green-100' },
-  ];
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories from backend API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch('http://localhost:3000/api/categories');
+        const data = await res.json();
+        if (data.success) {
+          setCategories(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const featuredProducts = [
     { id: 1, name: 'Premium Dog Food', price: 1299, originalPrice: 1599, image: '🍖', rating: 4.5, reviews: 128 },
@@ -26,34 +48,34 @@ const HomePage = () => {
 
   const categorySections = [
     {
-      id: 'clothes',
-      name: 'Pets Clothes',
-      title: 'Dress Your Pet in Style',
-      description: 'Explore our adorable collection of pet clothing designed for comfort and fashion. From cozy sweaters to raincoats, we have everything to keep your furry friend looking fabulous in every season.',
-      features: ['Premium quality fabrics', 'Comfortable fit for all breeds', 'Seasonal collections', 'Easy to wash & maintain'],
+      id: 'dogs',
+      name: 'Dogs',
+      title: 'Everything for Your Best Friend',
+      description: 'From premium dog food to toys and accessories, find everything your canine companion needs. We carry top brands and vet-recommended products to keep your dog healthy, happy, and well-groomed.',
+      features: ['Premium dog food & treats', 'Durable chew & fetch toys', 'Comfortable collars & leashes', 'Grooming essentials'],
       color: 'bg-amber-50',
       accentColor: 'bg-amber-500',
       textColor: 'text-amber-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360022/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1000_x_600_px_jssuuh.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770445933/Untitled_design_9_jtfiba.svg',
       ]
     },
     {
-      id: 'food',
-      name: 'Pets Food',
-      title: 'Nutritious Meals for Happy Pets',
-      description: 'Give your pets the nutrition they deserve with our premium selection of pet food. We offer balanced diets for dogs, cats, birds, and more from trusted brands worldwide.',
-      features: ['Vet-approved formulas', 'Natural ingredients', 'Age-specific nutrition', 'Grain-free options available'],
+      id: 'cats',
+      name: 'Cats',
+      title: 'Purr-fect Products for Your Feline',
+      description: 'Explore our curated collection of cat essentials. From nutritious meals and interactive toys to cozy beds and scratching posts, we have everything to keep your cat content and entertained.',
+      features: ['Nutritious cat food & treats', 'Interactive & feather toys', 'Scratching posts & trees', 'Litter & hygiene products'],
       color: 'bg-purple-50',
       accentColor: 'bg-purple-500',
       textColor: 'text-purple-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360339/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_a7yk4z.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770445459/Untitled_900_x_600_px_1080_x_1080_px_eerbg4.svg',
       ]
     },
     {
       id: 'toys',
-      name: 'Pets Toys',
+      name: 'Toys',
       title: 'Endless Fun & Entertainment',
       description: 'Keep your pets active and entertained with our exciting range of toys. From interactive puzzles to squeaky toys, we have something to delight every pet personality.',
       features: ['Safe & durable materials', 'Interactive designs', 'Mental stimulation toys', 'Variety for all pet sizes'],
@@ -65,11 +87,24 @@ const HomePage = () => {
       ]
     },
     {
-      id: 'skin-care',
-      name: 'Pets Skin Care',
-      title: 'Healthy Skin, Happy Pet',
-      description: 'Pamper your pets with our specialized skin care products. From gentle shampoos to moisturizing treatments, keep your pet\'s coat shiny and skin healthy.',
-      features: ['Dermatologist tested', 'Natural & organic options', 'Anti-itch formulas', 'Coat conditioning treatments'],
+      id: 'accessories',
+      name: 'Accessories',
+      title: 'Style Meets Functionality',
+      description: 'Discover our collection of pet accessories including collars, leashes, bowls, carriers, and clothing. Designed for safety, comfort, and style for your furry companions.',
+      features: ['Adjustable collars & leashes', 'Travel-friendly carriers', 'Stylish pet clothing', 'Durable bowls & feeders'],
+      color: 'bg-rose-50',
+      accentColor: 'bg-rose-500',
+      textColor: 'text-rose-600',
+      images: [
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770371876/Untitled_160_x_90_px_600_x_1000_px_600_x_800_px_1_ec1tsb.svg',
+      ]
+    },
+    {
+      id: 'grooming-essential',
+      name: 'Grooming & Essential',
+      title: 'Keep Them Clean & Fresh',
+      description: 'Pamper your pets with our professional-grade grooming products. From gentle shampoos and conditioners to brushes and nail care, everything you need to keep your pet looking their best.',
+      features: ['Natural shampoos & conditioners', 'Professional brushes & combs', 'Nail clippers & grinders', 'Dental care products'],
       color: 'bg-cyan-50',
       accentColor: 'bg-cyan-500',
       textColor: 'text-cyan-600',
@@ -78,29 +113,29 @@ const HomePage = () => {
       ]
     },
     {
-      id: 'house',
-      name: 'Pets House',
-      title: 'Cozy Homes for Your Companions',
-      description: 'Create the perfect space for your pets with our comfortable beds, houses, and crates. Give them a place they can call their own for rest and relaxation.',
-      features: ['Orthopedic options', 'Easy to clean', 'Multiple sizes available', 'Stylish designs'],
+      id: 'health-supplement',
+      name: 'Health & Supplement',
+      title: 'Wellness from the Inside Out',
+      description: 'Support your pet\'s overall health with our range of veterinary-approved supplements and health products. From vitamins and joint support to digestive aids, help your pets thrive at every life stage.',
+      features: ['Vet-approved formulas', 'Joint & mobility support', 'Skin & coat supplements', 'Digestive health boosters'],
+      color: 'bg-green-50',
+      accentColor: 'bg-green-500',
+      textColor: 'text-green-600',
+      images: [
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360339/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_a7yk4z.svg',
+      ]
+    },
+    {
+      id: 'beds-house',
+      name: 'Beds & House',
+      title: 'Cozy Spaces for Your Companions',
+      description: 'Create the perfect resting spot for your pets with our comfortable beds, houses, and crates. Give them a cozy place they can call their own for relaxation and peaceful sleep.',
+      features: ['Orthopedic & memory foam beds', 'Easy to clean & maintain', 'Multiple sizes available', 'Weatherproof outdoor houses'],
       color: 'bg-pink-50',
       accentColor: 'bg-pink-500',
       textColor: 'text-pink-600',
       images: [
         'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770364698/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_2_blykem.svg',
-      ]
-    },
-    {
-      id: 'belt',
-      name: 'Pets Belt & Leashes',
-      title: 'Walk with Confidence',
-      description: 'Explore our collection of premium leashes, harnesses, and collars. Designed for safety and comfort, perfect for daily walks and outdoor adventures.',
-      features: ['Adjustable & secure', 'Reflective for night walks', 'Padded for comfort', 'Durable hardware'],
-      color: 'bg-green-50',
-      accentColor: 'bg-green-500',
-      textColor: 'text-green-600',
-      images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770371876/Untitled_160_x_90_px_600_x_1000_px_600_x_800_px_1_ec1tsb.svg',
       ]
     },
   ];
@@ -116,17 +151,17 @@ const HomePage = () => {
           <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-8">
             Shop by Category
           </h2>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-            {categories.map((category, index) => (
-              <a
-                key={index}
-                href={`#${category.name.toLowerCase()}`}
+          <div className="grid grid-cols-3 md:grid-cols-7 gap-4">
+            {categories.map((category) => (
+              <Link
+                key={category._id || category.slug}
+                to={`/category/${category.slug}`}
                 className="text-center group cursor-pointer"
               >
                 <div className="relative flex items-center justify-center mb-4">
                   {/* Circle background */}
-                  <div className={`${category.color} w-28 h-28 md:w-36 md:h-36 rounded-full shadow-md group-hover:shadow-xl transition-shadow`}></div>
-                  {/* Image/Icon positioned to pop out */}
+                  <div className={`${categoryColors[category.slug] || 'bg-gray-100'} w-28 h-28 md:w-36 md:h-36 rounded-full shadow-md group-hover:shadow-xl transition-shadow`}></div>
+                  {/* Image from backend API */}
                   {category.image ? (
                     <img 
                       src={category.image} 
@@ -135,12 +170,12 @@ const HomePage = () => {
                     />
                   ) : (
                     <span className="absolute text-7xl md:text-8xl -top-2 group-hover:scale-110 group-hover:-top-4 transition-all duration-300 drop-shadow-lg">
-                      {category.icon}
+                      📦
                     </span>
                   )}
                 </div>
                 <span className="font-semibold text-gray-900">{category.name}</span>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
