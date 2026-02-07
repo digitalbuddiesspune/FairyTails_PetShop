@@ -7,6 +7,10 @@ dotenv.config();
 
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import foodRoutes from './routes/foodRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
+import wishlistRoutes from './routes/wishlistRoutes.js';
 
 const app = express();
 
@@ -24,6 +28,18 @@ app.get('/', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Category routes
+app.use('/api/categories', categoryRoutes);
+
+// Food routes
+app.use('/api/food', foodRoutes);
+
+// Cart routes
+app.use('/api/cart', cartRoutes);
+
+// Wishlist routes
+app.use('/api/wishlist', wishlistRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

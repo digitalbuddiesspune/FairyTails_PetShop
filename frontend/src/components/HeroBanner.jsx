@@ -17,18 +17,18 @@ const HeroBanner = () => {
       alt: 'Banner 2',
       link: '#',
     },
-     {
-       id: 3,
-       image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770371962/Untitled_1920_x_600_px_6_rigoq7.png', // Add your banner image URL here
-       alt: 'Banner 3',
-       link: '#',
-     },
-     {
-       id: 4,
-       image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770284814/Untitled_1920_x_600_px_1_ghdtzb.png', // Add your banner image URL here
-      alt: 'Banner 4',
-      link: '#',
-     },
+    //  {
+    //    id: 3,
+    //    image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770371962/Untitled_1920_x_600_px_6_rigoq7.png', // Add your banner image URL here
+    //    alt: 'Banner 3',
+    //    link: '#',
+    //  },
+    //  {
+    //    id: 4,
+    //    image: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770284814/Untitled_1920_x_600_px_1_ghdtzb.png', // Add your banner image URL here
+    //   alt: 'Banner 4',
+    //   link: '#',
+    //  },
   ];
 
   // Auto-play functionality
