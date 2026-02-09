@@ -11,6 +11,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import foodRoutes from './routes/foodRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
