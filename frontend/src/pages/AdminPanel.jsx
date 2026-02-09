@@ -1,0 +1,751 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+const API_BASE = import.meta.env.VITE_BACKEND_API;
+
+const AdminPanel = () => {
+  const navigate = useNavigate();
+  const [admin, setAdmin] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalOrders: 0,
+    totalProducts: 0,
+    totalRevenue: 0
+  });
+
+  // Product states
+  const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [productForm, setProductForm] = useState({
+    productName: '',
+    brand: '',
+    category: 'Dog',
+    subCategory: 'Dry Food',
+    prices: [{ capacity: '', mrp: '', discountedPrice: '' }],
+    details: [''],
+    keyFeatures: [''],
+    flavours: [''],
+    nutrients: [''],
+    healthBenefits: [''],
+    images: [''],
+    expiryDate: ''
+  });
+  const [formError, setFormError] = useState('');
+
+  useEffect(() => {
+    const adminData = localStorage.getItem('admin');
+    const adminToken = localStorage.getItem('adminToken');
+    if (!adminData || !adminToken) {
+      navigate('/admin/signin');
+      return;
+    }
+    setAdmin(JSON.parse(adminData));
+  }, [navigate]);
+
+  // Fetch products when products tab is active
+  useEffect(() => {
+    if (activeTab === 'products') {
+      fetchProducts();
+    }
+  }, [activeTab]);
+
+  const fetchProducts = async () => {
+    setProductsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/food?limit=100`);
+      const data = await res.json();
+      if (data.success) {
+        setProducts(data.data);
+        setStats(prev => ({ ...prev, totalProducts: data.total || data.data.length }));
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    } finally {
+      setProductsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('admin');
+    navigate('/admin/signin');
+  };
+
+  const resetForm = () => {
+    setProductForm({
+      productName: '',
+      brand: '',
+      category: 'Dog',
+      subCategory: 'Dry Food',
+      prices: [{ capacity: '', mrp: '', discountedPrice: '' }],
+      details: [''],
+      keyFeatures: [''],
+      flavours: [''],
+      nutrients: [''],
+      healthBenefits: [''],
+      images: [''],
+      expiryDate: ''
+    });
+    setFormError('');
+  };
+
+  const openAddForm = () => {
+    resetForm();
+    setEditingProduct(null);
+    setShowAddForm(true);
+  };
+
+  const openEditForm = (product) => {
+    setProductForm({
+      productName: product.productName || '',
+      brand: product.brand || '',
+      category: product.category || 'Dog',
+      subCategory: product.subCategory || 'Dry Food',
+      prices: product.prices?.length ? product.prices.map(p => ({ capacity: p.capacity, mrp: p.mrp, discountedPrice: p.discountedPrice })) : [{ capacity: '', mrp: '', discountedPrice: '' }],
+      details: product.details?.length ? [...product.details] : [''],
+      keyFeatures: product.keyFeatures?.length ? [...product.keyFeatures] : [''],
+      flavours: product.flavours?.length ? [...product.flavours] : [''],
+      nutrients: product.nutrients?.length ? [...product.nutrients] : [''],
+      healthBenefits: product.healthBenefits?.length ? [...product.healthBenefits] : [''],
+      images: product.images?.length ? [...product.images] : [''],
+      expiryDate: product.expiryDate ? new Date(product.expiryDate).toISOString().split('T')[0] : ''
+    });
+    setEditingProduct(product);
+    setShowAddForm(true);
+    setFormError('');
+  };
+
+  const handleFormChange = (field, value) => {
+    setProductForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleArrayFieldChange = (field, index, value) => {
+    setProductForm(prev => {
+      const arr = [...prev[field]];
+      arr[index] = value;
+      return { ...prev, [field]: arr };
+    });
+  };
+
+  const addArrayField = (field) => {
+    setProductForm(prev => ({ ...prev, [field]: [...prev[field], ''] }));
+  };
+
+  const removeArrayField = (field, index) => {
+    setProductForm(prev => {
+      const arr = prev[field].filter((_, i) => i !== index);
+      return { ...prev, [field]: arr.length ? arr : [''] };
+    });
+  };
+
+  const handlePriceChange = (index, key, value) => {
+    setProductForm(prev => {
+      const prices = [...prev.prices];
+      prices[index] = { ...prices[index], [key]: value };
+      return { ...prev, prices };
+    });
+  };
+
+  const addPriceRow = () => {
+    setProductForm(prev => ({ ...prev, prices: [...prev.prices, { capacity: '', mrp: '', discountedPrice: '' }] }));
+  };
+
+  const removePriceRow = (index) => {
+    setProductForm(prev => {
+      const prices = prev.prices.filter((_, i) => i !== index);
+      return { ...prev, prices: prices.length ? prices : [{ capacity: '', mrp: '', discountedPrice: '' }] };
+    });
+  };
+
+  const handleSubmitProduct = async (e) => {
+    e.preventDefault();
+    setFormError('');
+
+    // Validation
+    if (!productForm.productName.trim()) return setFormError('Product name is required');
+    if (!productForm.brand.trim()) return setFormError('Brand is required');
+    if (!productForm.images[0]?.trim()) return setFormError('At least one image URL is required');
+    if (!productForm.prices[0]?.capacity?.trim()) return setFormError('At least one price option is required');
+    if (!productForm.expiryDate) return setFormError('Expiry date is required');
+
+    // Clean up data
+    const payload = {
+      ...productForm,
+      prices: productForm.prices.filter(p => p.capacity).map(p => ({
+        capacity: p.capacity,
+        mrp: Number(p.mrp),
+        discountedPrice: Number(p.discountedPrice)
+      })),
+      details: productForm.details.filter(d => d.trim()),
+      keyFeatures: productForm.keyFeatures.filter(k => k.trim()),
+      flavours: productForm.flavours.filter(f => f.trim()),
+      nutrients: productForm.nutrients.filter(n => n.trim()),
+      healthBenefits: productForm.healthBenefits.filter(h => h.trim()),
+      images: productForm.images.filter(i => i.trim()),
+      expiryDate: new Date(productForm.expiryDate)
+    };
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      let res;
+
+      if (editingProduct) {
+        res = await fetch(`${API_BASE}/food/${editingProduct._id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        res = await fetch(`${API_BASE}/food`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        setShowAddForm(false);
+        resetForm();
+        setEditingProduct(null);
+        fetchProducts();
+      } else {
+        setFormError(data.message || 'Something went wrong');
+      }
+    } catch (err) {
+      setFormError('Network error. Please try again.');
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const res = await fetch(`${API_BASE}/food/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setProducts(prev => prev.filter(p => p._id !== id));
+        setDeleteConfirm(null);
+      }
+    } catch (err) {
+      console.error('Error deleting product:', err);
+    }
+  };
+
+  const menuItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
+    { id: 'products', label: 'Products', icon: <ProductIcon /> },
+    { id: 'categories', label: 'Categories', icon: <CategoryIcon /> },
+    { id: 'orders', label: 'Orders', icon: <OrderIcon /> },
+    { id: 'users', label: 'Users', icon: <UserIcon /> },
+    { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
+  ];
+
+  // ─── Add/Edit Product Form Modal ───
+  const renderProductForm = () => (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto py-8 px-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl relative">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-900">
+            {editingProduct ? 'Edit Product' : 'Add New Product'}
+          </h2>
+          <button onClick={() => { setShowAddForm(false); setEditingProduct(null); resetForm(); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmitProduct} className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+          {formError && (
+            <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm font-medium border border-red-200">
+              {formError}
+            </div>
+          )}
+
+          {/* Product Name & Brand */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Product Name *</label>
+              <input type="text" value={productForm.productName} onChange={(e) => handleFormChange('productName', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm" placeholder="e.g. Royal Canin Dog Food" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Brand *</label>
+              <input type="text" value={productForm.brand} onChange={(e) => handleFormChange('brand', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm" placeholder="e.g. Royal Canin" />
+            </div>
+          </div>
+
+          {/* Category & SubCategory */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category *</label>
+              <select value={productForm.category} onChange={(e) => handleFormChange('category', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm bg-white">
+                <option value="Dog">Dog</option>
+                <option value="Cat">Cat</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Sub Category *</label>
+              <select value={productForm.subCategory} onChange={(e) => handleFormChange('subCategory', e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm bg-white">
+                <option value="Dry Food">Dry Food</option>
+                <option value="Wet Food">Wet Food</option>
+                <option value="Treats">Treats</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Expiry Date */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Expiry Date *</label>
+            <input type="date" value={productForm.expiryDate} onChange={(e) => handleFormChange('expiryDate', e.target.value)}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm" />
+          </div>
+
+          {/* Prices */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-semibold text-gray-700">Prices *</label>
+              <button type="button" onClick={addPriceRow} className="text-xs font-semibold text-purple-600 hover:text-purple-700">+ Add Price</button>
+            </div>
+            <div className="space-y-2">
+              {productForm.prices.map((price, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <input type="text" placeholder="Capacity (e.g. 1kg)" value={price.capacity} onChange={(e) => handlePriceChange(i, 'capacity', e.target.value)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+                  <input type="number" placeholder="MRP" value={price.mrp} onChange={(e) => handlePriceChange(i, 'mrp', e.target.value)}
+                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+                  <input type="number" placeholder="Sale Price" value={price.discountedPrice} onChange={(e) => handlePriceChange(i, 'discountedPrice', e.target.value)}
+                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+                  {productForm.prices.length > 1 && (
+                    <button type="button" onClick={() => removePriceRow(i)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Image URLs */}
+          <ArrayField label="Image URLs *" field="images" values={productForm.images} onChange={handleArrayFieldChange} onAdd={addArrayField} onRemove={removeArrayField} placeholder="https://example.com/image.jpg" />
+
+          {/* Flavours */}
+          <ArrayField label="Flavours" field="flavours" values={productForm.flavours} onChange={handleArrayFieldChange} onAdd={addArrayField} onRemove={removeArrayField} placeholder="e.g. Chicken" />
+
+          {/* Details */}
+          <ArrayField label="Details" field="details" values={productForm.details} onChange={handleArrayFieldChange} onAdd={addArrayField} onRemove={removeArrayField} placeholder="Product detail..." />
+
+          {/* Key Features */}
+          <ArrayField label="Key Features" field="keyFeatures" values={productForm.keyFeatures} onChange={handleArrayFieldChange} onAdd={addArrayField} onRemove={removeArrayField} placeholder="Feature..." />
+
+          {/* Nutrients */}
+          <ArrayField label="Nutrients" field="nutrients" values={productForm.nutrients} onChange={handleArrayFieldChange} onAdd={addArrayField} onRemove={removeArrayField} placeholder="e.g. Protein 26%" />
+
+          {/* Health Benefits */}
+          <ArrayField label="Health Benefits" field="healthBenefits" values={productForm.healthBenefits} onChange={handleArrayFieldChange} onAdd={addArrayField} onRemove={removeArrayField} placeholder="e.g. Strong bones" />
+        </form>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-gray-200 flex gap-3 justify-end">
+          <button type="button" onClick={() => { setShowAddForm(false); setEditingProduct(null); resetForm(); }}
+            className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button onClick={handleSubmitProduct}
+            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium text-sm transition-colors shadow-lg">
+            {editingProduct ? 'Update Product' : 'Add Product'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ─── Delete Confirmation Modal ───
+  const renderDeleteConfirm = () => (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
+        <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+        </div>
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Product?</h3>
+        <p className="text-sm text-gray-500 mb-6">This will permanently delete <span className="font-semibold text-gray-700">"{deleteConfirm?.productName}"</span>. This action cannot be undone.</p>
+        <div className="flex gap-3">
+          <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button onClick={() => handleDeleteProduct(deleteConfirm._id)} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-sm transition-colors">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return (
+          <div className="animate-fadeIn">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard Overview</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <StatCard title="Total Users" value={stats.totalUsers} icon="👥" color="bg-blue-50 border-blue-200" textColor="text-blue-600" />
+              <StatCard title="Total Orders" value={stats.totalOrders} icon="📦" color="bg-green-50 border-green-200" textColor="text-green-600" />
+              <StatCard title="Total Products" value={stats.totalProducts} icon="🛍️" color="bg-purple-50 border-purple-200" textColor="text-purple-600" />
+              <StatCard title="Revenue" value={`₹${stats.totalRevenue}`} icon="💰" color="bg-amber-50 border-amber-200" textColor="text-amber-600" />
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
+              <div className="text-center py-12 text-gray-400">
+                <span className="text-5xl mb-4 block">📊</span>
+                <p className="text-lg font-medium">No recent activity</p>
+                <p className="text-sm mt-1">Activity will appear here as your store grows</p>
+              </div>
+            </div>
+          </div>
+        );
+      case 'products':
+        return (
+          <div className="animate-fadeIn">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Products</h2>
+                <p className="text-sm text-gray-500 mt-1">{products.length} product{products.length !== 1 ? 's' : ''} found</p>
+              </div>
+              <button onClick={openAddForm} className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm transition-colors shadow-lg flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Add Product
+              </button>
+            </div>
+
+            {/* Products Grid */}
+            {productsLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+                <span className="text-5xl mb-4 block">🛍️</span>
+                <p className="text-gray-500 text-lg font-medium">No products yet</p>
+                <p className="text-gray-400 text-sm mt-1">Click "Add Product" to add your first product</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {products.map((product) => (
+                  <div key={product._id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow group">
+                    {/* Product Image */}
+                    <div className="relative h-48 bg-gray-100 overflow-hidden">
+                      <img
+                        src={product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image'}
+                        alt={product.productName}
+                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-2 right-2">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                          product.category === 'Dog' ? 'bg-blue-100 text-blue-700' : 'bg-pink-100 text-pink-700'
+                        }`}>
+                          {product.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="p-4">
+                      <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">{product.brand}</p>
+                      <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2">{product.productName}</h3>
+                      
+                      {/* Price */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-lg font-bold text-purple-600">₹{product.prices?.[0]?.discountedPrice}</span>
+                        {product.prices?.[0]?.mrp > product.prices?.[0]?.discountedPrice && (
+                          <span className="text-sm text-gray-400 line-through">₹{product.prices?.[0]?.mrp}</span>
+                        )}
+                        <span className="text-xs text-gray-400">/ {product.prices?.[0]?.capacity}</span>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => openEditForm(product)}
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-xl text-sm font-semibold transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(product)}
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-sm font-semibold transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      case 'categories':
+        return (
+          <div className="animate-fadeIn">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Categories</h2>
+              <button className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium text-sm transition-colors shadow-lg">
+                + Add Category
+              </button>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+              <span className="text-5xl mb-4 block">📂</span>
+              <p className="text-gray-500 text-lg font-medium">No categories yet</p>
+              <p className="text-gray-400 text-sm mt-1">Organize your products into categories</p>
+            </div>
+          </div>
+        );
+      case 'orders':
+        return (
+          <div className="animate-fadeIn">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Orders</h2>
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+              <span className="text-5xl mb-4 block">📦</span>
+              <p className="text-gray-500 text-lg font-medium">No orders yet</p>
+              <p className="text-gray-400 text-sm mt-1">Orders will appear here when customers place them</p>
+            </div>
+          </div>
+        );
+      case 'users':
+        return (
+          <div className="animate-fadeIn">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Users</h2>
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+              <span className="text-5xl mb-4 block">👥</span>
+              <p className="text-gray-500 text-lg font-medium">User management</p>
+              <p className="text-gray-400 text-sm mt-1">View and manage registered users</p>
+            </div>
+          </div>
+        );
+      case 'settings':
+        return (
+          <div className="animate-fadeIn">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Settings</h2>
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-lg">
+              <h3 className="font-semibold text-gray-800 mb-4">Admin Profile</h3>
+              <div className="space-y-3">
+                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <label className="text-xs text-gray-500 uppercase font-bold">Email</label>
+                  <p className="text-gray-900 font-semibold">{admin?.email || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (!admin) return null;
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Modals */}
+      {showAddForm && renderProductForm()}
+      {deleteConfirm && renderDeleteConfirm()}
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        {/* Logo */}
+        <div className="p-5 border-b border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center font-bold text-lg">
+              🐾
+            </div>
+            <div>
+              <h1 className="font-bold text-sm">FairyTails</h1>
+              <p className="text-xs text-slate-400">Admin Panel</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Admin Info */}
+        <div className="p-4 border-b border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-purple-500/20 border border-purple-500/30 rounded-full flex items-center justify-center text-purple-300 font-bold text-sm">
+              {admin.email?.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{admin.email}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Menu */}
+        <nav className="p-3 flex-1">
+          <div className="space-y-1">
+            {menuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === item.id
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        {/* Logout */}
+        <div className="p-3 border-t border-slate-700/50">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all"
+          >
+            <LogoutIcon />
+            Log Out
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Top Bar */}
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <h1 className="text-lg font-bold text-gray-900 capitalize">{activeTab}</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500 hidden sm:inline">Welcome, <span className="font-semibold text-gray-700">Admin</span></span>
+            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">
+              {admin.email?.charAt(0).toUpperCase()}
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 p-4 sm:p-6">
+          {renderContent()}
+        </main>
+      </div>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// ─── Array Field Component ───
+const ArrayField = ({ label, field, values, onChange, onAdd, onRemove, placeholder }) => (
+  <div>
+    <div className="flex items-center justify-between mb-2">
+      <label className="text-sm font-semibold text-gray-700">{label}</label>
+      <button type="button" onClick={() => onAdd(field)} className="text-xs font-semibold text-purple-600 hover:text-purple-700">+ Add</button>
+    </div>
+    <div className="space-y-2">
+      {values.map((val, i) => (
+        <div key={i} className="flex gap-2 items-center">
+          <input type="text" value={val} onChange={(e) => onChange(field, i, e.target.value)} placeholder={placeholder}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+          {values.length > 1 && (
+            <button type="button" onClick={() => onRemove(field, i)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+// Stat Card
+const StatCard = ({ title, value, icon, color, textColor }) => (
+  <div className={`${color} border rounded-2xl p-5`}>
+    <div className="flex items-center justify-between mb-3">
+      <span className="text-3xl">{icon}</span>
+      <span className={`text-2xl font-bold ${textColor}`}>{value}</span>
+    </div>
+    <p className="text-gray-600 text-sm font-medium">{title}</p>
+  </div>
+);
+
+// Icons
+const DashboardIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+  </svg>
+);
+
+const ProductIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+  </svg>
+);
+
+const CategoryIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+  </svg>
+);
+
+const OrderIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+  </svg>
+);
+
+const SettingsIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const LogoutIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+  </svg>
+);
+
+export default AdminPanel;

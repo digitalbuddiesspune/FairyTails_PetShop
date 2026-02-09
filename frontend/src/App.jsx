@@ -13,6 +13,8 @@ import CategoryProducts from './pages/CategoryProducts';
 import ProductDetail from './pages/ProductDetail';
 import CartPage from './pages/CartPage';
 import WishlistPage from './pages/WishlistPage';
+import AdminSignIn from './pages/AdminSignIn';
+import AdminPanel from './pages/AdminPanel';
 import './App.css';
 
 // Scroll to top on every route change
@@ -45,6 +47,10 @@ function App() {
         {/* Auth Pages - No Navbar/Footer */}
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
+        
+        {/* Admin Pages - No Navbar/Footer */}
+        <Route path="/admin/signin" element={<AdminSignIn />} />
+        <Route path="/admin" element={<AdminPanel />} />
         
         {/* Main Pages - With Navbar/Footer */}
         <Route path="/" element={

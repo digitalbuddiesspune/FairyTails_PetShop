@@ -11,6 +11,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import foodRoutes from './routes/foodRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 const app = express();
 
@@ -27,19 +28,22 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
-app.use('/api/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
 
 // Category routes
-app.use('/api/categories', categoryRoutes);
+app.use('/api/v1/categories', categoryRoutes);
 
 // Food routes
-app.use('/api/food', foodRoutes);
+app.use('/api/v1/food', foodRoutes);
 
 // Cart routes
-app.use('/api/cart', cartRoutes);
+app.use('/api/v1/cart', cartRoutes);
 
 // Wishlist routes
-app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/v1/wishlist', wishlistRoutes);
+
+// Admin routes
+app.use('/api/v1/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import dogImage from '../assets/dog.png';
 
+const API_BASE = import.meta.env.VITE_BACKEND_API;
+
 const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('orders');
@@ -44,7 +46,7 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('token');
 
-      const response = await fetch('http://localhost:3000/api/auth/update', {
+      const response = await fetch(`${API_BASE}/auth/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -75,9 +77,16 @@ const Profile = () => {
     }
   };
 
+  // Helper to get first name only
+  const getFirstName = (fullName) => {
+    if (!fullName) return '';
+    return fullName.trim().split(/\s+/)[0];
+  };
+
   const menuItems = [
     { id: 'orders', label: 'Orders', icon: <OrdersIcon /> },
     { id: 'address', label: 'Address', icon: <AddressIcon /> },
+   
     { id: 'settings', label: 'Account Settings', icon: <SettingsIcon /> },
     { id: 'logout', label: 'Log Out', icon: <LogoutIcon /> },
   ];
@@ -128,6 +137,46 @@ const Profile = () => {
           </div>
         );
 
+      case 'subscription':
+        return (
+          <div className="animate-fadeIn h-full flex flex-col">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10">Subscriptions</h2>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 sm:p-12 text-center max-w-lg w-full shadow-sm">
+                <div className="w-28 h-28 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-6xl">🔄</span>
+                </div>
+                <p className="text-blue-600 font-bold mb-2 text-xl">No active subscriptions</p>
+                <p className="text-gray-500 text-sm mb-6">Subscribe for regular pet essentials delivery</p>
+                <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                  Browse Plans
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      case 'invite':
+        return (
+          <div className="animate-fadeIn h-full flex flex-col">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10">Invite Friends</h2>
+            <div className="flex-1 flex items-center justify-center">
+              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 sm:p-12 text-center max-w-lg w-full shadow-sm">
+                <div className="w-28 h-28 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-6xl">🎁</span>
+                </div>
+                <p className="text-gray-700 font-medium mb-4 text-lg">Share your referral code and earn rewards!</p>
+                <div className="bg-white p-4 rounded-xl flex items-center justify-center border border-blue-200 mb-6">
+                  <span className="font-mono text-2xl font-bold text-[#65a30d]">
+                    {user?.name?.toUpperCase().replace(/\s/g, '')?.slice(0, 6) || 'FAIRY'}2024
+                  </span>
+                </div>
+                <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                  Copy Code
+                </button>
+              </div>
+            </div>
+          </div>
+        );
       case 'settings':
         return (
           <div className="animate-fadeIn h-full flex flex-col justify-center items-center py-4">
@@ -248,7 +297,7 @@ const Profile = () => {
                   </div>
                   <div className="absolute bottom-0 right-0 bg-[#65a30d] w-4 h-4 rounded-full border border-white"></div>
                 </div>
-                <h1 className="text-lg font-bold text-gray-800 mb-0.5">Hi, {user.name}</h1>
+                <h1 className="text-lg font-bold text-gray-800 mb-0.5">Hi, {getFirstName(user.name)}</h1>
                 <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Pet Lover</p>
               </div>
 
