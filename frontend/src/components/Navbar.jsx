@@ -99,7 +99,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/categories');
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API}/categories`);
         const data = await res.json();
         if (data.success && data.data.length > 0) {
           setCategories(data.data);
@@ -124,8 +124,8 @@ const Navbar = () => {
     const fetchCounts = async () => {
       try {
         const [cartRes, wishRes] = await Promise.all([
-          fetch('http://localhost:3000/api/cart', { headers }),
-          fetch('http://localhost:3000/api/wishlist', { headers }),
+          fetch(`${import.meta.env.VITE_BACKEND_API}/cart`, { headers }),
+          fetch(`${import.meta.env.VITE_BACKEND_API}/wishlist`, { headers }),
         ]);
         const cartData = await cartRes.json();
         const wishData = await wishRes.json();

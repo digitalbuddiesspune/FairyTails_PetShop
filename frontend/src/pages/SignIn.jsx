@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const SignIn = () => {
+  const baseUrl = import.meta.env.VITE_BACKEND_API;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
