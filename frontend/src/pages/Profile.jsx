@@ -44,7 +44,7 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('token');
 
-      const response = await fetch('http://localhost:3000/api/auth/update', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_API}/update`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

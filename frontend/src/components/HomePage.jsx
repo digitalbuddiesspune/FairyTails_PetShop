@@ -20,7 +20,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/categories');
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_API}/categories`);
         const data = await res.json();
         if (data.success) {
           setCategories(data.data);
