@@ -12,22 +12,22 @@ import {
 
 const router = express.Router();
 
-// Seed route
-router.post('/food/seed', seedFood);
+// Seed route (must be before /:id to avoid conflict)
+router.post('/seed', seedFood);
 
-// Category route
-router.get('/food/category/:category', getFoodByCategory);
+// Category route (must be before /:id to avoid conflict)
+router.get('/category/:category', getFoodByCategory);
 
 // Public routes
-router.get('/food', getAllFood);
-router.post('/food', createFood);
+router.get('/', getAllFood);
+router.post('/', createFood);
 
 // ID-based routes
-router.get('/food/:id', getFoodById);
-router.put('/food/:id', updateFood);
-router.delete('/food/:id', deleteFood);
+router.get('/:id', getFoodById);
+router.put('/:id', updateFood);
+router.delete('/:id', deleteFood);
 
 // Reviews
-router.post('/food/:id/reviews', addReview);
+router.post('/:id/reviews', addReview);
 
 export default router;
