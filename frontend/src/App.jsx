@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
 import Footer from './components/Footer';
@@ -13,6 +14,15 @@ import ProductDetail from './pages/ProductDetail';
 import CartPage from './pages/CartPage';
 import WishlistPage from './pages/WishlistPage';
 import './App.css';
+
+// Scroll to top on every route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 // Layout component for pages with Navbar and Footer
 const MainLayout = ({ children }) => {
@@ -30,6 +40,7 @@ const MainLayout = ({ children }) => {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Auth Pages - No Navbar/Footer */}
         <Route path="/signup" element={<SignUp />} />

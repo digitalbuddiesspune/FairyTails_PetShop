@@ -149,12 +149,18 @@ const Navbar = () => {
     };
   }, []);
 
-  const handleCategoryClick = (index) => {
+  const handleCategoryClick = (index, slug) => {
+    // Toggle dropdown
     if (activeDropdown === index) {
       setActiveDropdown(null);
     } else {
       setActiveDropdown(index);
     }
+    // Navigate to category page without closing dropdown
+    // Use setTimeout so dropdown state is applied before navigation re-render
+    setTimeout(() => {
+      navigate(`/category/${slug}`);
+    }, 0);
   };
 
   const handleProfileClick = () => {
@@ -269,21 +275,16 @@ const Navbar = () => {
         <div className="w-full px-4 lg:px-8">
           <ul className="flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide">
             {categories.map((category, index) => (
-              <li key={category._id || index} className="relative flex items-center" data-idx={index}>
-                <Link
-                  to={`/category/${category.slug}`}
-                  className="px-3 md:px-4 py-3 text-sm font-medium text-white hover:text-[#a3e635] hover:bg-gray-900 transition-colors whitespace-nowrap"
+              <li key={category._id || index} className="relative" data-idx={index}>
+                <button
+                  onClick={() => handleCategoryClick(index, category.slug)}
+                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-white hover:text-[#a3e635] hover:bg-gray-900 transition-colors whitespace-nowrap"
                 >
                   {category.name}
-                </Link>
-                {category.subcategories?.length > 0 && (
-                  <button
-                    onClick={() => handleCategoryClick(index)}
-                    className="py-3 pr-2 text-white hover:text-[#a3e635] transition-colors"
-                  >
+                  {category.subcategories?.length > 0 && (
                     <ChevronDownIcon isOpen={activeDropdown === index} />
-                  </button>
-                )}
+                  )}
+                </button>
               </li>
             ))}
             
