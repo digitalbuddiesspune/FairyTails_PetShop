@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const SignUp = () => {
+  const baseUrl = import.meta.env.VITE_BACKEND_API;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -111,7 +112,7 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/auth/signup`, {
+      const response = await fetch(`${baseUrl}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

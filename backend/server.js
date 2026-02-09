@@ -28,22 +28,19 @@ app.get('/', (req, res) => {
 });
 
 // Auth routes
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1', authRoutes);
 
 // Category routes
-app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1', categoryRoutes);
 
 // Food routes
-app.use('/api/v1/food', foodRoutes);
+app.use('/api/v1', foodRoutes);
 
 // Cart routes
-app.use('/api/v1/cart', cartRoutes);
+app.use('/api/v1', cartRoutes);
 
 // Wishlist routes
-app.use('/api/v1/wishlist', wishlistRoutes);
-
-// Admin routes
-app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1', wishlistRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

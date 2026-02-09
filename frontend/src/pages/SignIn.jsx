@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const SignIn = () => {
+  const baseUrl = import.meta.env.VITE_BACKEND_API;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
