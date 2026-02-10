@@ -9,7 +9,10 @@ import {
     Settings,
     LogOut,
     Menu,
-    PawPrint
+    PawPrint,
+    ChevronDown,
+    PackageSearch,
+    PlusCircle
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -17,6 +20,7 @@ const AdminLayout = () => {
     const location = useLocation();
     const [admin, setAdmin] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [productsOpen, setProductsOpen] = useState(false);
 
     useEffect(() => {
         const adminData = localStorage.getItem('admin');
@@ -28,20 +32,31 @@ const AdminLayout = () => {
         setAdmin(JSON.parse(adminData));
     }, [navigate]);
 
+    // Auto-expand products accordion if on a product page
+    useEffect(() => {
+        if (location.pathname.includes('/admin/my-products') || location.pathname.includes('/admin/products')) {
+            setProductsOpen(true);
+        }
+    }, [location.pathname]);
+
     const handleLogout = () => {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('admin');
         navigate('/admin/signin');
     };
 
-    const menuItems = [
-        { id: '/admin/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-        { id: '/admin/products', label: 'Products', icon: <Package size={20} /> },
-        { id: '/admin/categories', label: 'Categories', icon: <List size={20} /> },
-        { id: '/admin/orders', label: 'Orders', icon: <ShoppingBag size={20} /> },
-        { id: '/admin/users', label: 'Users', icon: <Users size={20} /> },
-        { id: '/admin/settings', label: 'Settings', icon: <Settings size={20} /> },
-    ];
+    const isProductPage = location.pathname.includes('/admin/my-products') || location.pathname.includes('/admin/products');
+
+    const getPageTitle = () => {
+        if (location.pathname.includes('/admin/my-products')) return 'My Products';
+        if (location.pathname.includes('/admin/products')) return 'Add Product';
+        if (location.pathname.includes('/admin/dashboard')) return 'Dashboard';
+        if (location.pathname.includes('/admin/categories')) return 'Categories';
+        if (location.pathname.includes('/admin/orders')) return 'Orders';
+        if (location.pathname.includes('/admin/users')) return 'Users';
+        if (location.pathname.includes('/admin/settings')) return 'Settings';
+        return 'Dashboard';
+    };
 
     if (!admin) return null;
 
@@ -53,7 +68,7 @@ const AdminLayout = () => {
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+            <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
                 {/* Logo */}
                 <div className="p-5 border-b border-slate-700/50">
                     <div className="flex items-center gap-3">
@@ -80,24 +95,118 @@ const AdminLayout = () => {
                 </div>
 
                 {/* Menu */}
-                <nav className="p-3 flex-1">
+                <nav className="p-3 flex-1 overflow-y-auto">
                     <div className="space-y-1">
-                        {menuItems.map((item) => (
-                            <button
-                                key={item.id}
-                                onClick={() => {
-                                    navigate(item.id);
-                                    setSidebarOpen(false);
-                                }}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${location.pathname === item.id
+                        {/* Dashboard */}
+                        <button
+                            onClick={() => { navigate('/admin/dashboard'); setSidebarOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                location.pathname === '/admin/dashboard'
                                     ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                                    }`}
+                            }`}
+                        >
+                            <LayoutDashboard size={20} />
+                            Dashboard
+                        </button>
+
+                        {/* Products - Accordion */}
+                        <div>
+                            <button
+                                onClick={() => setProductsOpen(!productsOpen)}
+                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                    isProductPage
+                                        ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                                        : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                }`}
                             >
-                                {item.icon}
-                                {item.label}
+                                <div className="flex items-center gap-3">
+                                    <Package size={20} />
+                                    Products
+                                </div>
+                                <ChevronDown size={16} className={`transition-transform duration-200 ${productsOpen ? 'rotate-180' : ''}`} />
                             </button>
-                        ))}
+
+                            {/* Dropdown */}
+                            <div className={`overflow-hidden transition-all duration-200 ${productsOpen ? 'max-h-40 mt-1' : 'max-h-0'}`}>
+                                <div className="ml-4 space-y-1">
+                                    <button
+                                        onClick={() => { navigate('/admin/my-products'); setSidebarOpen(false); }}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                                            location.pathname === '/admin/my-products'
+                                                ? 'bg-purple-500/10 text-purple-300'
+                                                : 'text-slate-500 hover:bg-slate-800 hover:text-white'
+                                        }`}
+                                    >
+                                        <PackageSearch size={16} />
+                                        My Products
+                                    </button>
+                                    <button
+                                        onClick={() => { navigate('/admin/products'); setSidebarOpen(false); }}
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                                            location.pathname === '/admin/products'
+                                                ? 'bg-purple-500/10 text-purple-300'
+                                                : 'text-slate-500 hover:bg-slate-800 hover:text-white'
+                                        }`}
+                                    >
+                                        <PlusCircle size={16} />
+                                        Add Product
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Categories */}
+                        <button
+                            onClick={() => { navigate('/admin/categories'); setSidebarOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                location.pathname === '/admin/categories'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            }`}
+                        >
+                            <List size={20} />
+                            Categories
+                        </button>
+
+                        {/* Orders */}
+                        <button
+                            onClick={() => { navigate('/admin/orders'); setSidebarOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                location.pathname === '/admin/orders'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            }`}
+                        >
+                            <ShoppingBag size={20} />
+                            Orders
+                        </button>
+
+                        {/* Users */}
+                        <button
+                            onClick={() => { navigate('/admin/users'); setSidebarOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                location.pathname === '/admin/users'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            }`}
+                        >
+                            <Users size={20} />
+                            Users
+                        </button>
+
+                        {/* Settings */}
+                        <button
+                            onClick={() => { navigate('/admin/settings'); setSidebarOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                location.pathname === '/admin/settings'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            }`}
+                        >
+                            <Settings size={20} />
+                            Settings
+                        </button>
                     </div>
                 </nav>
 
@@ -121,8 +230,8 @@ const AdminLayout = () => {
                         <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
                             <Menu size={20} className="text-gray-600" />
                         </button>
-                        <h1 className="text-lg font-bold text-gray-900 capitalize">
-                            {menuItems.find(item => item.id === location.pathname)?.label || 'Dashboard'}
+                        <h1 className="text-lg font-bold text-gray-900">
+                            {getPageTitle()}
                         </h1>
                     </div>
                     <div className="flex items-center gap-3">
