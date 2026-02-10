@@ -30,12 +30,8 @@ const foodSubCategories = ['Dry Food', 'Wet Food', 'Treats'];
 
 // Build the product link for a subcategory
 const getSubcategoryLink = (categorySlug, subName) => {
-  const foodCategory = slugToFoodCategory[categorySlug];
-  if (foodCategory && foodSubCategories.includes(subName)) {
-    return `/products?category=${foodCategory}&subCategory=${encodeURIComponent(subName)}`;
-  }
-  // For non-food subcategories, link to the category page
-  return `/category/${categorySlug}`;
+  // Always pass subCategory so the category page filters correctly
+  return `/category/${categorySlug}?subCategory=${encodeURIComponent(subName)}`;
 };
 
 // Dropdown component rendered outside overflow container

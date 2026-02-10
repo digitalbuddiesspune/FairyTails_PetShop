@@ -78,7 +78,7 @@ export const getFoodById = async (req, res) => {
 export const createFood = async (req, res) => {
   try {
     const {
-      productName, brand, prices, details, keyFeatures,
+      productName, brand, prices, availableStock, details, keyFeatures,
       category, subCategory, expiryDate, images, flavours,
       nutrients, healthBenefits,
     } = req.body;
@@ -92,7 +92,7 @@ export const createFood = async (req, res) => {
     }
 
     const food = await Food.create({
-      productName, brand, prices, details, keyFeatures,
+      productName, brand, prices, availableStock, details, keyFeatures,
       category, subCategory, expiryDate, images, flavours,
       nutrients, healthBenefits,
     });
