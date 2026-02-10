@@ -7,10 +7,37 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 const DOG_ICON = 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457891/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_vzgzug.svg';
 const CAT_ICON = 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457890/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_1_q3xxat.svg';
 
-// Map category slug → Food model category enum value
+// Map category slug → Food/Clothes model category enum value
 const slugToFoodCategory = {
   'dogs': 'Dog',
   'cats': 'Cat',
+};
+
+// Subcategory names that map to the Clothes collection
+const clothesSubCategories = ['Dog Clothes', 'Cat Clothes'];
+
+// Category slugs that are served entirely by the Toys collection
+const toysCategorySlug = 'toys';
+
+// Category slug for health supplements
+const healthSupplementSlug = 'health-and-supplement';
+
+// Category slug for beds & house
+const houseSlug = 'beds-and-house';
+
+// Category slug for accessories
+const accessoriesSlug = 'accessories';
+
+// Category slug for grooming essentials
+const groomingSlug = 'grooming-and-essential';
+
+// Normalise subcategory tab label to DB value
+// e.g. "Dogs" → "dog", "Cats" → "cat", "Dog" → "Dog"
+const normaliseSubCategory = (sub) => {
+  const lower = sub.toLowerCase();
+  if (lower === 'dogs') return 'dog';
+  if (lower === 'cats') return 'cat';
+  return lower;
 };
 
 // Color mapping for category accents
@@ -41,13 +68,32 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
 
   const isInWishlist = wishlistIds.includes(product._id);
 
+  // Normalise across product types
+  const priceOptions = product.prices || product.sizes || product.variants || [];
+  const isToyProduct = product.category === 'Toy';
+  const isHealthSupplement = product.category === 'health-supplement';
+  const isHouseProduct = product.category === 'house';
+  const isAccessory = product.category === 'accessories';
+  const isGrooming = product.category === 'grooming-essentials';
+  const hasFlatPrice = isToyProduct || isHealthSupplement || isHouseProduct;
+
+  // Normalised display fields
+  const displayName = product.productName || product.name || 'Unnamed Product';
+  const displayImage = product.images?.[0] || product.image || null;
+
   const startingPrice = useMemo(() => {
-    if (!product.prices || product.prices.length === 0) return null;
-    return product.prices.reduce(
+    if (hasFlatPrice) {
+      const mrp = product.price;
+      const disc = product.discountedPrice || product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc };
+    }
+    if (priceOptions.length === 0) return null;
+    return priceOptions.reduce(
       (min, p) => (p.discountedPrice < min.discountedPrice ? p : min),
-      product.prices[0]
+      priceOptions[0]
     );
-  }, [product.prices]);
+  }, [priceOptions, hasFlatPrice, product.price, product.discountedPrice, product.discountPrice]);
 
   const discountPercent = startingPrice
     ? Math.round(((startingPrice.mrp - startingPrice.discountedPrice) / startingPrice.mrp) * 100)
@@ -75,8 +121,8 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
       <div className="relative overflow-hidden bg-gray-50">
         <Link to={`/product/${product._id}`}>
           <div className="aspect-square flex items-center justify-center p-4">
-            {product.images?.[0] ? (
-              <img src={product.images[0]} alt={product.productName} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+            {displayImage ? (
+              <img src={displayImage} alt={displayName} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-6xl text-gray-300">🐾</div>
             )}
@@ -87,7 +133,16 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
         )}
         <div className="absolute top-3 right-3 flex gap-1.5">
           <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full border border-gray-200">
-            <img src={product.category === 'Dog' ? DOG_ICON : CAT_ICON} alt={product.category} className="w-4 h-4 object-contain inline" /> {product.category}
+            {['Dog', 'dog'].includes(product.category) || ['Dog', 'dog'].includes(product.subCategory) ? (
+              <img src={DOG_ICON} alt="Dog" className="w-4 h-4 object-contain inline" />
+            ) : ['Cat', 'cat'].includes(product.category) || ['Cat', 'cat'].includes(product.subCategory) ? (
+              <img src={CAT_ICON} alt="Cat" className="w-4 h-4 object-contain inline" />
+            ) : (
+              <span>🧸</span>
+            )}{' '}
+            {(isToyProduct || isHealthSupplement || isHouseProduct || isAccessory || isGrooming)
+              ? (product.subCategory?.charAt(0).toUpperCase() + product.subCategory?.slice(1))
+              : product.category}
           </span>
         </div>
         <button
@@ -103,9 +158,11 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
         </button>
       </div>
       <div className="p-4">
-        <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">{product.brand}</p>
+        {product.brand && (
+          <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">{product.brand}</p>
+        )}
         <Link to={`/product/${product._id}`}>
-          <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5rem] hover:text-[#65a30d] transition-colors">{product.productName}</h3>
+          <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5rem] hover:text-[#65a30d] transition-colors">{displayName}</h3>
         </Link>
         <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full mb-3">{product.subCategory}</span>
         {startingPrice && (
@@ -114,8 +171,8 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
             {startingPrice.mrp > startingPrice.discountedPrice && (
               <span className="text-sm text-gray-400 line-through">₹{startingPrice.mrp}</span>
             )}
-            {product.prices.length > 1 && (
-              <span className="text-xs text-gray-500 ml-auto">{product.prices.length} sizes</span>
+            {priceOptions.length > 1 && (
+              <span className="text-xs text-gray-500 ml-auto">{priceOptions.length} sizes</span>
             )}
           </div>
         )}
@@ -179,24 +236,120 @@ const CategoryPage = () => {
     const fetchProducts = async () => {
       try {
         setProductsLoading(true);
+        const isToys = category.slug === toysCategorySlug;
         const foodCategory = slugToFoodCategory[category.slug];
-        if (!foodCategory) {
-          // Non-food categories — no products yet
+
+        const isHealthSup = category.slug === healthSupplementSlug;
+        const isHouse = category.slug === houseSlug;
+        const isAccessories = category.slug === accessoriesSlug;
+        const isGroomingCat = category.slug === groomingSlug;
+
+        if (isGroomingCat) {
+          // ── Grooming & Essential category ──
+          const params = {};
+          if (activeSubCategory && activeSubCategory !== 'All') {
+            params.subCategory = normaliseSubCategory(activeSubCategory);
+          }
+          if (sortBy) params.sort = sortBy;
+          const res = await axios.get(`${API_BASE}/grooming-essentials`, { params });
+          if (res.data.success) {
+            setProducts(res.data.data);
+            setTotal(res.data.total);
+          }
+        } else if (isAccessories) {
+          // ── Accessories category ──
+          const params = {};
+          if (activeSubCategory && activeSubCategory !== 'All') {
+            params.subCategory = normaliseSubCategory(activeSubCategory);
+          }
+          if (sortBy) params.sort = sortBy;
+          const res = await axios.get(`${API_BASE}/accessories`, { params });
+          if (res.data.success) {
+            setProducts(res.data.data);
+            setTotal(res.data.total);
+          }
+        } else if (isHealthSup) {
+          // ── Health & Supplement category ──
+          const params = {};
+          if (activeSubCategory && activeSubCategory !== 'All') {
+            params.subCategory = normaliseSubCategory(activeSubCategory);
+          }
+          if (sortBy) params.sort = sortBy;
+          const res = await axios.get(`${API_BASE}/health-supplements`, { params });
+          if (res.data.success) {
+            setProducts(res.data.data);
+            setTotal(res.data.total);
+          }
+        } else if (isHouse) {
+          // ── Beds & House category ──
+          const params = {};
+          if (activeSubCategory && activeSubCategory !== 'All') {
+            params.subCategory = normaliseSubCategory(activeSubCategory);
+          }
+          if (sortBy) params.sort = sortBy;
+          const res = await axios.get(`${API_BASE}/houses`, { params });
+          if (res.data.success) {
+            setProducts(res.data.data);
+            setTotal(res.data.total);
+          }
+        } else if (isToys) {
+          // ── Toys category: subcategories are "Dog" / "Cat" ──
+          const params = {};
+          if (activeSubCategory && activeSubCategory !== 'All') {
+            // Toys model stores "Dog" / "Cat" (capitalised, no trailing 's')
+            const sub = normaliseSubCategory(activeSubCategory); // "dog" or "cat"
+            params.subCategory = sub.charAt(0).toUpperCase() + sub.slice(1); // "Dog" or "Cat"
+          }
+          if (sortBy) params.sort = sortBy;
+          const res = await axios.get(`${API_BASE}/toys`, { params });
+          if (res.data.success) {
+            setProducts(res.data.data);
+            setTotal(res.data.total);
+          }
+        } else if (foodCategory) {
+          // ── Dogs / Cats categories ──
+          const isClothes = clothesSubCategories.includes(activeSubCategory);
+          const isAll = activeSubCategory === 'All';
+
+          if (isClothes) {
+            const params = { category: foodCategory };
+            if (sortBy) params.sort = sortBy;
+            const res = await axios.get(`${API_BASE}/clothes`, { params });
+            if (res.data.success) {
+              setProducts(res.data.data);
+              setTotal(res.data.total);
+            }
+          } else if (isAll) {
+            // Fetch food + clothes and combine
+            const foodParams = { category: foodCategory };
+            const clothesParams = { category: foodCategory };
+            if (sortBy) {
+              foodParams.sort = sortBy;
+              clothesParams.sort = sortBy;
+            }
+            const [foodRes, clothesRes] = await Promise.all([
+              axios.get(`${API_BASE}/food`, { params: foodParams }),
+              axios.get(`${API_BASE}/clothes`, { params: clothesParams }),
+            ]);
+            const foodData = foodRes.data.success ? foodRes.data.data : [];
+            const clothesData = clothesRes.data.success ? clothesRes.data.data : [];
+            const combined = [...foodData, ...clothesData];
+            setProducts(combined);
+            setTotal(combined.length);
+          } else {
+            // Food subcategory filter
+            const params = { category: foodCategory, subCategory: activeSubCategory };
+            if (sortBy) params.sort = sortBy;
+            const res = await axios.get(`${API_BASE}/food`, { params });
+            if (res.data.success) {
+              setProducts(res.data.data);
+              setTotal(res.data.total);
+            }
+          }
+        } else {
+          // Other categories — no products yet
           setProducts([]);
           setTotal(0);
-          setProductsLoading(false);
-          return;
-        }
-        const params = { category: foodCategory };
-        if (activeSubCategory && activeSubCategory !== 'All') {
-          params.subCategory = activeSubCategory;
-        }
-        if (sortBy) params.sort = sortBy;
-
-        const res = await axios.get(`${API_BASE}/food`, { params });
-        if (res.data.success) {
-          setProducts(res.data.data);
-          setTotal(res.data.total);
         }
       } catch (err) {
         console.error('Fetch products error:', err);

@@ -485,18 +485,18 @@ const CategoryProducts = () => {
           <div className="flex items-center justify-center gap-3 flex-wrap">
             {category !== 'Dog' && (
               <Link
-                to="/products?category=Dog"
+                to="/category/dogs"
                 className="px-5 py-2.5 bg-amber-50 text-amber-700 font-semibold rounded-xl border border-amber-200 hover:bg-amber-100 transition-colors"
               >
-                <img src={DOG_ICON} alt="Dog" className="w-5 h-5 object-contain inline" /> Dog Food
+                <img src={DOG_ICON} alt="Dog" className="w-5 h-5 object-contain inline" /> Dogs
               </Link>
             )}
             {category !== 'Cat' && (
               <Link
-                to="/products?category=Cat"
+                to="/category/cats"
                 className="px-5 py-2.5 bg-purple-50 text-purple-700 font-semibold rounded-xl border border-purple-200 hover:bg-purple-100 transition-colors"
               >
-                <img src={CAT_ICON} alt="Cat" className="w-5 h-5 object-contain inline" /> Cat Food
+                <img src={CAT_ICON} alt="Cat" className="w-5 h-5 object-contain inline" /> Cats
               </Link>
             )}
             <Link

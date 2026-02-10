@@ -12,6 +12,12 @@ import foodRoutes from './routes/foodRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import clothesRoutes from './routes/clothesRoutes.js';
+import toyRoutes from './routes/toyRoutes.js';
+import healthSupplementRoutes from './routes/healthSupplementRoutes.js';
+import houseRoutes from './routes/houseRoutes.js';
+import accessoryRoutes from './routes/accessoryRoutes.js';
+import groomingEssentialRoutes from './routes/groomingEssentialRoutes.js';
 
 const app = express();
 
@@ -44,6 +50,24 @@ app.use('/api/v1/wishlist', wishlistRoutes);
 
 // Admin routes
 app.use('/api/v1/admin', adminRoutes);
+
+// Clothes routes
+app.use('/api/v1/clothes', clothesRoutes);
+
+// Toy routes
+app.use('/api/v1/toys', toyRoutes);
+
+// Health Supplement routes
+app.use('/api/v1/health-supplements', healthSupplementRoutes);
+
+// House routes
+app.use('/api/v1/houses', houseRoutes);
+
+// Accessory routes
+app.use('/api/v1/accessories', accessoryRoutes);
+
+// Grooming Essentials routes
+app.use('/api/v1/grooming-essentials', groomingEssentialRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

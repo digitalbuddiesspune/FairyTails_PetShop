@@ -57,6 +57,12 @@ const productSchema = new mongoose.Schema(
       validate: [(v) => v.length > 0, 'At least one price option is required'],
     },
 
+    availableStock: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
     details: {
       type: [String],
       required: true,
@@ -70,7 +76,7 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: ['Dog', 'Cat'],
+      enum: ['Dog', 'Cat', 'Bird', 'Fish','Other'],
     },
 
     subCategory: {
