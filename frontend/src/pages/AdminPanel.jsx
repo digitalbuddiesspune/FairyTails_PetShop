@@ -577,13 +577,13 @@ const AdminPanel = () => {
   if (!admin) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {showAddForm && renderProductFormModal()}
       {deleteConfirm && renderDeleteConfirm()}
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* ─── SIDEBAR ─── */}
-      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 flex flex-col h-screen lg:h-full shrink-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-5 border-b border-slate-700/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center font-bold text-lg">🐾</div>
@@ -650,8 +650,8 @@ const AdminPanel = () => {
       </aside>
 
       {/* ─── MAIN ─── */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0 z-30">
           <div className="flex items-center gap-3">
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -663,7 +663,7 @@ const AdminPanel = () => {
             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">{admin.email?.charAt(0).toUpperCase()}</div>
           </div>
         </header>
-        <main className="flex-1 p-4 sm:p-6">{renderContent()}</main>
+        <main className={`flex-1 min-h-0 p-4 sm:p-6 ${activeTab === 'myProducts' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>{renderContent()}</main>
       </div>
 
       <style>{`

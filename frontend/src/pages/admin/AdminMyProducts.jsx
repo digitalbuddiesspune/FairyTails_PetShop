@@ -64,8 +64,35 @@ const AdminMyProducts = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
+  const [detailProduct, setDetailProduct] = useState(null);
+  const [categoryCounts, setCategoryCounts] = useState({});
 
+  // Fetch category counts on mount
+  useEffect(() => { fetchCategoryCounts(); }, []);
   useEffect(() => { fetchProducts(); }, [selectedKey]);
+
+  const fetchCategoryCounts = async () => {
+    try {
+      const results = await Promise.allSettled(
+        SINGLE_CATEGORIES.map(async (cat) => {
+          const res = await fetch(`${API_BASE}/${cat.endpoint}?limit=1`);
+          const data = await res.json();
+          const count = data.total || data.count || (Array.isArray(data.data) ? data.data.length : 0);
+          return { key: cat.key, count };
+        })
+      );
+      const counts = {};
+      let total = 0;
+      results.forEach(r => {
+        if (r.status === 'fulfilled') {
+          counts[r.value.key] = r.value.count;
+          total += r.value.count;
+        }
+      });
+      counts.all = total;
+      setCategoryCounts(counts);
+    } catch {}
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -108,7 +135,7 @@ const AdminMyProducts = () => {
       const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/${ep}/${product._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      if (data.success) { setProducts(prev => prev.filter(p => p._id !== product._id)); setDeleteConfirm(null); }
+      if (data.success) { setProducts(prev => prev.filter(p => p._id !== product._id)); setDeleteConfirm(null); fetchCategoryCounts(); }
     } catch (err) { console.error(err); }
   };
 
@@ -120,52 +147,62 @@ const AdminMyProducts = () => {
   const onEditSuccess = () => {
     setEditProduct(null);
     fetchProducts();
+    fetchCategoryCounts();
   };
 
   return (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn flex flex-col flex-1 min-h-0">
 
-      {/* ─── Category Tabs ─── */}
-      <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6 overflow-x-auto pb-2 scrollbar-thin -mx-1 px-1">
-        {CATEGORIES.map(cat => (
-          <button key={cat.key} onClick={() => { setSelectedKey(cat.key); setSearchQuery(''); }}
-            className={`flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl border-2 font-semibold text-xs sm:text-sm transition-all duration-200 ${
-              selectedKey === cat.key ? cat.activeColor : `${cat.color} hover:shadow-md`
-            }`}>
-            <span className="text-base sm:text-lg">{cat.icon}</span>
-            <span className="whitespace-nowrap hidden xs:inline sm:inline">{cat.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* ─── Search Bar ─── */}
-      <div className="relative mb-4 sm:mb-6">
-        <Search size={18} className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input type="text" placeholder="Search products..." value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className="w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm" />
-        {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">✕</button>}
-      </div>
-
-      {/* Count */}
-      <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
-        Showing <span className="font-semibold text-gray-800">{filtered.length}</span> products
-        {searchQuery && <span className="text-purple-600"> matching &ldquo;{searchQuery}&rdquo;</span>}
-      </p>
-
-      {/* ─── Content ─── */}
-      {loading ? (
-        <div className="flex justify-center py-16 sm:py-20"><div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" /></div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-12 sm:py-16 bg-white rounded-2xl border border-gray-200">
-          <span className="text-4xl sm:text-5xl block mb-3">📦</span>
-          <p className="text-gray-500 font-semibold text-base sm:text-lg">{searchQuery ? `No results for "${searchQuery}"` : 'No products found'}</p>
-          <p className="text-gray-400 text-xs sm:text-sm mt-1">{searchQuery ? 'Try different keywords' : 'Add products via the Add Product section'}</p>
+      {/* ═══ STICKY TOP: Tabs + Search + Count ═══ */}
+      <div className="shrink-0 bg-gray-50">
+        {/* ─── Category Tabs ─── */}
+        <div className="flex gap-2 sm:gap-3 mb-3 sm:mb-4 overflow-x-auto pb-2 scrollbar-thin -mx-1 px-1">
+          {CATEGORIES.map(cat => (
+            <button key={cat.key} onClick={() => { setSelectedKey(cat.key); setSearchQuery(''); }}
+              className={`flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl border-2 font-semibold text-xs sm:text-sm transition-all duration-200 ${
+                selectedKey === cat.key ? cat.activeColor : `${cat.color} hover:shadow-md`
+              }`}>
+              <span className="text-base sm:text-lg">{cat.icon}</span>
+              <span className="whitespace-nowrap hidden xs:inline sm:inline">{cat.label}</span>
+              {categoryCounts[cat.key] !== undefined && (
+                <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold min-w-[20px] text-center ${
+                  selectedKey === cat.key ? 'bg-white/25 text-white' : 'bg-black/10 text-current'
+                }`}>{categoryCounts[cat.key]}</span>
+              )}
+            </button>
+          ))}
         </div>
-      ) : (
-        <>
-          {/* ─── MOBILE: Card Layout (visible below lg) ─── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:hidden">
+
+        {/* ─── Search Bar ─── */}
+        <div className="relative mb-3 sm:mb-4">
+          <Search size={18} className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input type="text" placeholder="Search products..." value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm" />
+          {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">✕</button>}
+        </div>
+
+        {/* Count */}
+        <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-3">
+          Showing <span className="font-semibold text-gray-800">{filtered.length}</span> products
+          {searchQuery && <span className="text-purple-600"> matching &ldquo;{searchQuery}&rdquo;</span>}
+        </p>
+      </div>
+
+      {/* ═══ SCROLLABLE PRODUCT LIST ═══ */}
+      <div className="flex-1 overflow-y-auto min-h-0">
+        {loading ? (
+          <div className="flex justify-center py-16 sm:py-20"><div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" /></div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-12 sm:py-16 bg-white rounded-2xl border border-gray-200">
+            <span className="text-4xl sm:text-5xl block mb-3">📦</span>
+            <p className="text-gray-500 font-semibold text-base sm:text-lg">{searchQuery ? `No results for "${searchQuery}"` : 'No products found'}</p>
+            <p className="text-gray-400 text-xs sm:text-sm mt-1">{searchQuery ? 'Try different keywords' : 'Add products via the Add Product section'}</p>
+          </div>
+        ) : (
+          <>
+            {/* ─── MOBILE: Card Layout (visible below lg) ─── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:hidden pb-4">
             {filtered.map(product => {
               const price = getPrice(product);
               const stock = getStock(product);
@@ -202,6 +239,9 @@ const AdminMyProducts = () => {
                       {getExpiry(product) !== '—' && <span className="text-[11px] text-gray-400">Exp: {getExpiry(product)}</span>}
                     </div>
                     <div className="flex gap-1.5">
+                      <button onClick={() => setDetailProduct(product)} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Details">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      </button>
                       <button onClick={() => openEdit(product)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                       </button>
@@ -219,7 +259,7 @@ const AdminMyProducts = () => {
           <div className="hidden lg:block bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                   <tr>
                     <th className="px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Product</th>
                     {selectedKey === 'all' && <th className="px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Type</th>}
@@ -267,7 +307,10 @@ const AdminMyProducts = () => {
                           )}
                         </td>
                         <td className="px-5 py-4">
-                          <div className="flex items-center justify-center gap-2">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button onClick={() => setDetailProduct(product)} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Show Details">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            </button>
                             <button onClick={() => openEdit(product)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                             </button>
@@ -283,13 +326,14 @@ const AdminMyProducts = () => {
               </table>
             </div>
           </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
 
-      {/* Delete Modal */}
+      {/* Delete Modal — always centered */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
-          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-2xl text-center">
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-2xl text-center" onClick={e => e.stopPropagation()}>
             <div className="w-12 h-12 sm:w-14 sm:h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <svg className="w-6 h-6 sm:w-7 sm:h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </div>
@@ -313,6 +357,14 @@ const AdminMyProducts = () => {
         />
       )}
 
+      {/* Detail Modal */}
+      {detailProduct && (
+        <ProductDetailModal
+          product={detailProduct}
+          onClose={() => setDetailProduct(null)}
+        />
+      )}
+
       <style>{`
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         .animate-fadeIn { animation: fadeIn .3s ease-out forwards; }
@@ -320,6 +372,147 @@ const AdminMyProducts = () => {
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
       `}</style>
+    </div>
+  );
+};
+
+// ════════════════════════════════════════
+// PRODUCT DETAIL MODAL — Read-only view
+// ════════════════════════════════════════
+const ProductDetailModal = ({ product, onClose }) => {
+  const catKey = product._catKey || detectCategoryType(product);
+  const catLabel = CATEGORIES.find(c => c.key === catKey)?.label || 'Product';
+  const images = Array.isArray(product.images) ? product.images.filter(Boolean) : (product.image ? [product.image] : []);
+
+  // Skip keys
+  const SKIP = new Set(['_id', '__v', '_catKey', '_endpoint', '_catLabel', 'createdAt', 'updatedAt', 'reviews', 'images', 'image']);
+
+  const formatKey = (k) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).replace(/_/g, ' ');
+  const formatDate = (v) => { try { const d = new Date(v); return isNaN(d) ? v : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }); } catch { return v; } };
+
+  const renderValue = (key, val) => {
+    if (val === null || val === undefined || val === '') return <span className="text-gray-400 italic">—</span>;
+
+    // Date fields
+    if (key.toLowerCase().includes('date') || key.toLowerCase().includes('expiry')) return <span>{formatDate(val)}</span>;
+
+    // Array of objects (prices, sizes, variants)
+    if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object') {
+      return (
+        <div className="space-y-2 mt-1">
+          {val.map((item, i) => (
+            <div key={i} className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-sm">
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                {Object.entries(item).filter(([k]) => k !== '_id').map(([k, v]) => (
+                  <span key={k}><span className="font-medium text-gray-600">{formatKey(k)}:</span> <span className="text-gray-900">{String(v)}</span></span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Array of strings
+    if (Array.isArray(val)) {
+      const filtered = val.filter(v => v && String(v).trim());
+      if (!filtered.length) return <span className="text-gray-400 italic">—</span>;
+      return (
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          {filtered.map((v, i) => (
+            <span key={i} className="inline-block px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium border border-purple-100">{String(v)}</span>
+          ))}
+        </div>
+      );
+    }
+
+    // Nested object (dimensions, usage)
+    if (typeof val === 'object') {
+      return (
+        <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 mt-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+            {Object.entries(val).filter(([k]) => k !== '_id').map(([k, v]) => (
+              <div key={k}><span className="text-gray-500 text-xs">{formatKey(k)}</span><p className="font-medium text-gray-900">{String(v || '—')}</p></div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Boolean
+    if (typeof val === 'boolean') return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${val ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>{val ? 'Yes' : 'No'}</span>;
+
+    // Number
+    if (typeof val === 'number') {
+      if (key.toLowerCase().includes('price') || key.toLowerCase().includes('mrp')) return <span className="font-semibold text-gray-900">₹{val.toLocaleString('en-IN')}</span>;
+      if (key.toLowerCase().includes('stock')) return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${val > 10 ? 'bg-green-50 text-green-700' : val > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>{val} {val === 0 ? '(Out of stock)' : 'in stock'}</span>;
+      return <span>{val}</span>;
+    }
+
+    return <span className="text-gray-900">{String(val)}</span>;
+  };
+
+  // Group fields intelligently
+  const allFields = Object.entries(product).filter(([k]) => !SKIP.has(k));
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[88vh]" onClick={e => e.stopPropagation()}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 shrink-0">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{getName(product)}</h2>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100 shrink-0">{catLabel}</span>
+            </div>
+            {getBrand(product) && <p className="text-sm text-gray-500 mt-0.5">{getBrand(product)}</p>}
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg shrink-0 ml-3 transition-colors">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+          {/* Images Gallery */}
+          {images.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                Images ({images.length})
+              </h3>
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                {images.map((img, i) => (
+                  <div key={i} className="shrink-0 w-28 h-28 sm:w-36 sm:h-36 rounded-xl border-2 border-gray-200 bg-gray-50 overflow-hidden p-1.5 hover:border-purple-300 transition-colors">
+                    <img src={img} alt={`Product ${i + 1}`} className="w-full h-full object-contain" onError={e => { e.target.src = 'https://via.placeholder.com/150?text=No+Image'; }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* All Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+            {allFields.map(([key, val]) => {
+              // Full-width for arrays and objects
+              const isWide = Array.isArray(val) || (typeof val === 'object' && val !== null);
+              return (
+                <div key={key} className={isWide ? 'sm:col-span-2' : ''}>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{formatKey(key)}</label>
+                  <div className="mt-1 text-sm">{renderValue(key, val)}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Timestamps */}
+          <div className="border-t border-gray-200 pt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-400">
+            {product.createdAt && <span>Created: {formatDate(product.createdAt)}</span>}
+            {product.updatedAt && <span>Updated: {formatDate(product.updatedAt)}</span>}
+            {product._id && <span>ID: {product._id}</span>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -411,10 +604,10 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
   const catTitle = CATEGORIES.find(c => c.key === catKey)?.label || 'Product';
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto py-3 sm:py-6 px-2 sm:px-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl my-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white rounded-t-2xl z-10">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[88vh]" onClick={e => e.stopPropagation()}>
+        {/* Header — fixed at top */}
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 shrink-0">
           <div className="min-w-0 flex-1">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">Edit Product</h2>
             <p className="text-xs text-gray-500 mt-0.5 truncate">{catTitle} — {getName(product)}</p>
@@ -422,7 +615,8 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg shrink-0 ml-2"><svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
 
-        <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-4 sm:space-y-5 max-h-[65vh] sm:max-h-[70vh] overflow-y-auto">
+        {/* Scrollable form body */}
+        <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
           {error && <div className="bg-red-50 text-red-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-red-200">{error}</div>}
           {success && <div className="bg-green-50 text-green-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-green-200">{success}</div>}
 
@@ -553,8 +747,8 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
           </>}
         </form>
 
-        {/* Footer */}
-        <div className="p-4 sm:p-6 border-t border-gray-200 flex gap-3 justify-end sticky bottom-0 bg-white rounded-b-2xl">
+        {/* Footer — fixed at bottom */}
+        <div className="p-4 sm:p-6 border-t border-gray-200 flex gap-3 justify-end shrink-0">
           <button type="button" onClick={onClose} className="px-4 sm:px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50">Cancel</button>
           <button onClick={handleSave} disabled={loading}
             className="px-5 sm:px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium text-sm disabled:opacity-50 shadow-lg">

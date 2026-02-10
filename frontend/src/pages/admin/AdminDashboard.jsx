@@ -37,25 +37,33 @@ const AdminDashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                // Fetch basic counts
-                const productsRes = await fetch(`${API_BASE}/food?limit=1`);
-                const productsData = await productsRes.json();
-
                 const token = localStorage.getItem('adminToken');
-                const usersRes = await fetch(`${API_BASE}/admin/users`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const usersData = await usersRes.json();
 
-                // Initialize empty orders for now as per user request (or fetch real if available later)
-                // const ordersRes = await fetch(`${API_BASE}/admin/orders`, { ... });
-                // const ordersData = await ordersRes.json();
-                
-                // For now, pass empty array to show 0s
-                processOrderData([], productsData.total || 0, usersData.count || 0);
+                // Fetch product counts from ALL categories
+                const endpoints = ['food', 'clothes', 'grooming-essentials', 'health-supplements', 'houses', 'toys', 'accessories'];
+                const productResults = await Promise.allSettled(
+                    endpoints.map(ep => fetch(`${API_BASE}/${ep}?limit=1`).then(r => r.json()))
+                );
+                const totalProducts = productResults.reduce((sum, r) => {
+                    if (r.status === 'fulfilled') {
+                        const d = r.value;
+                        return sum + (d.total || d.count || (Array.isArray(d.data) ? d.data.length : 0));
+                    }
+                    return sum;
+                }, 0);
+
+                let userCount = 0;
+                try {
+                    const usersRes = await fetch(`${API_BASE}/admin/users`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const usersData = await usersRes.json();
+                    userCount = usersData.count || 0;
+                } catch {}
+
+                processOrderData([], totalProducts, userCount);
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
-                // Fallback to zero data
                 processOrderData([], 0, 0);
             } finally {
                 setLoading(false);
