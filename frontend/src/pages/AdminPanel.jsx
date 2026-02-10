@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AdminMyProducts from './admin/AdminMyProducts';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -518,68 +519,7 @@ const AdminPanel = () => {
         );
 
       case 'myProducts':
-        return (
-          <div className="animate-fadeIn">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">My Products</h2>
-
-            {/* Category Tabs */}
-            <div className="flex flex-wrap gap-3 mb-8">
-              {PRODUCT_CATEGORIES.map(cat => (
-                <button key={cat.key} onClick={() => setSelectedCategory(cat.key)}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-2xl border-2 font-semibold text-sm transition-all ${
-                    selectedCategory === cat.key
-                      ? 'border-purple-500 bg-purple-50 text-purple-700 shadow-md shadow-purple-100'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:shadow-sm'
-                  }`}>
-                  <span className="text-lg">{cat.icon}</span>
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Products Grid */}
-            {productsLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-              </div>
-            ) : products.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                <span className="text-5xl mb-4 block">{PRODUCT_CATEGORIES.find(c => c.key === selectedCategory)?.icon}</span>
-                <p className="text-gray-500 text-lg font-medium">No {PRODUCT_CATEGORIES.find(c => c.key === selectedCategory)?.label} products yet</p>
-                <p className="text-gray-400 text-sm mt-1">Add products using the "Add Product" option</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {products.map(product => (
-                  <div key={product._id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow group">
-                    <div className="relative h-48 bg-gray-100 overflow-hidden">
-                      <img src={product._image || 'https://via.placeholder.com/300x200?text=No+Image'} alt={product._name}
-                        className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-300" />
-                    </div>
-                    <div className="p-4">
-                      {product._brand && <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">{product._brand}</p>}
-                      <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2">{product._name}</h3>
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-lg font-bold text-purple-600">₹{product._price}</span>
-                        {product._mrp > product._price && <span className="text-sm text-gray-400 line-through">₹{product._mrp}</span>}
-                      </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => openEditForm(product, selectedCategory)}
-                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-xl text-sm font-semibold transition-colors">
-                          <EditIcon /> Edit
-                        </button>
-                        <button onClick={() => setDeleteConfirm(product)}
-                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl text-sm font-semibold transition-colors">
-                          <DeleteIcon /> Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
+        return <AdminMyProducts />;
 
       case 'addProduct':
         return null; // handled by modal
