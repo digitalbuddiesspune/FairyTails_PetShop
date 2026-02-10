@@ -1,86 +1,54 @@
 import { useState } from 'react';
 import AdminCategorySelection from './AdminCategorySelection';
-import AdminProductList from './AdminProductList';
 import ProductForm from './ProductForm';
 
 const AdminProducts = () => {
-    const [view, setView] = useState('dashboard'); // 'dashboard', 'list'
     const [selectedCategory, setSelectedCategory] = useState(null);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [editingProduct, setEditingProduct] = useState(null);
+    const [successMsg, setSuccessMsg] = useState('');
 
-    // Navigate to category list
     const handleCategorySelect = (category) => {
         setSelectedCategory(category);
-        setView('list');
     };
 
-    // Open Add Form
-    const handleAddProduct = () => {
-        if (selectedCategory) {
-            setEditingProduct(null);
-            setShowAddModal(true);
-        } else {
-            alert("Please select a category first to add a product.");
-        }
-    };
-
-    // Open Edit Form
-    const handleEditProduct = (product) => {
-        setEditingProduct(product);
-        setShowAddModal(true);
-    };
-
-    const handleBackToDashboard = () => {
+    const handleClose = () => {
         setSelectedCategory(null);
-        setView('dashboard');
+    };
+
+    const handleSuccess = () => {
+        const label = selectedCategory?.label?.replace(/s$/, '') || 'Product';
+        setSelectedCategory(null);
+        setSuccessMsg(`${label} added successfully!`);
+        setTimeout(() => setSuccessMsg(''), 4000);
     };
 
     return (
         <div className="p-6">
-            {view === 'dashboard' && (
-                <div>
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800">Product Management</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-800">Add Product</h1>
+            </div>
+
+            {/* Success Toast */}
+            {successMsg && (
+                <div className="fixed top-6 right-6 z-[60] animate-slideIn">
+                    <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-5 py-3.5 rounded-xl shadow-lg">
+                        <span className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-lg shrink-0">✓</span>
+                        <span className="font-medium text-sm">{successMsg}</span>
+                        <button onClick={() => setSuccessMsg('')} className="text-green-400 hover:text-green-600 ml-2 text-lg">×</button>
                     </div>
-                    <AdminCategorySelection onSelect={handleCategorySelect} />
                 </div>
             )}
 
-            {view === 'list' && selectedCategory && (
-                <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <div />
-                        <button
-                            onClick={handleAddProduct}
-                            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg transition-all transform hover:scale-105"
-                        >
-                            <span className="text-xl">+</span> Add {selectedCategory.label.slice(0, -1)}
-                        </button>
-                    </div>
+            <AdminCategorySelection onSelect={handleCategorySelect} />
 
-                    <AdminProductList
-                        categoryData={selectedCategory}
-                        onBack={handleBackToDashboard}
-                        onEdit={handleEditProduct}
-                    />
-                </div>
-            )}
-
-            {showAddModal && selectedCategory && (
+            {selectedCategory && (
                 <ProductForm
                     categoryData={selectedCategory}
-                    existingProduct={editingProduct}
-                    onClose={() => setShowAddModal(false)}
-                    onSuccess={() => {
-                        setShowAddModal(false);
-                        // Refresh logic: temporarily unset category to unmount/remount list
-                        const currentCat = selectedCategory;
-                        setSelectedCategory(null);
-                        setTimeout(() => setSelectedCategory(currentCat), 50);
-                    }}
+                    existingProduct={null}
+                    onClose={handleClose}
+                    onSuccess={handleSuccess}
                 />
             )}
+
             <style>{`
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }
@@ -88,6 +56,13 @@ const AdminProducts = () => {
                 }
                 .animate-fadeIn {
                     animation: fadeIn 0.3s ease-out forwards;
+                }
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateX(80px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+                .animate-slideIn {
+                    animation: slideIn 0.35s ease-out forwards;
                 }
             `}</style>
         </div>
