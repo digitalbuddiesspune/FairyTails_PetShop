@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+const API_BASE = import.meta.env.VITE_BACKEND_API;
+
 const SignUp = () => {
-  const baseUrl = import.meta.env.VITE_BACKEND_API;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -13,48 +14,113 @@ const SignUp = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
+  // Password strength indicators
+  const passwordChecks = {
+    length: formData.password.length >= 6,
+    uppercase: /[A-Z]/.test(formData.password),
+    lowercase: /[a-z]/.test(formData.password),
+    number: /[0-9]/.test(formData.password),
+    special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password),
+  };
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value
     });
     setError('');
+    
+    // Clear field-specific error when user types
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    // Name validation: must be at least 2 words
+    const nameParts = formData.name.trim().split(/\s+/);
+    if (!formData.name.trim()) {
+      errors.name = 'Full name is required';
+    } else if (nameParts.length < 2) {
+      errors.name = 'Please enter both first name and surname';
+    } else if (nameParts.some(part => part.length < 2)) {
+      errors.name = 'Each name must be at least 2 characters';
+    }
+
+    // Phone validation: starts with 6/7/8/9, exactly 10 digits
+    if (!formData.phone.trim()) {
+      errors.phone = 'Phone number is required';
+    } else if (!/^[6-9]\d{9}$/.test(formData.phone.trim())) {
+      if (!/^[6-9]/.test(formData.phone.trim())) {
+        errors.phone = 'Invalid number';
+      } else if (formData.phone.trim().length !== 10) {
+        errors.phone = 'Number must be exactly 10 digits';
+      } else {
+        errors.phone = 'Enter a valid 10-digit phone number';
+      }
+    }
+
+    // Email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email.trim())) {
+      errors.email = 'Enter a valid email address';
+    }
+
+    // Password validation: 6+ chars, uppercase, lowercase, number, special char
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    } else {
+      const missing = [];
+      if (!passwordChecks.length) missing.push('at least 6 characters');
+      if (!passwordChecks.uppercase) missing.push('an uppercase letter');
+      if (!passwordChecks.lowercase) missing.push('a lowercase letter');
+      if (!passwordChecks.number) missing.push('a number');
+      if (!passwordChecks.special) missing.push('a special character');
+      if (missing.length > 0) {
+        errors.password = `Password needs ${missing.join(', ')}`;
+      }
+    }
+
+    // Confirm password
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!formData.name || !formData.email || !formData.password) {
-      setError('Please fill in all required fields');
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch(`${baseUrl}/signup`, {
+      const response = await fetch(`${API_BASE}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
           password: formData.password,
-          phone: formData.phone
+          phone: formData.phone.trim()
         })
       });
 
@@ -73,6 +139,39 @@ const SignUp = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const PasswordStrengthBar = () => {
+    const checks = Object.values(passwordChecks);
+    const passed = checks.filter(Boolean).length;
+    const percentage = (passed / checks.length) * 100;
+    
+    let color = 'bg-red-400';
+    if (percentage >= 80) color = 'bg-green-500';
+    else if (percentage >= 60) color = 'bg-yellow-400';
+    else if (percentage >= 40) color = 'bg-orange-400';
+
+    if (!formData.password) return null;
+
+    return (
+      <div className="mt-2 space-y-2">
+        {/* Strength bar */}
+        <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className={`h-full ${color} rounded-full transition-all duration-300`}
+            style={{ width: `${percentage}%` }}
+          />
+        </div>
+        {/* Checklist */}
+        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5">
+          <CheckItem label="6+ characters" passed={passwordChecks.length} />
+          <CheckItem label="Uppercase (A-Z)" passed={passwordChecks.uppercase} />
+          <CheckItem label="Lowercase (a-z)" passed={passwordChecks.lowercase} />
+          <CheckItem label="Number (0-9)" passed={passwordChecks.number} />
+          <CheckItem label="Special (!@#$)" passed={passwordChecks.special} />
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -112,23 +211,36 @@ const SignUp = () => {
               <input
                 name="name"
                 type="text"
-                required
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm"
-                placeholder="Your name"
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.name ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm`}
+                placeholder="Name Surname"
               />
+              {fieldErrors.name && (
+                <p className="text-red-500 text-xs mt-1">{fieldErrors.name}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
               <input
                 name="phone"
                 type="tel"
+                maxLength={10}
                 value={formData.phone}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm"
-                placeholder="Phone number"
+                onChange={(e) => {
+                  // Only allow digits
+                  const val = e.target.value.replace(/\D/g, '');
+                  setFormData({ ...formData, phone: val });
+                  if (fieldErrors.phone) {
+                    setFieldErrors(prev => ({ ...prev, phone: '' }));
+                  }
+                }}
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.phone ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm`}
+                placeholder="9876543210"
               />
+              {fieldErrors.phone && (
+                <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>
+              )}
             </div>
           </div>
 
@@ -137,12 +249,14 @@ const SignUp = () => {
             <input
               name="email"
               type="email"
-              required
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm"
+              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.email ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm`}
               placeholder="Enter your email"
             />
+            {fieldErrors.email && (
+              <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div>
@@ -151,10 +265,9 @@ const SignUp = () => {
               <input
                 name="password"
                 type={showPassword ? 'text' : 'password'}
-                required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm pr-12"
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.password ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm pr-12`}
                 placeholder="Create password"
               />
               <button
@@ -165,6 +278,10 @@ const SignUp = () => {
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
+            {fieldErrors.password && (
+              <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
+            )}
+            <PasswordStrengthBar />
           </div>
 
           <div>
@@ -172,12 +289,14 @@ const SignUp = () => {
             <input
               name="confirmPassword"
               type={showPassword ? 'text' : 'password'}
-              required
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm"
+              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.confirmPassword ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm`}
               placeholder="Confirm password"
             />
+            {fieldErrors.confirmPassword && (
+              <p className="text-red-500 text-xs mt-1">{fieldErrors.confirmPassword}</p>
+            )}
           </div>
 
           <button
@@ -207,6 +326,13 @@ const SignUp = () => {
     </div>
   );
 };
+
+const CheckItem = ({ label, passed }) => (
+  <div className={`flex items-center gap-1 text-xs ${passed ? 'text-green-600' : 'text-gray-400'}`}>
+    <span>{passed ? '✓' : '○'}</span>
+    <span>{label}</span>
+  </div>
+);
 
 const EyeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

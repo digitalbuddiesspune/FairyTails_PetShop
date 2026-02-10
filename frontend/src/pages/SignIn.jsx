@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+const API_BASE = import.meta.env.VITE_BACKEND_API;
+
 const SignIn = () => {
-  const baseUrl = import.meta.env.VITE_BACKEND_API;
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -11,6 +12,8 @@ const SignIn = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  
 
   const handleChange = (e) => {
     setFormData({
@@ -32,7 +35,7 @@ const SignIn = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${baseUrl}/signin`, {
+      const response = await fetch(`${API_BASE}/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
