@@ -25,7 +25,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
       setAddingToCart(true);
       await axios.post(
         `${API_BASE}/cart`,
-        { productId: product._id, quantity: 1, selectedSize: 0 },
+        { productId: product._id, quantity: 1, selectedSize: 0, productType: 'Food' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       window.dispatchEvent(new Event('cart-wishlist-update'));
