@@ -4,6 +4,52 @@ import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
+// ─── Helper: extract pricing from any product type ───────────────────────────
+const getItemPricing = (item) => {
+  const product = item.product;
+  if (!product) return { mrp: 0, discountedPrice: 0, label: '' };
+
+  // Food: prices[] → { capacity, mrp, discountedPrice }
+  if (product.prices?.length > 0) {
+    const p = product.prices[item.selectedSize] || product.prices[0];
+    return { mrp: p.mrp, discountedPrice: p.discountedPrice, label: p.capacity || '' };
+  }
+
+  // Clothes / Accessories: sizes[] → { size, mrp, discountedPrice, availableStock }
+  if (product.sizes?.length > 0) {
+    const s = product.sizes[item.selectedSize] || product.sizes[0];
+    return { mrp: s.mrp, discountedPrice: s.discountedPrice, label: s.size || '' };
+  }
+
+  // Grooming Essentials: variants[] → { volume, mrp, discountedPrice }
+  if (product.variants?.length > 0) {
+    const v = product.variants[item.selectedSize] || product.variants[0];
+    return { mrp: v.mrp, discountedPrice: v.discountedPrice, label: v.volume || '' };
+  }
+
+  // Flat price: Toy (price, discountedPrice), House/HealthSupplement (price, discountPrice)
+  const mrp = product.price || 0;
+  const discountedPrice = product.discountedPrice || product.discountPrice || mrp;
+  return { mrp, discountedPrice, label: product.size || '' };
+};
+
+// ─── Helper: get display name ───────────────────────────────────────────────
+const getDisplayName = (product) => product?.productName || product?.name || 'Unnamed Product';
+
+// ─── Helper: get first image ────────────────────────────────────────────────
+const getDisplayImage = (product) => product?.images?.[0] || product?.image || null;
+
+// ─── Helper: product type label for badge ───────────────────────────────────
+const TYPE_BADGES = {
+  Food: { label: 'Food', color: 'bg-green-50 text-green-700 border-green-200' },
+  Clothes: { label: 'Clothes', color: 'bg-purple-50 text-purple-700 border-purple-200' },
+  Toy: { label: 'Toy', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  House: { label: 'House', color: 'bg-pink-50 text-pink-700 border-pink-200' },
+  Accessory: { label: 'Accessory', color: 'bg-rose-50 text-rose-700 border-rose-200' },
+  GroomingEssential: { label: 'Grooming', color: 'bg-cyan-50 text-cyan-700 border-cyan-200' },
+  HealthSupplement: { label: 'Health', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+};
+
 const CartPage = () => {
   const navigate = useNavigate();
   const [cart, setCart] = useState(null);
@@ -88,15 +134,15 @@ const CartPage = () => {
     }
   };
 
-  // Calculate totals
+  // Calculate totals using the universal pricing helper
   const cartItems = cart?.items || [];
   const subtotal = cartItems.reduce((sum, item) => {
-    const price = item.product?.prices?.[item.selectedSize];
-    return sum + (price ? price.discountedPrice * item.quantity : 0);
+    const pricing = getItemPricing(item);
+    return sum + pricing.discountedPrice * item.quantity;
   }, 0);
   const mrpTotal = cartItems.reduce((sum, item) => {
-    const price = item.product?.prices?.[item.selectedSize];
-    return sum + (price ? price.mrp * item.quantity : 0);
+    const pricing = getItemPricing(item);
+    return sum + pricing.mrp * item.quantity;
   }, 0);
   const savings = mrpTotal - subtotal;
 
@@ -199,8 +245,11 @@ const CartPage = () => {
                   {cartItems.map((item) => {
                     const product = item.product;
                     if (!product) return null;
-                    const selectedPrice = product.prices?.[item.selectedSize] || product.prices?.[0];
+                    const pricing = getItemPricing(item);
                     const isUpdating = updating === item._id;
+                    const displayName = getDisplayName(product);
+                    const displayImage = getDisplayImage(product);
+                    const badge = TYPE_BADGES[item.productType] || TYPE_BADGES.Food;
 
                     return (
                       <div
@@ -210,8 +259,8 @@ const CartPage = () => {
                         {/* Product Image */}
                         <Link to={`/product/${product._id}`} className="shrink-0">
                           <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden bg-gray-50">
-                            {product.images?.[0] ? (
-                              <img src={product.images[0]} alt={product.productName} className="w-full h-full object-contain" />
+                            {displayImage ? (
+                              <img src={displayImage} alt={displayName} className="w-full h-full object-contain" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-4xl text-gray-300">🐾</div>
                             )}
@@ -222,14 +271,23 @@ const CartPage = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div className="min-w-0">
-                              <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide">{product.brand}</p>
+                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                {product.brand && (
+                                  <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide">{product.brand}</p>
+                                )}
+                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.color}`}>
+                                  {badge.label}
+                                </span>
+                              </div>
                               <Link to={`/product/${product._id}`}>
                                 <h3 className="font-bold text-gray-900 text-sm md:text-base leading-tight hover:text-[#65a30d] transition-colors line-clamp-2">
-                                  {product.productName}
+                                  {displayName}
                                 </h3>
                               </Link>
-                              {selectedPrice && (
-                                <p className="text-xs text-gray-500 mt-1">Size: {selectedPrice.capacity}</p>
+                              {pricing.label && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {product.prices ? 'Size' : product.sizes ? 'Size' : product.variants ? 'Volume' : 'Size'}: {pricing.label}
+                                </p>
                               )}
                             </div>
 
@@ -265,18 +323,16 @@ const CartPage = () => {
                               </button>
                             </div>
 
-                            {selectedPrice && (
-                              <div className="text-right">
-                                <p className="text-lg font-bold text-gray-900">
-                                  ₹{(selectedPrice.discountedPrice * item.quantity).toLocaleString()}
+                            <div className="text-right">
+                              <p className="text-lg font-bold text-gray-900">
+                                ₹{(pricing.discountedPrice * item.quantity).toLocaleString()}
+                              </p>
+                              {pricing.mrp > pricing.discountedPrice && (
+                                <p className="text-xs text-gray-400 line-through">
+                                  ₹{(pricing.mrp * item.quantity).toLocaleString()}
                                 </p>
-                                {selectedPrice.mrp > selectedPrice.discountedPrice && (
-                                  <p className="text-xs text-gray-400 line-through">
-                                    ₹{(selectedPrice.mrp * item.quantity).toLocaleString()}
-                                  </p>
-                                )}
-                              </div>
-                            )}
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -292,7 +348,7 @@ const CartPage = () => {
 
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between text-gray-600">
-                      <span>Subtotal ({cartItems.length} items)</span>
+                      <span>Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</span>
                       <span>₹{mrpTotal.toLocaleString()}</span>
                     </div>
                     {savings > 0 && (

@@ -62,21 +62,6 @@ const DropdownMenu = ({ category, index, onClose }) => {
             <SubIcon name={sub.name} />
             <span className="font-medium">{sub.name}</span>
           </Link>
-          {/* Sub-subcategories (e.g., Treats -> Dental, Biscuits, Healthy) */}
-          {sub.subSubCategories?.length > 0 && (
-            <div className="pl-12 pb-1">
-              {sub.subSubCategories.map((subSub, ssIdx) => (
-                <Link
-                  key={ssIdx}
-                  to={getSubcategoryLink(category.slug, sub.name)}
-                  onClick={onClose}
-                  className="block px-3 py-1.5 text-sm text-gray-500 hover:text-[#65a30d] transition-colors"
-                >
-                  {subSub}
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
       ))}
     </div>

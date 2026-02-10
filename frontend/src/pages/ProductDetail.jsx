@@ -18,6 +18,17 @@ const PRODUCT_ENDPOINTS = [
   '/houses',
 ];
 
+// Map API endpoint → Mongoose model name for cart
+const ENDPOINT_TO_MODEL = {
+  '/food': 'Food',
+  '/clothes': 'Clothes',
+  '/toys': 'Toy',
+  '/accessories': 'Accessory',
+  '/grooming-essentials': 'GroomingEssential',
+  '/health-supplements': 'HealthSupplement',
+  '/houses': 'House',
+};
+
 // Map product category → category page slug for breadcrumbs
 const categoryToSlug = {
   'Dog': 'dogs',
@@ -71,9 +82,10 @@ const ProductDetail = () => {
     }
     try {
       setAddingToCart(true);
+      const modelType = productType ? (ENDPOINT_TO_MODEL[productType] || undefined) : undefined;
       await axios.post(
         `${API_BASE}/cart`,
-        { productId: id, quantity: 1, selectedSize },
+        { productId: id, quantity: 1, selectedSize, productType: modelType },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setCartMessage('Added to cart!');
