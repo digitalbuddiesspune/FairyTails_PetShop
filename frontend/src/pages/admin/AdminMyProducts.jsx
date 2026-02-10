@@ -63,6 +63,8 @@ const AdminMyProducts = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [detailProduct, setDetailProduct] = useState(null);
   const [categoryCounts, setCategoryCounts] = useState({});
@@ -132,11 +134,20 @@ const AdminMyProducts = () => {
   const handleDelete = async (product) => {
     const ep = product._endpoint || getEndpoint(detectCategoryType(product));
     try {
+      setDeleting(true);
       const token = localStorage.getItem('adminToken');
       const res = await fetch(`${API_BASE}/${ep}/${product._id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      if (data.success) { setProducts(prev => prev.filter(p => p._id !== product._id)); setDeleteConfirm(null); fetchCategoryCounts(); }
+      if (data.success) {
+        setProducts(prev => prev.filter(p => p._id !== product._id));
+        setDeleteConfirm(null);
+        fetchCategoryCounts();
+        // Show success popup
+        setDeleteSuccess(true);
+        setTimeout(() => setDeleteSuccess(false), 2500);
+      }
     } catch (err) { console.error(err); }
+    finally { setDeleting(false); }
   };
 
   const openEdit = (product) => {
@@ -330,19 +341,42 @@ const AdminMyProducts = () => {
         )}
       </div>
 
-      {/* Delete Modal — always centered */}
+      {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={() => setDeleteConfirm(null)}>
-          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-sm w-full shadow-2xl text-center" onClick={e => e.stopPropagation()}>
-            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
-              <svg className="w-6 h-6 sm:w-7 sm:h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4" onClick={() => !deleting && setDeleteConfirm(null)}>
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-sm w-full shadow-2xl text-center animate-scaleIn" onClick={e => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">Delete Product?</h3>
-            <p className="text-xs sm:text-sm text-gray-500 mb-5 sm:mb-6">Permanently delete <span className="font-semibold text-gray-700">&ldquo;{getName(deleteConfirm)}&rdquo;</span>?</p>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Permanently Delete?</h3>
+            <p className="text-sm sm:text-base text-gray-500 mb-2">This action cannot be undone.</p>
+            <p className="text-sm text-gray-600 mb-6 bg-gray-50 rounded-lg py-2 px-3 border border-gray-200 truncate font-medium">{getName(deleteConfirm)}</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50">Cancel</button>
-              <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-sm">Delete</button>
+              <button onClick={() => setDeleteConfirm(null)} disabled={deleting}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors disabled:opacity-50">
+                Cancel
+              </button>
+              <button onClick={() => handleDelete(deleteConfirm)} disabled={deleting}
+                className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                {deleting ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Deleting...</>
+                ) : (
+                  <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg> Delete</>
+                )}
+              </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Success Toast */}
+      {deleteSuccess && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[80] animate-slideDown">
+          <div className="bg-green-600 text-white px-6 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-semibold text-sm">
+            <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+            </div>
+            Product deleted successfully!
           </div>
         </div>
       )}
@@ -368,6 +402,10 @@ const AdminMyProducts = () => {
       <style>{`
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         .animate-fadeIn { animation: fadeIn .3s ease-out forwards; }
+        @keyframes scaleIn { from { opacity:0; transform:scale(0.9); } to { opacity:1; transform:scale(1); } }
+        .animate-scaleIn { animation: scaleIn .2s ease-out forwards; }
+        @keyframes slideDown { from { opacity:0; transform:translate(-50%,-20px); } to { opacity:1; transform:translate(-50%,0); } }
+        .animate-slideDown { animation: slideDown .35s ease-out forwards; }
         .scrollbar-thin::-webkit-scrollbar { height: 4px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
@@ -457,15 +495,13 @@ const ProductDetailModal = ({ product, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[88vh]" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[78vh] sm:max-h-[75vh] animate-scaleIn" onClick={e => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 shrink-0">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{getName(product)}</h2>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100 shrink-0">{catLabel}</span>
-            </div>
-            {getBrand(product) && <p className="text-sm text-gray-500 mt-0.5">{getBrand(product)}</p>}
+        <div className="flex items-center justify-between px-5 py-4 sm:px-6 sm:py-4 border-b border-gray-200 shrink-0">
+          <div className="min-w-0 flex-1 flex items-center gap-3">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{getName(product)}</h2>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100 shrink-0">{catLabel}</span>
+            {getBrand(product) && <span className="text-sm text-gray-400 hidden sm:inline">by {getBrand(product)}</span>}
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg shrink-0 ml-3 transition-colors">
             <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -473,17 +509,17 @@ const ProductDetailModal = ({ product, onClose }) => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5">
+        <div className="flex-1 overflow-y-auto px-5 py-4 sm:px-6 sm:py-5 space-y-4">
           {/* Images Gallery */}
           {images.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 Images ({images.length})
               </h3>
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
                 {images.map((img, i) => (
-                  <div key={i} className="shrink-0 w-28 h-28 sm:w-36 sm:h-36 rounded-xl border-2 border-gray-200 bg-gray-50 overflow-hidden p-1.5 hover:border-purple-300 transition-colors">
+                  <div key={i} className="shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-gray-200 bg-gray-50 overflow-hidden p-1 hover:border-purple-300 transition-colors">
                     <img src={img} alt={`Product ${i + 1}`} className="w-full h-full object-contain" onError={e => { e.target.src = 'https://via.placeholder.com/150?text=No+Image'; }} />
                   </div>
                 ))}
@@ -491,22 +527,25 @@ const ProductDetailModal = ({ product, onClose }) => {
             </div>
           )}
 
-          {/* All Fields */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          {/* All Fields — 3 cols to fit more in one line */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
             {allFields.map(([key, val]) => {
               // Full-width for arrays and objects
               const isWide = Array.isArray(val) || (typeof val === 'object' && val !== null);
               return (
-                <div key={key} className={isWide ? 'sm:col-span-2' : ''}>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{formatKey(key)}</label>
-                  <div className="mt-1 text-sm">{renderValue(key, val)}</div>
+                <div key={key} className={isWide ? 'sm:col-span-2 lg:col-span-3' : ''}>
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide shrink-0">{formatKey(key)}</label>
+                    {!isWide && <span className="text-sm font-medium">{renderValue(key, val)}</span>}
+                  </div>
+                  {isWide && <div className="mt-1 text-sm">{renderValue(key, val)}</div>}
                 </div>
               );
             })}
           </div>
 
           {/* Timestamps */}
-          <div className="border-t border-gray-200 pt-4 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-400">
+          <div className="border-t border-gray-200 pt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-400">
             {product.createdAt && <span>Created: {formatDate(product.createdAt)}</span>}
             {product.updatedAt && <span>Updated: {formatDate(product.updatedAt)}</span>}
             {product._id && <span>ID: {product._id}</span>}
@@ -605,18 +644,18 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[92vh] sm:max-h-[88vh]" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[78vh] sm:max-h-[75vh] animate-scaleIn" onClick={e => e.stopPropagation()}>
         {/* Header — fixed at top */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 shrink-0">
+        <div className="flex items-center justify-between px-5 py-3.5 sm:px-6 sm:py-4 border-b border-gray-200 shrink-0">
           <div className="min-w-0 flex-1">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">Edit Product</h2>
-            <p className="text-xs text-gray-500 mt-0.5 truncate">{catTitle} — {getName(product)}</p>
+            <p className="text-sm text-gray-500 mt-0.5 truncate">{catTitle} — {getName(product)}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg shrink-0 ml-2"><svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
 
         {/* Scrollable form body */}
-        <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-y-auto flex-1">
+        <form onSubmit={handleSave} className="px-5 py-4 sm:px-6 sm:py-5 space-y-4 overflow-y-auto flex-1">
           {error && <div className="bg-red-50 text-red-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-red-200">{error}</div>}
           {success && <div className="bg-green-50 text-green-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-green-200">{success}</div>}
 
@@ -748,10 +787,10 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
         </form>
 
         {/* Footer — fixed at bottom */}
-        <div className="p-4 sm:p-6 border-t border-gray-200 flex gap-3 justify-end shrink-0">
-          <button type="button" onClick={onClose} className="px-4 sm:px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50">Cancel</button>
+        <div className="px-5 py-3.5 sm:px-6 sm:py-4 border-t border-gray-200 flex gap-3 justify-end shrink-0">
+          <button type="button" onClick={onClose} className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-50">Cancel</button>
           <button onClick={handleSave} disabled={loading}
-            className="px-5 sm:px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium text-sm disabled:opacity-50 shadow-lg">
+            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold text-sm disabled:opacity-50 shadow-lg">
             {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
@@ -777,17 +816,17 @@ const Row = ({ children }) => {
 
 const Input = ({ label, value, onChange, type = 'text' }) => (
   <div>
-    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-1.5">{label}</label>
+    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
     <input type={type} value={value ?? ''} onChange={e => onChange(e.target.value)}
-      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm" />
+      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm" />
   </div>
 );
 
 const Select = ({ label, value, onChange, options }) => (
   <div>
-    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-1.5">{label}</label>
+    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
     <select value={value ?? ''} onChange={e => onChange(e.target.value)}
-      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm bg-white">
+      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm bg-white">
       {options.map(o => <option key={o} value={o}>{o}</option>)}
     </select>
   </div>
@@ -795,23 +834,23 @@ const Select = ({ label, value, onChange, options }) => (
 
 const Textarea = ({ label, value, onChange }) => (
   <div>
-    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1 sm:mb-1.5">{label}</label>
+    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
     <textarea value={value ?? ''} onChange={e => onChange(e.target.value)} rows={3}
-      className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm resize-none" />
+      className="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm resize-none" />
   </div>
 );
 
 const ArrayField = ({ label, items, onChange, onAdd, onRemove, placeholder }) => (
   <div>
-    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-      <label className="text-xs sm:text-sm font-semibold text-gray-700">{label}</label>
+    <div className="flex items-center justify-between mb-1.5">
+      <label className="text-sm font-semibold text-gray-700">{label}</label>
       <button type="button" onClick={onAdd} className="text-xs font-semibold text-purple-600 hover:text-purple-700">+ Add</button>
     </div>
     <div className="space-y-2">
       {(items || ['']).map((val, i) => (
         <div key={i} className="flex gap-2 items-center">
           <input type="text" value={val ?? ''} onChange={e => onChange(i, e.target.value)} placeholder={placeholder}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+            className="flex-1 px-3.5 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
           {(items || []).length > 1 && <button type="button" onClick={() => onRemove(i)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>}
@@ -823,15 +862,15 @@ const ArrayField = ({ label, items, onChange, onAdd, onRemove, placeholder }) =>
 
 const SubArrayField = ({ label, items, fields, onChange, onAdd, onRemove }) => (
   <div>
-    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-      <label className="text-xs sm:text-sm font-semibold text-gray-700">{label}</label>
+    <div className="flex items-center justify-between mb-1.5">
+      <label className="text-sm font-semibold text-gray-700">{label}</label>
       <button type="button" onClick={onAdd} className="text-xs font-semibold text-purple-600 hover:text-purple-700">+ Add</button>
     </div>
     <div className="space-y-3">
       {(items || []).map((item, i) => (
         <div key={i} className="flex flex-wrap gap-2 items-start sm:items-center p-2.5 sm:p-0 bg-gray-50 sm:bg-transparent rounded-lg sm:rounded-none border sm:border-0 border-gray-200">
           {fields.map(f => {
-            const baseClass = "px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-purple-500";
+            const baseClass = "px-3.5 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-purple-500";
             if (f.type === 'select') {
               return <select key={f.key} value={item[f.key] ?? ''} onChange={e => onChange(i, f.key, e.target.value)}
                 className={`${f.w} ${baseClass} bg-white`}>

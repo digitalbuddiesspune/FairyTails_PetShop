@@ -3,8 +3,14 @@ import mongoose from 'mongoose';
 const cartItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Food',
     required: true,
+    refPath: 'items.productType',
+  },
+  productType: {
+    type: String,
+    required: true,
+    enum: ['Food', 'Clothes', 'Toy', 'House', 'Accessory', 'GroomingEssential', 'HealthSupplement'],
+    default: 'Food',
   },
   quantity: {
     type: Number,

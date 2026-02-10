@@ -99,12 +99,24 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
     ? Math.round(((startingPrice.mrp - startingPrice.discountedPrice) / startingPrice.mrp) * 100)
     : 0;
 
+  // Determine Mongoose model name for cart
+  const productModelType = useMemo(() => {
+    if (isToyProduct) return 'Toy';
+    if (isHouseProduct) return 'House';
+    if (isHealthSupplement) return 'HealthSupplement';
+    if (isAccessory) return 'Accessory';
+    if (isGrooming) return 'GroomingEssential';
+    // Distinguish Food vs Clothes: Clothes have sizes array, Food has prices array
+    if (product.sizes && !product.prices) return 'Clothes';
+    return 'Food';
+  }, [isToyProduct, isHouseProduct, isHealthSupplement, isAccessory, isGrooming, product]);
+
   const handleAddToCart = async (e) => {
     e.stopPropagation();
     if (!token) { navigate('/signin'); return; }
     try {
       setAddingToCart(true);
-      await axios.post(`${API_BASE}/cart`, { productId: product._id, quantity: 1, selectedSize: 0 }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post(`${API_BASE}/cart`, { productId: product._id, quantity: 1, selectedSize: 0, productType: productModelType }, { headers: { Authorization: `Bearer ${token}` } });
       window.dispatchEvent(new Event('cart-wishlist-update'));
     } catch (err) { console.error(err); }
     finally { setAddingToCart(false); }
