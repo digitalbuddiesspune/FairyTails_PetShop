@@ -61,14 +61,14 @@ const AdminLayout = () => {
     if (!admin) return null;
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="h-screen bg-gray-50 flex overflow-hidden">
             {/* Mobile overlay */}
             {sidebarOpen && (
                 <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
             )}
 
             {/* Sidebar */}
-            <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+            <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 flex flex-col h-screen lg:h-full shrink-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
                 {/* Logo */}
                 <div className="p-5 border-b border-slate-700/50">
                     <div className="flex items-center gap-3">
@@ -223,9 +223,9 @@ const AdminLayout = () => {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-h-screen">
+            <div className="flex-1 flex flex-col h-full overflow-hidden">
                 {/* Top Bar */}
-                <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+                <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0 z-30">
                     <div className="flex items-center gap-3">
                         <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
                             <Menu size={20} className="text-gray-600" />
@@ -242,8 +242,12 @@ const AdminLayout = () => {
                     </div>
                 </header>
 
-                {/* Page Content */}
-                <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">
+                {/* Page Content — my-products uses internal scroll; other pages scroll normally */}
+                <main className={`flex-1 min-h-0 p-4 sm:p-6 ${
+                    location.pathname === '/admin/my-products'
+                        ? 'flex flex-col overflow-hidden'
+                        : 'overflow-y-auto'
+                }`}>
                     <Outlet />
                 </main>
             </div>
