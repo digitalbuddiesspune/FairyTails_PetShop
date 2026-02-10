@@ -1,4 +1,5 @@
 import Admin from '../models/Admin.js';
+import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 
 // Generate JWT Token for admin
@@ -95,6 +96,37 @@ export const getAdminMe = async (req, res) => {
   try {
     const admin = await Admin.findById(req.admin.id);
     res.status(200).json({ success: true, data: admin });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Get all users
+// @route   GET /api/v1/admin/users
+// @access  Private (admin only)
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    res.status(200).json({ success: true, count: users.length, data: users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Delete user
+// @route   DELETE /api/v1/admin/users/:id
+// @access  Private (admin only)
+export const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    await user.deleteOne();
+
+    res.status(200).json({ success: true, message: 'User removed' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
