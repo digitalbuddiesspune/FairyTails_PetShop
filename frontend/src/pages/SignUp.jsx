@@ -47,9 +47,9 @@ const SignUp = () => {
     const nameParts = formData.name.trim().split(/\s+/);
     if (!formData.name.trim()) {
       errors.name = 'Full name is required';
-    } else if (nameParts.length < 2) {
+    } else if (nameParts.length < 3) {
       errors.name = 'Please enter both first name and surname';
-    } else if (nameParts.some(part => part.length < 2)) {
+    } else if (nameParts.some(part => part.length < 3)) {
       errors.name = 'Each name must be at least 2 characters';
     }
 

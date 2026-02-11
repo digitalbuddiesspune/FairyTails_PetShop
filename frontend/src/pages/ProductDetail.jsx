@@ -50,6 +50,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState(0);
   const [selectedImage, setSelectedImage] = useState(0);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false);
   const [togglingWishlist, setTogglingWishlist] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [cartMessage, setCartMessage] = useState('');
@@ -97,6 +98,30 @@ const ProductDetail = () => {
       setTimeout(() => setCartMessage(''), 2500);
     } finally {
       setAddingToCart(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
+    try {
+      setBuyingNow(true);
+      const modelType = productType ? (ENDPOINT_TO_MODEL[productType] || undefined) : undefined;
+      await axios.post(
+        `${API_BASE}/cart`,
+        { productId: id, quantity: 1, selectedSize, productType: modelType },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      window.dispatchEvent(new Event('cart-wishlist-update'));
+      navigate('/checkout');
+    } catch (err) {
+      console.error('Buy now error:', err);
+      setCartMessage('Failed to add');
+      setTimeout(() => setCartMessage(''), 2500);
+    } finally {
+      setBuyingNow(false);
     }
   };
 
@@ -585,6 +610,17 @@ const ProductDetail = () => {
                         ? 'Adding...'
                         : cartMessage || '🛒 Add to Cart'
                     }
+                  </button>
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={buyingNow || availableStock === 0}
+                    className={`flex-1 font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 ${
+                      availableStock === 0
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white hover:from-[#d97706] hover:to-[#b45309]'
+                    }`}
+                  >
+                    {buyingNow ? 'Processing...' : '⚡ Buy Now'}
                   </button>
                   <button
                     onClick={handleToggleWishlist}

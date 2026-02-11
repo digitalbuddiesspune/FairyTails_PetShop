@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import dogImage from '../assets/dog.png';
 
@@ -7,7 +7,9 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('orders');
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'orders';
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -164,9 +166,8 @@ const Profile = () => {
                 {orders.map((order) => {
                   const statusMap = {
                     placed: { label: 'Placed', color: 'bg-blue-100 text-blue-700' },
-                    confirmed: { label: 'Confirmed', color: 'bg-purple-100 text-purple-700' },
+                    processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700' },
                     shipped: { label: 'Shipped', color: 'bg-indigo-100 text-indigo-700' },
-                    out_for_delivery: { label: 'Out for Delivery', color: 'bg-orange-100 text-orange-700' },
                     delivered: { label: 'Delivered', color: 'bg-green-100 text-green-700' },
                     cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-700' },
                   };
