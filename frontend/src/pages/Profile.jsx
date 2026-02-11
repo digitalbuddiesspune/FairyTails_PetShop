@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import dogImage from '../assets/dog.png';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -17,6 +18,10 @@ const Profile = () => {
   const [updateSuccess, setUpdateSuccess] = useState('');
   const [updateError, setUpdateError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [addressesLoading, setAddressesLoading] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -32,6 +37,38 @@ const Profile = () => {
       navigate('/signin');
     }
   }, [navigate]);
+
+  // Fetch orders when orders tab is active
+  useEffect(() => {
+    if (activeTab !== 'orders') return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const fetchOrders = async () => {
+      setOrdersLoading(true);
+      try {
+        const res = await axios.get(`${API_BASE}/orders`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.data.success) setOrders(res.data.data);
+      } catch (err) { console.error(err); }
+      finally { setOrdersLoading(false); }
+    };
+    fetchOrders();
+  }, [activeTab]);
+
+  // Fetch addresses when address tab is active
+  useEffect(() => {
+    if (activeTab !== 'address') return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const fetchAddresses = async () => {
+      setAddressesLoading(true);
+      try {
+        const res = await axios.get(`${API_BASE}/addresses`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.data.success) setAddresses(res.data.data);
+      } catch (err) { console.error(err); }
+      finally { setAddressesLoading(false); }
+    };
+    fetchAddresses();
+  }, [activeTab]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -105,35 +142,107 @@ const Profile = () => {
       case 'orders':
         return (
           <div className="animate-fadeIn h-full flex flex-col">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10">Your Orders</h2>
-            <div className="flex-1 flex items-center justify-center">
-              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 sm:p-12 text-center max-w-lg w-full shadow-sm">
-                <div className="w-28 h-28 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-6xl">📦</span>
-                </div>
-                <p className="text-blue-600 font-bold mb-6 text-xl">No orders available</p>
-                <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                  Start Shopping
-                </button>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">Your Orders</h2>
+            {ordersLoading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin" />
               </div>
-            </div>
+            ) : orders.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 text-center max-w-lg w-full shadow-sm">
+                  <div className="w-24 h-24 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <span className="text-5xl">📦</span>
+                  </div>
+                  <p className="text-blue-600 font-bold mb-5 text-lg">No orders yet</p>
+                  <Link to="/" className="inline-block bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-7 py-3 rounded-xl transition-colors font-semibold shadow-lg">
+                    Start Shopping
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                {orders.map((order) => {
+                  const statusMap = {
+                    placed: { label: 'Placed', color: 'bg-blue-100 text-blue-700' },
+                    confirmed: { label: 'Confirmed', color: 'bg-purple-100 text-purple-700' },
+                    shipped: { label: 'Shipped', color: 'bg-indigo-100 text-indigo-700' },
+                    out_for_delivery: { label: 'Out for Delivery', color: 'bg-orange-100 text-orange-700' },
+                    delivered: { label: 'Delivered', color: 'bg-green-100 text-green-700' },
+                    cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-700' },
+                  };
+                  const st = statusMap[order.status] || statusMap.placed;
+                  return (
+                    <div key={order._id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-[10px] text-gray-400 uppercase">Order #{order._id.slice(-8).toUpperCase()}</p>
+                          <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${st.color}`}>{st.label}</span>
+                          <span className="font-bold text-gray-900">₹{order.total.toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {order.items.map((item, i) => (
+                          <div key={i} className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shrink-0 overflow-hidden">
+                              {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className="flex items-center justify-center h-full text-sm">🐾</span>}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>
+                              <p className="text-[10px] text-gray-400">Qty: {item.quantity} × ₹{item.price}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 pt-2 border-t border-gray-50 text-[10px] text-gray-400">
+                        {order.paymentMethod === 'cash_on_delivery' ? '💵 Cash on Delivery' : '💳 Online'} · {order.shippingAddress.city}, {order.shippingAddress.state}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       case 'address':
         return (
           <div className="animate-fadeIn h-full flex flex-col">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10">Your Addresses</h2>
-            <div className="flex-1 flex items-center justify-center">
-              <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 sm:p-12 text-center max-w-lg w-full shadow-sm">
-                <div className="w-28 h-28 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-6xl">📍</span>
-                </div>
-                <p className="text-gray-500 font-medium mb-6 text-xl">No addresses saved</p>
-                <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                  + Add New Address
-                </button>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">Your Addresses</h2>
+            {addressesLoading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin" />
               </div>
-            </div>
+            ) : addresses.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 text-center max-w-lg w-full shadow-sm">
+                  <div className="w-24 h-24 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <span className="text-5xl">📍</span>
+                  </div>
+                  <p className="text-gray-500 font-medium mb-5 text-lg">No addresses saved</p>
+                  <Link to="/checkout" className="inline-block bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-7 py-3 rounded-xl transition-colors font-semibold shadow-lg">
+                    + Add New Address
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                {addresses.map((addr) => (
+                  <div key={addr._id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${addr.addressType === 'home' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
+                        {addr.addressType === 'home' ? '🏠' : '🏢'} {addr.addressType}
+                      </span>
+                      <span className="font-semibold text-gray-900 text-sm">{addr.firstName} {addr.lastName}</span>
+                    </div>
+                    <p className="text-sm text-gray-600">{addr.streetAddress}</p>
+                    <p className="text-sm text-gray-600">{addr.city}, {addr.state} — {addr.pincode}</p>
+                    <p className="text-xs text-gray-400 mt-1">📞 {addr.phone}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
 
