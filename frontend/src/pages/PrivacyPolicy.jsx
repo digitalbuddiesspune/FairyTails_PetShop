@@ -19,7 +19,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#65a30d] to-[#84cc16] py-16 md:py-24">
+      <div className="bg-gradient-to-r from-[#65a30d] to-[#84cc16] py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-6">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,7 +31,7 @@ const PrivacyPolicy = () => {
           <p className="text-white/80 text-lg max-w-2xl mx-auto">
             We're committed to protecting your personal information and being transparent about how we use it.
           </p>
-          <p className="text-white/60 mt-4 text-sm">Last updated: February 2, 2026</p>
+          <p className="text-white/90 mt-3 text-sm font-medium">Last updated: February 10, 2026</p>
         </div>
       </div>
 

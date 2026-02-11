@@ -35,6 +35,7 @@ const CheckoutPage = () => {
   const [serverError, setServerError] = useState('');
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [useSaved, setUseSaved] = useState(null);
+  const [showNewForm, setShowNewForm] = useState(false); // controls address form visibility
   const [orderSuccess, setOrderSuccess] = useState(false);
 
   // Use ref for form values to avoid full-page re-renders on every keystroke
@@ -66,7 +67,27 @@ const CheckoutPage = () => {
         ]);
         if (cartRes.data.success) setCart(cartRes.data.data);
         if (addrRes.data.success && addrRes.data.data.length > 0) {
-          setSavedAddresses(addrRes.data.data);
+          const addrs = addrRes.data.data;
+          setSavedAddresses(addrs);
+          // Auto-select the first saved address
+          const first = addrs[0];
+          setUseSaved(first._id);
+          setShowNewForm(false);
+          formRef.current = {
+            ...formRef.current,
+            addressType: first.addressType,
+            firstName: first.firstName,
+            lastName: first.lastName,
+            phone: first.phone,
+            streetAddress: first.streetAddress,
+            city: first.city,
+            state: first.state,
+            pincode: first.pincode,
+          };
+          setAddressType(first.addressType);
+        } else {
+          // No saved addresses — show the form
+          setShowNewForm(true);
         }
       } catch (err) {
         console.error(err);
@@ -80,9 +101,10 @@ const CheckoutPage = () => {
   // DOM refs for text inputs so we can set values without re-rendering
   const inputRefs = useRef({});
 
-  // Select a saved address → populate form + DOM inputs
+  // Select a saved address → populate ref + hide form
   const selectSavedAddress = (addr) => {
     setUseSaved(addr._id);
+    setShowNewForm(false);
     const updated = {
       addressType: addr.addressType,
       firstName: addr.firstName,
@@ -96,10 +118,25 @@ const CheckoutPage = () => {
     };
     formRef.current = updated;
     setAddressType(addr.addressType);
-    // Push values into DOM inputs
-    Object.entries(updated).forEach(([k, v]) => {
-      if (inputRefs.current[k]) inputRefs.current[k].value = v;
-    });
+    setErrors({});
+  };
+
+  // Open new address form — clear selection
+  const openNewForm = () => {
+    setUseSaved(null);
+    setShowNewForm(true);
+    const blank = {
+      addressType: 'home', firstName: '', lastName: '', phone: '',
+      streetAddress: '', city: '', state: '', pincode: '', paymentMethod: paymentMethod,
+    };
+    formRef.current = blank;
+    setAddressType('home');
+    // Clear DOM inputs after a tick (so refs are rendered)
+    setTimeout(() => {
+      Object.keys(blank).forEach((k) => {
+        if (inputRefs.current[k]) inputRefs.current[k].value = '';
+      });
+    }, 0);
     setErrors({});
   };
 
@@ -242,17 +279,17 @@ const CheckoutPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <section className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] py-8">
-        <div className="container mx-auto px-4">
-          <nav className="mb-3 text-white/60 text-sm flex items-center gap-2">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+      <section className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-6">
+          <nav className="mb-2 text-gray-400 text-sm flex items-center gap-2">
+            <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             <span>/</span>
-            <Link to="/cart" className="hover:text-white transition-colors">Cart</Link>
+            <Link to="/cart" className="hover:text-gray-700 transition-colors">Cart</Link>
             <span>/</span>
-            <span className="text-white font-medium">Checkout</span>
+            <span className="text-gray-900 font-medium">Checkout</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-white">📦 Checkout</h1>
-          <p className="mt-1 text-white/70">Enter your delivery address to complete the order</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Checkout</h1>
+          <p className="mt-1 text-gray-500 text-sm">Enter your delivery address to complete the order</p>
         </div>
       </section>
 
@@ -260,7 +297,7 @@ const CheckoutPage = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-8">
 
-            {/* ─── LEFT: Address Form ───────────────────────────────────── */}
+            {/* ─── LEFT: Payment + Address ────────────────────────────────── */}
             <div className="flex-1">
               <form onSubmit={handleSubmit} className="space-y-6">
 
@@ -270,99 +307,7 @@ const CheckoutPage = () => {
                   </div>
                 )}
 
-                {/* Saved Addresses */}
-                {savedAddresses.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Saved Addresses</h3>
-                    <div className="space-y-3">
-                      {savedAddresses.map((addr) => (
-                        <button
-                          key={addr._id}
-                          type="button"
-                          onClick={() => selectSavedAddress(addr)}
-                          className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-                            useSaved === addr._id
-                              ? 'border-[#65a30d] bg-[#65a30d]/5'
-                              : 'border-gray-100 hover:border-gray-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                              addr.addressType === 'home' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                            }`}>{addr.addressType}</span>
-                            <span className="font-semibold text-gray-900 text-sm">{addr.firstName} {addr.lastName}</span>
-                          </div>
-                          <p className="text-sm text-gray-600">{addr.streetAddress}, {addr.city}, {addr.state} — {addr.pincode}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">📞 {addr.phone}</p>
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUseSaved(null);
-                        const blank = { addressType: 'home', firstName: '', lastName: '', phone: '', streetAddress: '', city: '', state: '', pincode: '', paymentMethod: paymentMethod };
-                        formRef.current = blank;
-                        setAddressType('home');
-                        Object.keys(blank).forEach((k) => { if (inputRefs.current[k]) inputRefs.current[k].value = ''; });
-                      }}
-                      className="mt-3 text-sm text-[#65a30d] hover:text-[#4d7c0f] font-medium"
-                    >
-                      + Add New Address
-                    </button>
-                  </div>
-                )}
-
-                {/* Address Type */}
-                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Delivery Address</h3>
-
-                  <div className="flex gap-3 mb-5">
-                    {['home', 'office'].map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setToggle('addressType', t)}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
-                          addressType === t
-                            ? 'border-[#65a30d] bg-[#65a30d]/5 text-[#65a30d]'
-                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                        }`}
-                      >
-                        {t === 'home' ? '🏠' : '🏢'} {t.charAt(0).toUpperCase() + t.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field label="First Name *" error={errors.firstName}>
-                      <input ref={(el) => (inputRefs.current.firstName = el)} className={inputClass('firstName')} defaultValue={formRef.current.firstName} onChange={(e) => setField('firstName', e.target.value)} placeholder="John" />
-                    </Field>
-                    <Field label="Last Name *" error={errors.lastName}>
-                      <input ref={(el) => (inputRefs.current.lastName = el)} className={inputClass('lastName')} defaultValue={formRef.current.lastName} onChange={(e) => setField('lastName', e.target.value)} placeholder="Doe" />
-                    </Field>
-                    <Field label="Phone Number *" error={errors.phone}>
-                      <input ref={(el) => (inputRefs.current.phone = el)} className={inputClass('phone')} defaultValue={formRef.current.phone} onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); e.target.value = v; setField('phone', v); }} placeholder="9876543210" maxLength={10} />
-                    </Field>
-                    <Field label="Pincode *" error={errors.pincode}>
-                      <input ref={(el) => (inputRefs.current.pincode = el)} className={inputClass('pincode')} defaultValue={formRef.current.pincode} onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0, 6); e.target.value = v; setField('pincode', v); }} placeholder="110001" maxLength={6} />
-                    </Field>
-                    <Field label="Street Address *" error={errors.streetAddress} className="md:col-span-2">
-                      <input ref={(el) => (inputRefs.current.streetAddress = el)} className={inputClass('streetAddress')} defaultValue={formRef.current.streetAddress} onChange={(e) => setField('streetAddress', e.target.value)} placeholder="House No., Building, Street" />
-                    </Field>
-                    <Field label="City *" error={errors.city}>
-                      <input ref={(el) => (inputRefs.current.city = el)} className={inputClass('city')} defaultValue={formRef.current.city} onChange={(e) => setField('city', e.target.value)} placeholder="Mumbai" />
-                    </Field>
-                    <Field label="State *" error={errors.state}>
-                      <select ref={(el) => (inputRefs.current.state = el)} className={inputClass('state')} defaultValue={formRef.current.state} onChange={(e) => setField('state', e.target.value)}>
-                        <option value="">Select State</option>
-                        {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </Field>
-                  </div>
-                </div>
-
-                {/* Payment Method */}
+                {/* ① Payment Method — shown first */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Payment Method</h3>
                   {errors.paymentMethod && <p className="text-xs text-red-500 mb-2">{errors.paymentMethod}</p>}
@@ -395,6 +340,115 @@ const CheckoutPage = () => {
                     </label>
                   </div>
                 </div>
+
+                {/* ② Saved Addresses (only if user has any) */}
+                {savedAddresses.length > 0 && (
+                  <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Deliver To</h3>
+                    <div className="space-y-3">
+                      {savedAddresses.map((addr) => (
+                        <button
+                          key={addr._id}
+                          type="button"
+                          onClick={() => selectSavedAddress(addr)}
+                          className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                            useSaved === addr._id && !showNewForm
+                              ? 'border-[#65a30d] bg-[#65a30d]/5'
+                              : 'border-gray-100 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                              addr.addressType === 'home' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                            }`}>{addr.addressType === 'home' ? '🏠 Home' : '🏢 Office'}</span>
+                            <span className="font-semibold text-gray-900 text-sm">{addr.firstName} {addr.lastName}</span>
+                          </div>
+                          <p className="text-sm text-gray-600">{addr.streetAddress}, {addr.city}, {addr.state} — {addr.pincode}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">📞 {addr.phone}</p>
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={openNewForm}
+                      className={`mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed text-sm font-semibold transition-all ${
+                        showNewForm
+                          ? 'border-[#65a30d] bg-[#65a30d]/5 text-[#65a30d]'
+                          : 'border-gray-200 text-gray-500 hover:border-[#65a30d] hover:text-[#65a30d]'
+                      }`}
+                    >
+                      <span className="text-lg">+</span> Add New Address
+                    </button>
+                  </div>
+                )}
+
+                {/* ③ Address Form — shown if user has NO saved addresses, or clicked "Add New" */}
+                {showNewForm && (
+                  <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold text-gray-900">
+                        {savedAddresses.length > 0 ? 'New Address' : 'Delivery Address'}
+                      </h3>
+                      {savedAddresses.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowNewForm(false);
+                            // Re-select the first saved address if available
+                            if (savedAddresses.length > 0) selectSavedAddress(savedAddresses[0]);
+                          }}
+                          className="text-xs text-gray-400 hover:text-gray-600 font-medium"
+                        >
+                          ✕ Cancel
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex gap-3 mb-5">
+                      {['home', 'office'].map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setToggle('addressType', t)}
+                          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
+                            addressType === t
+                              ? 'border-[#65a30d] bg-[#65a30d]/5 text-[#65a30d]'
+                              : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                          }`}
+                        >
+                          {t === 'home' ? '🏠' : '🏢'} {t.charAt(0).toUpperCase() + t.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Field label="First Name *" error={errors.firstName}>
+                        <input ref={(el) => (inputRefs.current.firstName = el)} className={inputClass('firstName')} defaultValue={formRef.current.firstName} onChange={(e) => setField('firstName', e.target.value)} placeholder="John" />
+                      </Field>
+                      <Field label="Last Name *" error={errors.lastName}>
+                        <input ref={(el) => (inputRefs.current.lastName = el)} className={inputClass('lastName')} defaultValue={formRef.current.lastName} onChange={(e) => setField('lastName', e.target.value)} placeholder="Doe" />
+                      </Field>
+                      <Field label="Phone Number *" error={errors.phone}>
+                        <input ref={(el) => (inputRefs.current.phone = el)} className={inputClass('phone')} defaultValue={formRef.current.phone} onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0, 10); e.target.value = v; setField('phone', v); }} placeholder="9876543210" maxLength={10} />
+                      </Field>
+                      <Field label="Pincode *" error={errors.pincode}>
+                        <input ref={(el) => (inputRefs.current.pincode = el)} className={inputClass('pincode')} defaultValue={formRef.current.pincode} onChange={(e) => { const v = e.target.value.replace(/\D/g, '').slice(0, 6); e.target.value = v; setField('pincode', v); }} placeholder="110001" maxLength={6} />
+                      </Field>
+                      <Field label="Street Address *" error={errors.streetAddress} className="md:col-span-2">
+                        <input ref={(el) => (inputRefs.current.streetAddress = el)} className={inputClass('streetAddress')} defaultValue={formRef.current.streetAddress} onChange={(e) => setField('streetAddress', e.target.value)} placeholder="House No., Building, Street" />
+                      </Field>
+                      <Field label="City *" error={errors.city}>
+                        <input ref={(el) => (inputRefs.current.city = el)} className={inputClass('city')} defaultValue={formRef.current.city} onChange={(e) => setField('city', e.target.value)} placeholder="Mumbai" />
+                      </Field>
+                      <Field label="State *" error={errors.state}>
+                        <select ref={(el) => (inputRefs.current.state = el)} className={inputClass('state')} defaultValue={formRef.current.state} onChange={(e) => setField('state', e.target.value)}>
+                          <option value="">Select State</option>
+                          {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </Field>
+                    </div>
+                  </div>
+                )}
 
                 {/* Submit (mobile only — desktop uses sidebar button) */}
                 <button

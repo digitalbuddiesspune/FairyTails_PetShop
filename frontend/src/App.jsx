@@ -25,6 +25,10 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminSettings from './pages/admin/AdminSettings';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import RefundPolicy from './pages/RefundPolicy';
+import ShippingPolicy from './pages/ShippingPolicy';
+import TermsAndConditions from './pages/TermsAndConditions';
 import './App.css';
 
 // Scroll to top on every route change
@@ -136,6 +140,26 @@ function App() {
         <Route path="/orders" element={
           <MainLayout>
             <OrdersPage />
+          </MainLayout>
+        } />
+        <Route path="/privacy-policy" element={
+          <MainLayout>
+            <PrivacyPolicy />
+          </MainLayout>
+        } />
+        <Route path="/refund-policy" element={
+          <MainLayout>
+            <RefundPolicy />
+          </MainLayout>
+        } />
+        <Route path="/shipping-policy" element={
+          <MainLayout>
+            <ShippingPolicy />
+          </MainLayout>
+        } />
+        <Route path="/terms-and-conditions" element={
+          <MainLayout>
+            <TermsAndConditions />
           </MainLayout>
         } />
       </Routes>
