@@ -18,6 +18,8 @@ import healthSupplementRoutes from './routes/healthSupplementRoutes.js';
 import houseRoutes from './routes/houseRoutes.js';
 import accessoryRoutes from './routes/accessoryRoutes.js';
 import groomingEssentialRoutes from './routes/groomingEssentialRoutes.js';
+import addressRoutes from './routes/addressRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 
 const app = express();
 
@@ -68,6 +70,12 @@ app.use('/api/v1/accessories', accessoryRoutes);
 
 // Grooming Essentials routes
 app.use('/api/v1/grooming-essentials', groomingEssentialRoutes);
+
+// Address routes
+app.use('/api/v1/addresses', addressRoutes);
+
+// Order routes
+app.use('/api/v1/orders', orderRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

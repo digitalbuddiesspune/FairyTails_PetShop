@@ -358,6 +358,10 @@ const CartPage = () => {
                       </div>
                     )}
                     <div className="flex justify-between text-gray-600">
+                      <span>GST (18%)</span>
+                      <span className="text-gray-500 text-xs italic">Included</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
                       <span>Delivery</span>
                       <span className="text-green-600 font-medium">{subtotal >= 500 ? 'Free' : '₹50'}</span>
                     </div>
@@ -368,12 +372,16 @@ const CartPage = () => {
                       <span>Total</span>
                       <span>₹{(subtotal + (subtotal >= 500 ? 0 : 50)).toLocaleString()}</span>
                     </div>
+                    <p className="text-[11px] text-gray-400 mt-0.5">Inclusive of 18% GST</p>
                     {savings > 0 && (
                       <p className="text-xs text-green-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
                     )}
                   </div>
 
-                  <button className="w-full mt-6 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm">
+                  <button
+                    onClick={() => navigate('/checkout')}
+                    className="w-full mt-6 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm"
+                  >
                     Proceed to Checkout
                   </button>
 

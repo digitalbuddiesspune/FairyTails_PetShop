@@ -12,6 +12,8 @@ import CategoryPage from './pages/CategoryPage';
 import CategoryProducts from './pages/CategoryProducts';
 import ProductDetail from './pages/ProductDetail';
 import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrdersPage from './pages/OrdersPage';
 import WishlistPage from './pages/WishlistPage';
 import AdminSignIn from './pages/AdminSignIn';
 import AdminLayout from './components/AdminLayout';
@@ -115,9 +117,19 @@ function App() {
             <CartPage />
           </MainLayout>
         } />
+        <Route path="/checkout" element={
+          <MainLayout>
+            <CheckoutPage />
+          </MainLayout>
+        } />
         <Route path="/wishlist" element={
           <MainLayout>
             <WishlistPage />
+          </MainLayout>
+        } />
+        <Route path="/orders" element={
+          <MainLayout>
+            <OrdersPage />
           </MainLayout>
         } />
       </Routes>
