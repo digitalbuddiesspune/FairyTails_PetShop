@@ -11,56 +11,21 @@ const Footer = () => {
       { name: 'Health & Supplement', path: '#health-supplement' },
       { name: 'Beds & House', path: '#beds-house' },
     ],
-    'Help & Support': [
-      { name: 'Contact Us', path: '/contact' },
-      { name: 'FAQs', path: '#faqs' },
-      { name: 'Shipping Info', path: '#shipping-info' },
-      { name: 'Returns & Refunds', path: '#returns-refunds' },
-      { name: 'Track Order', path: '#track-order' },
-    ],
-    'About FairyTails': [
-      { name: 'Our Story', path: '/about' },
-      { name: 'Careers', path: '#careers' },
-      { name: 'Blog', path: '#blog' },
-      { name: 'Partnerships', path: '#partnerships' },
-    ],
     'Policies': [
       { name: 'Privacy Policy', path: '/privacy-policy' },
-      { name: 'Terms of Service', path: '/terms-of-service' },
-      { name: 'Cookie Policy', path: '/cookie-policy' },
-      { name: 'Accessibility', path: '/accessibility' },
+      { name: 'Refund & Cancellation Policy', path: '/refund-policy' },
+      { name: 'Shipping Policy', path: '/shipping-policy' },
+      { name: 'Terms & Conditions', path: '/terms-and-conditions' },
     ],
   };
 
   return (
     <footer className="bg-[#1a1a1a] text-white w-full">
-      {/* Newsletter Section */}
-      <div className="bg-[#a3e635] py-8 w-full">
-        <div className="w-full px-4 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold text-gray-900">Join the FairyTails Family!</h3>
-              <p className="text-gray-800">Subscribe for exclusive deals, pet care tips, and new arrivals.</p>
-            </div>
-            <div className="flex w-full md:w-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="px-4 py-3 rounded-l-md w-full md:w-80 text-gray-800 focus:outline-none"
-              />
-              <button className="bg-[#1a1a1a] text-white px-6 py-3 rounded-r-md hover:bg-[#2d2d2d] transition-colors font-semibold">
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Footer Content */}
       <div className="w-full px-4 lg:px-8 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {/* Brand Column */}
-          <div className="col-span-2 md:col-span-4 lg:col-span-1">
+          <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <a href="/" className="inline-block mb-4 bg-white rounded-lg p-2">
               <img 
                 src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770288839/LOGO-2_l5wmxs.png" 
@@ -140,6 +105,21 @@ const Footer = () => {
                 <span className="bg-white px-2 py-1 rounded text-xs font-bold text-gray-800">COD</span>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Policy Links Bar */}
+      <div className="border-t border-gray-800 w-full">
+        <div className="w-full px-4 lg:px-8 py-4">
+          <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-500">
+            <Link to="/privacy-policy" className="hover:text-[#a3e635] transition-colors">Privacy Policy</Link>
+            <span className="text-gray-700">·</span>
+            <Link to="/refund-policy" className="hover:text-[#a3e635] transition-colors">Refund & Cancellation Policy</Link>
+            <span className="text-gray-700">·</span>
+            <Link to="/shipping-policy" className="hover:text-[#a3e635] transition-colors">Shipping Policy</Link>
+            <span className="text-gray-700">·</span>
+            <Link to="/terms-and-conditions" className="hover:text-[#a3e635] transition-colors">Terms & Conditions</Link>
           </div>
         </div>
       </div>

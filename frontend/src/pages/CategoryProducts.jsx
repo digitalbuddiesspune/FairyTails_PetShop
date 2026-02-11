@@ -318,31 +318,31 @@ const CategoryProducts = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero / Header */}
-      <section className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] py-10 md:py-14">
-        <div className="container mx-auto px-4">
+      <section className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-6">
           {/* Breadcrumb */}
-          <nav className="mb-4 text-white/60 text-sm flex items-center gap-2">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+          <nav className="mb-2 text-gray-400 text-sm flex items-center gap-2">
+            <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             <span>/</span>
             {category && (
               <>
                 <Link
                   to={`/category/${category.toLowerCase()}s`}
-                  className="hover:text-white transition-colors"
+                  className="hover:text-gray-700 transition-colors"
                 >
                   {category}s
                 </Link>
                 <span>/</span>
               </>
             )}
-            <span className="text-white font-medium">
+            <span className="text-gray-900 font-medium">
               {activeSubCategory !== 'All' ? activeSubCategory : 'All Products'}
             </span>
           </nav>
 
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white flex items-center gap-3">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 flex items-center gap-3">
                 {categoryIcon ? (
                   <img src={categoryIcon} alt={category} className="w-12 h-12 md:w-14 md:h-14 object-contain" />
                 ) : (
@@ -350,21 +350,21 @@ const CategoryProducts = () => {
                 )}
                 {pageTitle}
               </h1>
-              <p className="mt-2 text-white/70 text-lg">
+              <p className="mt-1 text-gray-500 text-sm">
                 {total} product{total !== 1 ? 's' : ''} found
               </p>
             </div>
 
             {/* Sort Dropdown */}
             <div className="flex items-center gap-3">
-              <label className="text-white/70 text-sm font-medium whitespace-nowrap">Sort by:</label>
+              <label className="text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
               <select
                 value={sortBy}
                 onChange={handleSortChange}
-                className="bg-white/10 backdrop-blur-sm text-white border border-white/20 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#65a30d] cursor-pointer appearance-none min-w-[180px]"
+                className="bg-gray-50 text-gray-900 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#65a30d] cursor-pointer min-w-[180px]"
               >
                 {sortOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value} className="text-gray-900">
+                  <option key={opt.value} value={opt.value}>
                     {opt.label}
                   </option>
                 ))}
