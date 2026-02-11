@@ -75,6 +75,8 @@ const Navbar = () => {
   const [categories, setCategories] = useState([]);
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef(null);
 
   // Fetch categories from backend API on mount
   useEffect(() => {
@@ -147,11 +149,33 @@ const Navbar = () => {
   const handleProfileClick = () => {
     const token = localStorage.getItem('token');
     if (token) {
-      navigate('/profile');
+      setUserDropdownOpen(prev => !prev);
     } else {
       navigate('/signin');
     }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUserDropdownOpen(false);
+    setCartCount(0);
+    setWishlistCount(0);
+    navigate('/signin');
+  };
+
+  // Close user dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    if (userDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [userDropdownOpen]);
 
   return (
     <header className="sticky top-0 z-50 w-full">
@@ -223,14 +247,53 @@ const Navbar = () => {
                 )}
               </Link>
 
-              {/* Profile */}
-              <button 
-                onClick={handleProfileClick}
-                className="text-gray-800 hover:text-black transition-colors" 
-                title="Profile"
-              >
-                <UserIcon />
-              </button>
+              {/* Profile Dropdown */}
+              <div className="relative" ref={userDropdownRef}>
+                <button 
+                  onClick={handleProfileClick}
+                  className="text-gray-800 hover:text-black transition-colors" 
+                  title="Profile"
+                >
+                  <UserIcon />
+                </button>
+
+                {/* Dropdown Menu */}
+                {userDropdownOpen && localStorage.getItem('token') && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[100]" style={{ animation: 'dropIn .2s ease-out' }}>
+                    {/* User greeting */}
+                    <div className="px-4 py-2.5 border-b border-gray-100">
+                      <p className="text-sm font-bold text-gray-900">
+                        {(() => { try { const u = JSON.parse(localStorage.getItem('user')); return `Hi, ${u?.name?.split(' ')[0] || 'User'}`; } catch { return 'Hi, User'; } })()}
+                      </p>
+                      <p className="text-[11px] text-gray-400">Welcome back!</p>
+                    </div>
+
+                    <button onClick={() => { setUserDropdownOpen(false); navigate('/orders'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                      My Orders
+                    </button>
+                    <button onClick={() => { setUserDropdownOpen(false); navigate('/address'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      My Addresses
+                    </button>
+                    <button onClick={() => { setUserDropdownOpen(false); navigate('/account-settings'); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      Account Settings
+                    </button>
+
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                        Log Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

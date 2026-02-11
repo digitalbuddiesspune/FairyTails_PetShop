@@ -5,7 +5,8 @@ import HomePage from './components/HomePage';
 import Footer from './components/Footer';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
-import Profile from './pages/Profile';
+import AddressPage from './pages/AddressPage';
+import AccountSettingsPage from './pages/AccountSettingsPage';
 import Contact from './pages/Contact';
 import About from './pages/About';
 import CategoryPage from './pages/CategoryPage';
@@ -82,9 +83,14 @@ function App() {
             <HomePage />
           </MainLayout>
         } />
-        <Route path="/profile" element={
+        <Route path="/address" element={
           <MainLayout>
-            <Profile />
+            <AddressPage />
+          </MainLayout>
+        } />
+        <Route path="/account-settings" element={
+          <MainLayout>
+            <AccountSettingsPage />
           </MainLayout>
         } />
         <Route path="/contact" element={
