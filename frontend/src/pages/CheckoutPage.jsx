@@ -228,8 +228,9 @@ const CheckoutPage = () => {
   const subtotal = cartItems.reduce((s, i) => s + getItemPricing(i).discountedPrice * i.quantity, 0);
   const mrpTotal = cartItems.reduce((s, i) => s + getItemPricing(i).mrp * i.quantity, 0);
   const savings = mrpTotal - subtotal;
+  const gst = Math.round(subtotal * 0.18);        // 18% GST
   const delivery = subtotal >= 500 ? 0 : 50;
-  const total = subtotal + delivery;
+  const total = subtotal + gst + delivery;
 
   // ─── States ────────────────────────────────────────────────────────────────
   if (!token) return null;
@@ -502,7 +503,7 @@ const CheckoutPage = () => {
                   )}
                   <div className="flex justify-between text-gray-600">
                     <span>GST (18%)</span>
-                    <span className="text-gray-500 text-xs italic">Included</span>
+                    <span>₹{gst.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery</span>
@@ -515,7 +516,7 @@ const CheckoutPage = () => {
                     <span>Total</span>
                     <span>₹{total.toLocaleString()}</span>
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Inclusive of 18% GST</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">GST of ₹{gst.toLocaleString()} included</p>
                   {savings > 0 && (
                     <p className="text-xs text-green-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
                   )}

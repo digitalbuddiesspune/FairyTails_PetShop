@@ -90,8 +90,9 @@ export const placeOrder = async (req, res) => {
     }
 
     const discount = mrpTotal - subtotal;
+    const gst = Math.round(subtotal * 0.18);          // 18% GST
     const deliveryCharge = subtotal >= 500 ? 0 : 50;
-    const total = subtotal + deliveryCharge;
+    const total = subtotal + gst + deliveryCharge;
 
     const order = await Order.create({
       user: req.user._id,
@@ -101,9 +102,11 @@ export const placeOrder = async (req, res) => {
       subtotal,
       mrpTotal,
       discount,
+      gst,
       deliveryCharge,
       total,
       status: 'placed',
+      paymentStatus: 'unpaid',
     });
 
     // Clear the cart after order is placed
@@ -148,32 +151,121 @@ export const getOrderById = async (req, res) => {
   }
 };
 
+// @desc    Cancel order (user — only if status is 'placed')
+// @route   PUT /api/v1/orders/:id/cancel
+// @access  Private
+export const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    if (order.status !== 'placed') {
+      return res.status(400).json({ success: false, message: 'Order can only be cancelled when status is "placed"' });
+    }
+    order.status = 'cancelled';
+    order.statusHistory.push({ status: 'cancelled', timestamp: new Date() });
+    await order.save();
+    res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // @desc    Get all orders (admin)
-// @route   GET /api/v1/orders/admin/all
+// @route   GET /api/v1/admin/orders
 // @access  Private (Admin)
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate('user', 'name email').sort({ createdAt: -1 });
+    const orders = await Order.find().populate('user', 'name email phone').sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: orders, total: orders.length });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
+// @desc    Get a single order by ID (admin — no user filter)
+// @route   GET /api/v1/admin/orders/:id
+// @access  Private (Admin)
+export const getOrderByIdAdmin = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('user', 'name email phone');
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // @desc    Update order status (admin)
-// @route   PUT /api/v1/orders/:id/status
+// @route   PUT /api/v1/admin/orders/:id/status
 // @access  Private (Admin)
 export const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true, runValidators: true },
-    );
+    const validStatuses = ['placed', 'processing', 'shipped', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status' });
+    }
+
+    const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
+
+    const previousStatus = order.status;
+    order.status = status;
+    order.statusHistory.push({ status, timestamp: new Date() });
+
+    // Auto-set paymentStatus to "paid" when delivered
+    if (status === 'delivered') {
+      order.paymentStatus = 'paid';
+
+      // Deduct stock only if order was NOT already delivered (prevent double deduction)
+      if (previousStatus !== 'delivered') {
+        for (const item of order.items) {
+          const Model = MODEL_MAP[item.productType];
+          if (Model) {
+            await Model.findByIdAndUpdate(item.product, {
+              $inc: { availableStock: -item.quantity },
+            });
+          }
+        }
+      }
+    }
+
+    await order.save();
+
+    // Re-populate user for response
+    await order.populate('user', 'name email phone');
+    res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    console.error('Update order status error:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Update payment status (admin)
+// @route   PUT /api/v1/admin/orders/:id/payment
+// @access  Private (Admin)
+export const updatePaymentStatus = async (req, res) => {
+  try {
+    const { paymentStatus } = req.body;
+    if (!['unpaid', 'paid'].includes(paymentStatus)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment status' });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    order.paymentStatus = paymentStatus;
+    await order.save();
+    await order.populate('user', 'name email phone');
+
     res.status(200).json({ success: true, data: order });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
