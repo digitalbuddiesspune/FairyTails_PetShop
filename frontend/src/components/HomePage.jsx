@@ -239,8 +239,8 @@ const HomePage = () => {
                   <div className={`${categoryColors[category.slug] || 'bg-gray-100'} w-28 h-28 md:w-36 md:h-36 rounded-full shadow-md group-hover:shadow-xl transition-shadow`}></div>
                   {/* Image from backend API */}
                   {category.image ? (
-                    <img 
-                      src={category.image} 
+                    <img
+                      src={category.image}
                       alt={category.name}
                       className="absolute w-32 h-32 md:w-40 md:h-40 object-contain -top-4 group-hover:scale-110 group-hover:-top-6 transition-all duration-300 drop-shadow-lg"
                     />
@@ -333,8 +333,8 @@ const HomePage = () => {
 
       {/* Category Detail Sections */}
       {categorySections.map((section, index) => (
-        <section 
-          key={section.id} 
+        <section
+          key={section.id}
           id={section.id}
           className={`py-16 md:py-24 ${section.color}`}
         >
@@ -363,7 +363,7 @@ const HomePage = () => {
                     </li>
                   ))}
                 </ul>
-                <a 
+                <a
                   href={`#shop-${section.id}`}
                   className={`inline-block px-8 py-3 rounded-full font-semibold ${section.accentColor} text-white hover:opacity-90 transition-opacity shadow-lg`}
                 >
@@ -376,11 +376,11 @@ const HomePage = () => {
                 <div className="relative">
                   {/* Decorative circle background */}
                   <div className={`absolute inset-0 ${section.accentColor} opacity-10 rounded-full transform scale-75`}></div>
-                  
+
                   {/* Main image */}
                   <div className="relative z-10 flex items-center justify-center">
-                    <img 
-                      src={section.images[0]} 
+                    <img
+                      src={section.images[0]}
                       alt={section.name}
                       className="w-72 h-72 md:w-96 md:h-96 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                     />
@@ -427,6 +427,58 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Vet Consultation Banner */}
+      <section className="bg-[#fff7ed] overflow-hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 py-10 md:py-14">
+
+            {/* Left — Text Content */}
+            <div className="flex-1 space-y-5">
+              <p className="text-gray-500 text-sm font-medium italic">
+                A healthy pet is a happy pet.
+              </p>
+
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+                Expert <span className="text-[#65a30d]">Vet Consultation</span><br />
+                at Your Fingertips
+              </h2>
+
+              <div className="space-y-3 pt-2">
+                {[
+                  { icon: '🩺', text: 'Instant Online Vet Consultations' },
+                  { icon: '💊', text: 'Personalised Health & Diet Plans' },
+                  { icon: '📍', text: 'Find Nearby Vet Clinics & Pet Hospitals' },
+                  { icon: '📋', text: 'Vaccination Reminders & Health Records' },
+                ].map((item) => (
+                  <div key={item.text} className="flex items-center gap-3">
+                    <span className="text-xl">{item.icon}</span>
+                    <span className="text-gray-700 font-medium">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                to="/contact"
+                className="inline-block mt-4 bg-[#65a30d] hover:bg-[#4d7c0f] text-white font-bold px-8 py-3 rounded-full transition-colors shadow-lg shadow-[#65a30d]/20"
+              >
+                Book a Consultation
+              </Link>
+            </div>
+
+            {/* Right — Image Only */}
+            <div className="flex-1 flex justify-center">
+              <img
+                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770878069/Untitled_1080_x_1080_px_1_ok1teu.svg"
+                alt="Vet Consultation"
+                className="w-full max-w-md object-contain"
+              />
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+
       {/* Why Choose Us */}
       <section className="py-12 md:py-16 bg-white">
         <div className="container mx-auto px-4">
@@ -472,8 +524,8 @@ const HomePage = () => {
           </div>
           <div className="grid grid-cols-2  md:grid-cols-4 gap-6">
             {services.map((service, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="bg-gray-100 backdrop-blur-sm rounded-2xl p-6 text-center hover:bg-gray-200 transition-all duration-300 hover:scale-105 group"
               >
                 <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-shadow">
