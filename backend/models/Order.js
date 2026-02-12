@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Counter from './Counter.js';
 
 const orderItemSchema = new mongoose.Schema(
   {
@@ -36,8 +37,24 @@ const shippingAddressSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const statusHistorySchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      enum: ['placed', 'processing', 'shipped', 'delivered', 'cancelled'],
+      required: true,
+    },
+    timestamp: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
+    orderNumber: {
+      type: Number,
+      unique: true,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -60,6 +77,7 @@ const orderSchema = new mongoose.Schema(
     subtotal: { type: Number, required: true },     // sum of (price * qty)
     mrpTotal: { type: Number, required: true },      // sum of (mrp * qty)
     discount: { type: Number, default: 0 },
+    gst: { type: Number, default: 0 },               // 18% GST amount
     deliveryCharge: { type: Number, default: 0 },
     total: { type: Number, required: true },
     status: {
@@ -67,8 +85,35 @@ const orderSchema = new mongoose.Schema(
       enum: ['placed', 'processing', 'shipped', 'delivered', 'cancelled'],
       default: 'placed',
     },
+    paymentStatus: {
+      type: String,
+      enum: ['unpaid', 'paid'],
+      default: 'unpaid',
+    },
+    statusHistory: {
+      type: [statusHistorySchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );
+
+// Auto-generate numeric orderNumber and add initial "placed" status
+orderSchema.pre('save', async function () {
+  if (this.isNew) {
+    // Generate auto-incrementing order number
+    const counter = await Counter.findByIdAndUpdate(
+      'orderNumber',
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.orderNumber = 100000 + counter.seq;   // start from 100001
+
+    // Add initial status history entry
+    if (this.statusHistory.length === 0) {
+      this.statusHistory.push({ status: 'placed', timestamp: new Date() });
+    }
+  }
+});
 
 export default mongoose.model('Order', orderSchema);
