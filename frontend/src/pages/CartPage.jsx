@@ -198,17 +198,17 @@ const CartPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <section className="bg-gradient-to-r from-[#1a1a2e] to-[#16213e] py-8">
-        <div className="container mx-auto px-4">
-          <nav className="mb-3 text-white/60 text-sm flex items-center gap-2">
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+      <section className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-6">
+          <nav className="mb-2 text-gray-400 text-sm flex items-center gap-2">
+            <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             <span>/</span>
-            <span className="text-white font-medium">Cart</span>
+            <span className="text-gray-900 font-medium">Cart</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
-            🛒 Shopping Cart
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
+            Shopping Cart
           </h1>
-          <p className="mt-1 text-white/70">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart</p>
+          <p className="mt-1 text-gray-500 text-sm">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart</p>
         </div>
       </section>
 

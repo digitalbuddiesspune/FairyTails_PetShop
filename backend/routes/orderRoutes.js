@@ -3,8 +3,7 @@ import {
   placeOrder,
   getMyOrders,
   getOrderById,
-  getAllOrders,
-  updateOrderStatus,
+  cancelOrder,
 } from '../controllers/orderController.js';
 import protect from '../middleware/auth.js';
 
@@ -16,9 +15,6 @@ router.use(protect);
 // User routes
 router.route('/').get(getMyOrders).post(placeOrder);
 router.route('/:id').get(getOrderById);
-
-// Admin routes
-router.get('/admin/all', getAllOrders);
-router.put('/:id/status', updateOrderStatus);
+router.put('/:id/cancel', cancelOrder);
 
 export default router;

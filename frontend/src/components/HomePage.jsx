@@ -13,14 +13,53 @@ const categoryColors = {
   'beds-and-house': 'bg-pink-100',
 };
 
+const API = import.meta.env.VITE_BACKEND_API;
+
+// Category endpoints with their product type identifier
+const FEATURED_SOURCES = [
+  { endpoint: '/food', type: 'Food' },
+  { endpoint: '/clothes', type: 'Clothes' },
+  { endpoint: '/toys', type: 'Toy' },
+  { endpoint: '/accessories', type: 'Accessory' },
+  { endpoint: '/grooming-essentials', type: 'GroomingEssential' },
+  { endpoint: '/health-supplements', type: 'HealthSupplement' },
+  { endpoint: '/houses', type: 'House' },
+];
+
+// Extract a displayable price from any product shape
+const extractPrice = (p) => {
+  // Food has prices[], Clothes has sizes[], Toys has variants[], Accessories has variants[]
+  const options = p.prices || p.sizes || p.variants || [];
+  if (options.length > 0) {
+    const best = options.reduce(
+      (min, o) => ((o.discountedPrice ?? o.price) < (min.discountedPrice ?? min.price) ? o : min),
+      options[0],
+    );
+    return { price: best.discountedPrice ?? best.price, mrp: best.mrp ?? best.price };
+  }
+  // Flat-price models (HealthSupplement, House, Grooming)
+  const disc = p.discountedPrice ?? p.discountPrice ?? p.price;
+  const mrp = p.mrp ?? p.price;
+  return { price: disc, mrp };
+};
+
+const extractImage = (p) => {
+  if (Array.isArray(p.images) && p.images.length > 0) return p.images[0];
+  if (typeof p.images === 'string') return p.images;
+  if (typeof p.image === 'string') return p.image;
+  return null;
+};
+
 const HomePage = () => {
   const [categories, setCategories] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
 
   // Fetch categories from backend API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_API}/categories`);
+        const res = await fetch(`${API}/categories`);
         const data = await res.json();
         if (data.success) {
           setCategories(data.data);
@@ -32,12 +71,49 @@ const HomePage = () => {
     fetchCategories();
   }, []);
 
-  const featuredProducts = [
-    { id: 1, name: 'Premium Dog Food', price: 1299, originalPrice: 1599, image: '🍖', rating: 4.5, reviews: 128 },
-    { id: 2, name: 'Cat Scratching Post', price: 899, originalPrice: 1199, image: '🐱', rating: 4.8, reviews: 89 },
-    { id: 3, name: 'Bird Cage Deluxe', price: 2499, originalPrice: 2999, image: '🏠', rating: 4.3, reviews: 45 },
-    { id: 4, name: 'Aquarium Starter Kit', price: 3499, originalPrice: 4299, image: '🐟', rating: 4.7, reviews: 67 },
-  ];
+  // Fetch featured products from multiple categories
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const results = await Promise.allSettled(
+          FEATURED_SOURCES.map(async ({ endpoint, type }) => {
+            const res = await fetch(`${API}${endpoint}?limit=3`);
+            const data = await res.json();
+            const items = data.success ? (data.data || data.products || []) : [];
+            return items.map((p) => ({ ...p, _type: type }));
+          }),
+        );
+        const all = results
+          .filter((r) => r.status === 'fulfilled')
+          .flatMap((r) => r.value);
+
+        // Shuffle and pick up to 8 diverse products
+        const shuffled = all.sort(() => Math.random() - 0.5);
+        // Try to pick at most 1-2 per category for diversity
+        const picked = [];
+        const typeCounts = {};
+        for (const p of shuffled) {
+          const count = typeCounts[p._type] || 0;
+          if (count < 2 && picked.length < 8) {
+            picked.push(p);
+            typeCounts[p._type] = count + 1;
+          }
+        }
+        // Fill remaining slots if we have fewer than 8
+        if (picked.length < 8) {
+          for (const p of shuffled) {
+            if (!picked.includes(p) && picked.length < 8) picked.push(p);
+          }
+        }
+        setFeaturedProducts(picked);
+      } catch (err) {
+        console.error('Failed to fetch featured products:', err);
+      } finally {
+        setFeaturedLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
 
   const services = [
     { title: 'Free Delivery', description: 'On orders above ₹499', icon: '🚚' },
@@ -188,36 +264,70 @@ const HomePage = () => {
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
               Featured Products
             </h2>
-            <a href="#all-products" className="text-[#65a30d] font-semibold hover:underline">
-              View All →
-            </a>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {featuredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="bg-gray-50 rounded-2xl p-4 hover:shadow-lg transition-shadow group"
-              >
-                <div className="bg-white rounded-xl p-6 mb-4 text-center">
-                  <span className="text-6xl group-hover:scale-110 transition-transform inline-block">
-                    {product.image}
-                  </span>
+
+          {featuredLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="bg-gray-50 rounded-2xl p-4 animate-pulse">
+                  <div className="bg-gray-200 rounded-xl h-40 mb-4" />
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-2" />
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-                <div className="flex items-center gap-1 mb-2">
-                  <span className="text-yellow-400">★</span>
-                  <span className="text-sm text-gray-600">{product.rating} ({product.reviews})</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-gray-900">₹{product.price}</span>
-                  <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
-                </div>
-                <button className="w-full mt-4 bg-[#a3e635] text-gray-900 py-2 rounded-lg font-semibold hover:bg-[#84cc16] transition-colors">
-                  Add to Cart
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {featuredProducts.map((product) => {
+                const { price, mrp } = extractPrice(product);
+                const img = extractImage(product);
+                const discount = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
+                const name = product.productName || product.name || 'Product';
+
+                return (
+                  <Link
+                    to={`/product/${product._id}`}
+                    key={product._id}
+                    className="bg-gray-50 rounded-2xl p-4 hover:shadow-lg transition-all group relative overflow-hidden"
+                  >
+                    {discount > 0 && (
+                      <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
+                        {discount}% OFF
+                      </span>
+                    )}
+                    <div className="bg-white rounded-xl h-40 mb-4 flex items-center justify-center overflow-hidden">
+                      {img ? (
+                        <img
+                          src={img}
+                          alt={name}
+                          className="max-h-full max-w-full object-contain p-2 group-hover:scale-110 transition-transform duration-300"
+                        />
+                      ) : (
+                        <span className="text-5xl">🐾</span>
+                      )}
+                    </div>
+                    <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">
+                      {product._type}
+                    </span>
+                    <h3 className="font-semibold text-gray-900 mb-1.5 line-clamp-2 text-sm leading-snug">{name}</h3>
+                    {product.rating != null && (
+                      <div className="flex items-center gap-1 mb-1.5">
+                        <span className="text-yellow-400 text-sm">★</span>
+                        <span className="text-xs text-gray-500">{product.rating}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-gray-900">₹{price?.toLocaleString()}</span>
+                      {mrp > price && (
+                        <span className="text-sm text-gray-400 line-through">₹{mrp?.toLocaleString()}</span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 

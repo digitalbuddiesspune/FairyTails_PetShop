@@ -5,7 +5,6 @@ import HomePage from './components/HomePage';
 import Footer from './components/Footer';
 import SignUp from './pages/SignUp';
 import SignIn from './pages/SignIn';
-import AddressPage from './pages/AddressPage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import Contact from './pages/Contact';
 import About from './pages/About';
@@ -15,6 +14,7 @@ import ProductDetail from './pages/ProductDetail';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
+import OrderDetailsPage from './pages/OrderDetailsPage';
 import WishlistPage from './pages/WishlistPage';
 import AdminSignIn from './pages/AdminSignIn';
 import AdminLayout from './components/AdminLayout';
@@ -24,6 +24,7 @@ import AdminMyProducts from './pages/admin/AdminMyProducts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminOrderDetails from './pages/admin/AdminOrderDetails';
 import AdminSettings from './pages/admin/AdminSettings';
 import './App.css';
 
@@ -68,6 +69,7 @@ function App() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="order-details/:id" element={<AdminOrderDetails />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
@@ -81,11 +83,6 @@ function App() {
         <Route path="/home" element={
           <MainLayout>
             <HomePage />
-          </MainLayout>
-        } />
-        <Route path="/address" element={
-          <MainLayout>
-            <AddressPage />
           </MainLayout>
         } />
         <Route path="/account-settings" element={
@@ -136,6 +133,11 @@ function App() {
         <Route path="/orders" element={
           <MainLayout>
             <OrdersPage />
+          </MainLayout>
+        } />
+        <Route path="/order-details/:id" element={
+          <MainLayout>
+            <OrderDetailsPage />
           </MainLayout>
         } />
       </Routes>
