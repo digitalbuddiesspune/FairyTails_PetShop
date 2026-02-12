@@ -87,7 +87,7 @@ const OrdersPage = () => {
 
       {/* ── Scattered paw decorations ───────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <PawIcon className="absolute top-16 left-[5%] w-10 h-10 text-gray-300/50 rotate-12" />
+        <PawIcon className="absolute top-30 left-[5%] w-10 h-10 text-gray-300/50 rotate-12" />
         <PawIcon className="absolute top-28 right-[8%] w-12 h-12 text-gray-300/40 -rotate-[25deg]" />
         <PawIcon className="absolute top-[20%] right-[22%] w-8 h-8 text-gray-300/45 rotate-45" />
         <PawIcon className="absolute top-[30%] left-[3%] w-9 h-9 text-gray-300/35 rotate-[60deg]" />
@@ -107,7 +107,7 @@ const OrdersPage = () => {
       {/* ── Page Title with cat image ──────────────────────────────── */}
       <div className="container mx-auto px-4 pt-8 pb-4 relative z-10">
         <div className="flex items-center gap-4">
-          <img src={cattImage} alt="Cat" className="w-14 h-14 object-contain" />
+          <img src={cattImage} alt="Cat" className="w-20 h-20 object-contain" />
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
             <p className="text-sm text-gray-400 mt-0.5">{orders.length} order{orders.length !== 1 ? 's' : ''}</p>
@@ -168,7 +168,7 @@ const OrdersPage = () => {
                               <p className="font-semibold text-gray-900 text-sm line-clamp-1">{item.productName}</p>
                               <p className="text-xs text-gray-400">Qty: {item.quantity} × ₹{item.price?.toLocaleString()}</p>
                             </div>
-                            <p className="text-sm font-bold text-gray-900 shrink-0">₹{(item.price * item.quantity).toLocaleString()}</p>
+                           
                           </div>
                         ))}
                       </div>

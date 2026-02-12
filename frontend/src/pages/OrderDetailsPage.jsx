@@ -125,7 +125,7 @@ const OrderDetailsPage = () => {
         <div className="container mx-auto px-4 max-w-3xl">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
-            <img src={cattImg} alt="" className="w-14 h-14 object-contain" />
+            <img src={cattImg} alt="" className="w-20 h-20 object-contain" />
             <div>
               
               <h1 className="text-2xl font-bold text-gray-900">

@@ -157,17 +157,7 @@ const AdminLayout = () => {
                         </div>
 
                         {/* Categories */}
-                        <button
-                            onClick={() => { navigate('/admin/categories'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                location.pathname === '/admin/categories'
-                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
-                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                            }`}
-                        >
-                            <List size={20} />
-                            Categories
-                        </button>
+                       
 
                         {/* Orders */}
                         <button
@@ -196,17 +186,7 @@ const AdminLayout = () => {
                         </button>
 
                         {/* Settings */}
-                        <button
-                            onClick={() => { navigate('/admin/settings'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                location.pathname === '/admin/settings'
-                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
-                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                            }`}
-                        >
-                            <Settings size={20} />
-                            Settings
-                        </button>
+                        
 
                         {/* Visit Site */}
                         <button
