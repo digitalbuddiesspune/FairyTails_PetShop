@@ -228,9 +228,8 @@ const CheckoutPage = () => {
   const subtotal = cartItems.reduce((s, i) => s + getItemPricing(i).discountedPrice * i.quantity, 0);
   const mrpTotal = cartItems.reduce((s, i) => s + getItemPricing(i).mrp * i.quantity, 0);
   const savings = mrpTotal - subtotal;
-  const gst = Math.round(subtotal * 0.18);        // 18% GST
   const delivery = subtotal >= 500 ? 0 : 50;
-  const total = subtotal + gst + delivery;
+  const total = subtotal + delivery;  // GST already included in product prices
 
   // ─── States ────────────────────────────────────────────────────────────────
   if (!token) return null;
@@ -502,10 +501,6 @@ const CheckoutPage = () => {
                     </div>
                   )}
                   <div className="flex justify-between text-gray-600">
-                    <span>GST (18%)</span>
-                    <span>₹{gst.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
                     <span>Delivery</span>
                     <span className={delivery === 0 ? 'text-green-600 font-medium' : ''}>{delivery === 0 ? 'Free' : `₹${delivery}`}</span>
                   </div>
@@ -516,7 +511,7 @@ const CheckoutPage = () => {
                     <span>Total</span>
                     <span>₹{total.toLocaleString()}</span>
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5">GST of ₹{gst.toLocaleString()} included</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">18% GST included</p>
                   {savings > 0 && (
                     <p className="text-xs text-green-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
                   )}

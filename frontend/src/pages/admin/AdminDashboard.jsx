@@ -32,6 +32,7 @@ const AdminDashboard = () => {
         totalProducts: 0
     });
     const [chartData, setChartData] = useState([]);
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -61,7 +62,19 @@ const AdminDashboard = () => {
                     userCount = usersData.count || 0;
                 } catch {}
 
-                processOrderData([], totalProducts, userCount);
+                // Fetch all orders
+                let orders = [];
+                try {
+                    const ordersRes = await fetch(`${API_BASE}/admin/orders`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const ordersData = await ordersRes.json();
+                    if (ordersData.success) {
+                        orders = ordersData.data || [];
+                    }
+                } catch {}
+
+                processOrderData(orders, totalProducts, userCount);
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
                 processOrderData([], 0, 0);
@@ -71,47 +84,18 @@ const AdminDashboard = () => {
         };
 
         fetchDashboardData();
-    }, []);
-
-    const generateMockOrders = () => {
-        const orders = [];
-        const statuses = ['Pending', 'Delivered', 'Cancelled', 'Processing'];
-        const today = new Date();
-
-        // Generate last 6 months of data
-        for (let i = 0; i < 100; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - Math.floor(Math.random() * 180));
-
-            orders.push({
-                id: i,
-                totalAmount: Math.floor(Math.random() * 2000) + 500,
-                status: statuses[Math.floor(Math.random() * statuses.length)],
-                createdAt: date.toISOString()
-            });
-        }
-
-        // Add some specifically for today
-        for (let i = 0; i < 10; i++) {
-            orders.push({
-                id: 100 + i,
-                totalAmount: Math.floor(Math.random() * 2000) + 500,
-                status: statuses[Math.floor(Math.random() * statuses.length)],
-                createdAt: new Date().toISOString()
-            });
-        }
-        return orders;
-    };
+    }, [selectedYear]);
 
     const processOrderData = (orders, productCount, userCount) => {
-        const today = new Date().toDateString();
+        const today = new Date();
+        const todayDateString = today.toDateString();
 
         let todayOrders = 0;
         let todayPending = 0;
         let todayDelivered = 0;
         let todayCancelled = 0;
 
-        // Initialize all 12 months with 0
+        // Initialize all 12 months with 0 for selected year
         const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const monthlyData = monthsOrder.reduce((acc, month) => {
             acc[month] = { name: month, revenue: 0, orders: 0 };
@@ -121,19 +105,23 @@ const AdminDashboard = () => {
         orders.forEach(order => {
             const orderDate = new Date(order.createdAt);
             const dateString = orderDate.toDateString();
+            const orderYear = orderDate.getFullYear();
             const monthKey = orderDate.toLocaleString('default', { month: 'short' });
 
-            // Today's Metrics
-            if (dateString === today) {
+            // Today's Metrics - only count orders created TODAY
+            if (dateString === todayDateString) {
                 todayOrders++;
-                if (order.status === 'Pending') todayPending++;
-                if (order.status === 'Delivered') todayDelivered++;
-                if (order.status === 'Cancelled') todayCancelled++;
+                // Count pending: placed, processing, or shipped
+                if (order.status === 'placed' || order.status === 'processing' || order.status === 'shipped') {
+                    todayPending++;
+                }
+                if (order.status === 'delivered') todayDelivered++;
+                if (order.status === 'cancelled') todayCancelled++;
             }
 
-            // Monthly Aggregation
-            if (monthlyData[monthKey]) {
-                monthlyData[monthKey].revenue += order.totalAmount;
+            // Monthly Aggregation - only for selected year
+            if (orderYear === selectedYear && monthlyData[monthKey]) {
+                monthlyData[monthKey].revenue += order.total || 0;
                 monthlyData[monthKey].orders += 1;
             }
         });
@@ -234,12 +222,18 @@ const AdminDashboard = () => {
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h3 className="text-lg font-bold text-gray-800">Revenue & Order Analytics</h3>
+                        <h3 className="text-lg font-bold text-gray-800">Orders & Sales Graph</h3>
                         <p className="text-sm text-gray-500">Monthly breakdown of performance</p>
                     </div>
-                    <div className="p-2 bg-gray-50 rounded-lg">
-                        <TrendingUp className="w-5 h-5 text-gray-600" />
-                    </div>
+                    <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                        {[2023, 2024, 2025, 2026].map(year => (
+                            <option key={year} value={year}>{year}</option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="h-[400px] w-full">
@@ -276,8 +270,8 @@ const AdminDashboard = () => {
                                 cursor={{ fill: '#F3F4F6' }}
                             />
                             <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                            <Bar yAxisId="left" dataKey="revenue" name="Revenue" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={30} />
-                            <Bar yAxisId="right" dataKey="orders" name="Orders" fill="#10B981" radius={[4, 4, 0, 0]} barSize={30} />
+                            <Bar yAxisId="right" dataKey="orders" name="Total Orders" fill="#10B981" radius={[4, 4, 0, 0]} barSize={30} />
+                            <Bar yAxisId="left" dataKey="revenue" name="Total Sales Amount" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={30} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

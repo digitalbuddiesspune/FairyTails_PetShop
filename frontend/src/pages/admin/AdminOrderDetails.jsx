@@ -320,12 +320,12 @@ const AdminOrderDetails = () => {
         <div className="space-y-2 text-xs max-w-sm">
           <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="text-gray-700">₹{order.subtotal?.toLocaleString()}</span></div>
           {order.discount > 0 && <div className="flex justify-between"><span className="text-green-500">Discount</span><span className="text-green-500">-₹{order.discount?.toLocaleString()}</span></div>}
-          <div className="flex justify-between"><span className="text-gray-400">GST (18%)</span><span className="text-gray-700">₹{(order.gst || 0).toLocaleString()}</span></div>
           <div className="flex justify-between"><span className="text-gray-400">Shipping Charges</span><span className="text-gray-700">{order.deliveryCharge === 0 ? 'Free' : `₹${order.deliveryCharge}`}</span></div>
           <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100 text-sm">
             <span>Total Amount</span>
             <span>₹{order.total?.toLocaleString()}</span>
           </div>
+          <p className="text-[10px] text-gray-500 text-right">18% GST included</p>
         </div>
       </div>
 

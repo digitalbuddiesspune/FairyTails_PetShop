@@ -61,7 +61,7 @@ const sortOptions = [
 ];
 
 // ─── ProductCard ────────────────────────────────────────────────────────────
-const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
+const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const [addingToCart, setAddingToCart] = useState(false);
@@ -128,10 +128,13 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
     if (onWishlistToggle) onWishlistToggle(product._id);
   };
 
+  // Build product detail URL with type parameter
+  const productUrl = apiEndpoint ? `/product/${product._id}?type=${apiEndpoint}` : `/product/${product._id}`;
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
       <div className="relative overflow-hidden bg-gray-50">
-        <Link to={`/product/${product._id}`}>
+        <Link to={productUrl}>
           <div className="aspect-square flex items-center justify-center p-4">
             {displayImage ? (
               <img src={displayImage} alt={displayName} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
@@ -173,7 +176,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
         {product.brand && (
           <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">{product.brand}</p>
         )}
-        <Link to={`/product/${product._id}`}>
+        <Link to={productUrl}>
           <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5rem] hover:text-[#65a30d] transition-colors">{displayName}</h3>
         </Link>
         <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full mb-3">{product.subCategory}</span>
@@ -189,7 +192,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
           </div>
         )}
         <div className="flex gap-2 mt-1">
-          <Link to={`/product/${product._id}`} className="flex-1 text-center bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all duration-200 text-sm">
+          <Link to={productUrl} className="flex-1 text-center bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all duration-200 text-sm">
             View Details
           </Link>
           <button onClick={handleAddToCart} disabled={addingToCart} className="px-4 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all duration-200 text-sm border border-gray-200 disabled:opacity-50" title="Add to Cart">
@@ -215,6 +218,7 @@ const CategoryPage = () => {
   const [total, setTotal] = useState(0);
   const [sortBy, setSortBy] = useState('');
   const [wishlistIds, setWishlistIds] = useState([]);
+  const [currentApiEndpoint, setCurrentApiEndpoint] = useState(null);
 
   const activeSubCategory = searchParams.get('subCategory') || 'All';
   const token = localStorage.getItem('token');
@@ -267,6 +271,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/grooming-essentials');
           }
         } else if (isAccessories) {
           // ── Accessories category ──
@@ -279,6 +284,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/accessories');
           }
         } else if (isHealthSup) {
           // ── Health & Supplement category ──
@@ -291,6 +297,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/health-supplements');
           }
         } else if (isHouse) {
           // ── Beds & House category ──
@@ -303,6 +310,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/houses');
           }
         } else if (isToys) {
           // ── Toys category: subcategories are "Dog" / "Cat" ──
@@ -317,6 +325,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/toys');
           }
         } else if (foodCategory) {
           // ── Dogs / Cats categories ──
@@ -330,6 +339,7 @@ const CategoryPage = () => {
             if (res.data.success) {
               setProducts(res.data.data);
               setTotal(res.data.total);
+              setCurrentApiEndpoint('/clothes');
             }
           } else if (isAll) {
             // Fetch food + clothes and combine
@@ -348,6 +358,7 @@ const CategoryPage = () => {
             const combined = [...foodData, ...clothesData];
             setProducts(combined);
             setTotal(combined.length);
+            setCurrentApiEndpoint(null); // Mixed products, no single endpoint
           } else {
             // Food subcategory filter
             const params = { category: foodCategory, subCategory: activeSubCategory };
@@ -356,12 +367,14 @@ const CategoryPage = () => {
             if (res.data.success) {
               setProducts(res.data.data);
               setTotal(res.data.total);
+              setCurrentApiEndpoint('/food');
             }
           }
         } else {
           // Other categories — no products yet
           setProducts([]);
           setTotal(0);
+          setCurrentApiEndpoint(null);
         }
       } catch (err) {
         console.error('Fetch products error:', err);
@@ -537,6 +550,7 @@ const CategoryPage = () => {
                     product={product}
                     wishlistIds={wishlistIds}
                     onWishlistToggle={handleWishlistToggle}
+                    apiEndpoint={currentApiEndpoint}
                   />
                 ))}
               </div>

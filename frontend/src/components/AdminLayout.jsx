@@ -12,7 +12,8 @@ import {
     PawPrint,
     ChevronDown,
     PackageSearch,
-    PlusCircle
+    PlusCircle,
+    ExternalLink
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -95,8 +96,7 @@ const AdminLayout = () => {
                 </div>
 
                 {/* Menu */}
-                <nav className="p-3 flex-1 overflow-y-auto">
-                    <div className="space-y-1">
+<nav className="p-3 flex-1 overflow-y-auto no-scrollbar">                    <div className="space-y-1">
                         {/* Dashboard */}
                         <button
                             onClick={() => { navigate('/admin/dashboard'); setSidebarOpen(false); }}
@@ -206,6 +206,15 @@ const AdminLayout = () => {
                         >
                             <Settings size={20} />
                             Settings
+                        </button>
+
+                        {/* Visit Site */}
+                        <button
+                            onClick={() => { window.open('/', '_blank'); }}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all"
+                        >
+                            <ExternalLink size={20} />
+                            Visit Site
                         </button>
                     </div>
                 </nav>
