@@ -90,9 +90,8 @@ export const placeOrder = async (req, res) => {
     }
 
     const discount = mrpTotal - subtotal;
-    const gst = Math.round(subtotal * 0.18);          // 18% GST
     const deliveryCharge = subtotal >= 500 ? 0 : 50;
-    const total = subtotal + gst + deliveryCharge;
+    const total = subtotal + deliveryCharge;  // GST already included in product prices
 
     const order = await Order.create({
       user: req.user._id,
@@ -102,7 +101,7 @@ export const placeOrder = async (req, res) => {
       subtotal,
       mrpTotal,
       discount,
-      gst,
+      gst: 0,  // GST is already included in product prices, not added separately
       deliveryCharge,
       total,
       status: 'placed',

@@ -12,7 +12,8 @@ import {
     PawPrint,
     ChevronDown,
     PackageSearch,
-    PlusCircle
+    PlusCircle,
+    ExternalLink
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -95,8 +96,7 @@ const AdminLayout = () => {
                 </div>
 
                 {/* Menu */}
-                <nav className="p-3 flex-1 overflow-y-auto">
-                    <div className="space-y-1">
+<nav className="p-3 flex-1 overflow-y-auto no-scrollbar">                    <div className="space-y-1">
                         {/* Dashboard */}
                         <button
                             onClick={() => { navigate('/admin/dashboard'); setSidebarOpen(false); }}
@@ -157,17 +157,7 @@ const AdminLayout = () => {
                         </div>
 
                         {/* Categories */}
-                        <button
-                            onClick={() => { navigate('/admin/categories'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                location.pathname === '/admin/categories'
-                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
-                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                            }`}
-                        >
-                            <List size={20} />
-                            Categories
-                        </button>
+                       
 
                         {/* Orders */}
                         <button
@@ -196,16 +186,15 @@ const AdminLayout = () => {
                         </button>
 
                         {/* Settings */}
+                        
+
+                        {/* Visit Site */}
                         <button
-                            onClick={() => { navigate('/admin/settings'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                                location.pathname === '/admin/settings'
-                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
-                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                            }`}
+                            onClick={() => { window.open('/', '_blank'); }}
+                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all"
                         >
-                            <Settings size={20} />
-                            Settings
+                            <ExternalLink size={20} />
+                            Visit Site
                         </button>
                     </div>
                 </nav>

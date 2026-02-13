@@ -125,7 +125,7 @@ const OrderDetailsPage = () => {
         <div className="container mx-auto px-4 max-w-3xl">
           {/* Header */}
           <div className="flex items-center gap-4 mb-6">
-            <img src={cattImg} alt="" className="w-14 h-14 object-contain" />
+            <img src={cattImg} alt="" className="w-20 h-20 object-contain" />
             <div>
               
               <h1 className="text-2xl font-bold text-gray-900">
@@ -235,9 +235,12 @@ const OrderDetailsPage = () => {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="text-gray-800">₹{order.subtotal?.toLocaleString()}</span></div>
               {order.discount > 0 && <div className="flex justify-between"><span className="text-green-500">Discount</span><span className="text-green-500">-₹{order.discount?.toLocaleString()}</span></div>}
-              <div className="flex justify-between"><span className="text-gray-400">GST (18%)</span><span className="text-gray-800">₹{(order.gst || 0).toLocaleString()}</span></div>
               <div className="flex justify-between"><span className="text-gray-400">Delivery</span><span className="text-gray-800">{order.deliveryCharge === 0 ? 'Free' : `₹${order.deliveryCharge}`}</span></div>
-              <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100"><span>Total</span><span>₹{order.total?.toLocaleString()}</span></div>
+              <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100">
+                <span>Total</span>
+                <span>₹{order.total?.toLocaleString()}</span>
+              </div>
+              <p className="text-xs text-gray-500 text-right">18% GST included</p>
             </div>
 
             <div className="mt-3 pt-3 border-t border-gray-100">

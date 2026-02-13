@@ -109,6 +109,27 @@ const ProductDetail = () => {
     try {
       setBuyingNow(true);
       const modelType = productType ? (ENDPOINT_TO_MODEL[productType] || undefined) : undefined;
+      
+      // Clear cart first to ensure only current product is in checkout
+      try {
+        const cartRes = await axios.get(`${API_BASE}/cart`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (cartRes.data.success && cartRes.data.data.items?.length > 0) {
+          // Delete all items from cart
+          await Promise.all(
+            cartRes.data.data.items.map(item => 
+              axios.delete(`${API_BASE}/cart/${item._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              })
+            )
+          );
+        }
+      } catch (err) {
+        console.error('Clear cart error:', err);
+      }
+      
+      // Add current product to cart
       await axios.post(
         `${API_BASE}/cart`,
         { productId: id, quantity: 1, selectedSize, productType: modelType },
@@ -159,6 +180,26 @@ const ProductDetail = () => {
         setLoading(true);
         setError(null);
 
+        // Check if category type is provided in URL query params
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryType = urlParams.get('type');
+
+        // If category type is provided, try that endpoint first
+        if (categoryType) {
+          try {
+            const res = await axios.get(`${API_BASE}${categoryType}/${id}`);
+            if (res.data.success) {
+              setProduct(res.data.data);
+              setProductType(categoryType);
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            // If specific category fails, fall through to search all
+          }
+        }
+
+        // Fallback: search all endpoints in parallel (silently, no console errors)
         const results = await Promise.allSettled(
           PRODUCT_ENDPOINTS.map((ep) => axios.get(`${API_BASE}${ep}/${id}`))
         );
@@ -168,6 +209,7 @@ const ProductDetail = () => {
           if (r.status === 'fulfilled' && r.value.data.success) {
             setProduct(r.value.data.data);
             setProductType(PRODUCT_ENDPOINTS[i]);
+            setLoading(false);
             return;
           }
         }
