@@ -234,7 +234,8 @@ const AdminMyProducts = () => {
                       </div>
                       <div className="flex items-center gap-2 mt-1.5">
                         <span className="font-bold text-gray-900 text-sm">₹{price.sale}</span>
-                        {price.mrp > price.sale && <span className="text-xs text-gray-400 line-through">₹{price.mrp}</span>}
+                        
+                       
                       </div>
                     </div>
                   </div>
@@ -307,7 +308,7 @@ const AdminMyProducts = () => {
                         )}
                         <td className="px-5 py-4">
                           <p className="font-bold text-gray-900 text-sm">₹{price.sale}</p>
-                          {price.mrp > price.sale && <p className="text-xs text-gray-400 line-through">₹{price.mrp}</p>}
+                         
                         </td>
                         <td className="px-5 py-4"><p className="text-sm text-gray-600">{getExpiry(product)}</p></td>
                         <td className="px-5 py-4">

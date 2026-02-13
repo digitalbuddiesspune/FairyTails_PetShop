@@ -109,21 +109,21 @@ const AdminOrderDetails = () => {
   const displayOrderId = order.orderNumber || parseInt(order._id.slice(-8), 16);
 
   return (
-    <div className="animate-fadeIn space-y-5">
+    <div className="animate-fadeIn space-y-4 sm:space-y-5">
       {/* ─── Header with Order ID, Status Dropdown, Payment Dropdown ─── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-start sm:justify-between gap-4">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate('/admin/orders')} className="p-2 hover:bg-gray-100 rounded-lg">
+            <button onClick={() => navigate('/admin/orders')} className="p-2 hover:bg-gray-100 rounded-lg shrink-0" aria-label="Back to orders">
               <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             </button>
-            <div>
+            <div className="min-w-0">
               <p className="text-[10px] text-gray-400 uppercase font-bold">Order ID</p>
-              <h2 className="text-lg font-bold text-gray-900">#{displayOrderId}</h2>
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">#{displayOrderId}</h2>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Order Status Dropdown */}
             <div>
               <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Order Status</p>
@@ -156,7 +156,7 @@ const AdminOrderDetails = () => {
         </div>
 
         {/* Order Meta Row */}
-        <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+        <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs">
           <div>
             <p className="text-gray-400 font-semibold mb-0.5">Date</p>
             <p className="text-gray-700 font-medium">
@@ -179,20 +179,21 @@ const AdminOrderDetails = () => {
         </div>
       </div>
 
-      {/* ─── Progress Bar ─── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-        <div className="flex items-center justify-between">
+      {/* ─── Progress Bar (no scroll, fits viewport) ─── */}
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
+        <div className="flex items-start w-full gap-0">
           {STATUS_FLOW.map((s, i) => {
             const done = currentIdx >= i;
             const isCancelled = s === 'cancelled';
             const ts = historyMap[s];
+            const rightDone = currentIdx > i;
             return (
               <React.Fragment key={s}>
                 {i > 0 && (
-                  <div className={`h-0.5 flex-1 mx-1 rounded ${done && !isCancelled ? 'bg-green-400' : 'bg-gray-200'}`} />
+                  <div className={`h-0.5 flex-1 min-w-0 shrink mt-[0.85rem] -mx-0.5 ${rightDone && !isCancelled ? 'bg-green-400' : 'bg-gray-200'}`} />
                 )}
-                <div className="flex flex-col items-center shrink-0 w-[80px]">
-                  <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm border-2 transition-all ${
+                <div className="flex flex-col items-center flex-1 min-w-0 shrink-0">
+                  <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs border-2 transition-all shrink-0 ${
                     done && !isCancelled
                       ? 'bg-green-500 border-green-500 text-white'
                       : isCancelled && order.status === 'cancelled'
@@ -200,18 +201,18 @@ const AdminOrderDetails = () => {
                         : 'bg-gray-100 border-gray-200 text-gray-300'
                   }`}>
                     {done && !isCancelled ? (
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                     ) : isCancelled && order.status === 'cancelled' ? (
-                      <span className="text-xs font-bold">✕</span>
+                      <span className="text-[10px] font-bold">✕</span>
                     ) : (
-                      <span className="text-xs font-bold">{i + 1}</span>
+                      <span className="text-[10px] font-bold">{i + 1}</span>
                     )}
                   </div>
-                  <p className={`text-[10px] mt-1.5 font-bold text-center ${done && !isCancelled ? 'text-gray-800' : isCancelled && order.status === 'cancelled' ? 'text-red-500' : 'text-gray-300'}`}>
+                  <p className={`text-[9px] sm:text-[10px] mt-1.5 font-bold text-center truncate w-full px-0.5 ${done && !isCancelled ? 'text-gray-800' : isCancelled && order.status === 'cancelled' ? 'text-red-500' : 'text-gray-300'}`} title={STATUS_CONFIG[s].label}>
                     {STATUS_CONFIG[s].label}
                   </p>
                   {ts && (done || (isCancelled && order.status === 'cancelled')) && (
-                    <p className="text-[9px] text-gray-400 text-center mt-0.5 whitespace-pre-line leading-tight">{formatDate(ts)}</p>
+                    <p className="text-[8px] sm:text-[9px] text-gray-400 text-center mt-0.5 truncate w-full px-0.5" title={formatDate(ts)}>{formatDate(ts).replace('\n', ', ')}</p>
                   )}
                 </div>
               </React.Fragment>
@@ -221,8 +222,8 @@ const AdminOrderDetails = () => {
       </div>
 
       {/* ─── Order Info Grid ─── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 text-xs">
           <div>
             <p className="text-gray-400 font-semibold uppercase mb-0.5">Order ID</p>
             <p className="text-gray-700 font-bold">#{displayOrderId}</p>
@@ -251,7 +252,7 @@ const AdminOrderDetails = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-xs mt-4 pt-4 border-t border-gray-100">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 text-xs mt-4 pt-4 border-t border-gray-100">
           <div>
             <p className="text-gray-400 font-semibold uppercase mb-0.5">Payment Mode</p>
             <p className="text-gray-700 font-bold">{order.paymentMethod === 'cash_on_delivery' ? 'Cash' : 'Online'}</p>
@@ -269,44 +270,61 @@ const AdminOrderDetails = () => {
               {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
-          <div className="col-span-2 sm:col-span-3">
+          <div className="col-span-2 sm:col-span-3 min-w-0">
             <p className="text-gray-400 font-semibold uppercase mb-0.5">Address</p>
-            <p className="text-gray-700 font-medium leading-relaxed">
+            <p className="text-gray-700 font-medium leading-relaxed line-clamp-2" title={`${order.shippingAddress?.streetAddress}, ${order.shippingAddress?.city}, ${order.shippingAddress?.state} — ${order.shippingAddress?.pincode}`}>
               {order.shippingAddress?.streetAddress}, {order.shippingAddress?.city}, {order.shippingAddress?.state} — {order.shippingAddress?.pincode}
             </p>
           </div>
         </div>
       </div>
 
-      {/* ─── Order Items Table ─── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+      {/* ─── Order Items (no scroll, card on mobile / table on larger) ─── */}
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-4 sm:px-5 py-3 border-b border-gray-100">
           <h3 className="text-sm font-bold text-gray-800">Order Items</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+
+        {/* Mobile: Card layout */}
+        <div className="sm:hidden divide-y divide-gray-100">
+          {order.items.map((item, i) => (
+            <div key={i} className="p-4 flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-gray-50 border border-gray-200 shrink-0 overflow-hidden">
+                {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className="flex items-center justify-center h-full text-sm">🐾</span>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-gray-800 truncate" title={item.productName}>{item.productName}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">Qty: {item.quantity} × ₹{item.price.toLocaleString()} = ₹{(item.price * item.quantity).toLocaleString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: Table layout (no overflow) */}
+        <div className="hidden sm:block">
+          <table className="w-full text-left table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-5 py-2.5 text-[10px] font-bold text-gray-400 uppercase">Item</th>
-                <th className="px-5 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-center">Quantity</th>
-                <th className="px-5 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-right">Unit Price</th>
-                <th className="px-5 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-right">Total</th>
+                <th className="px-4 py-2.5 text-[10px] font-bold text-gray-400 uppercase w-[45%]">Item</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-center w-[12%]">Qty</th>
+                <th className="px-3 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-right w-[20%]">Unit Price</th>
+                <th className="px-4 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-right w-[23%]">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {order.items.map((item, i) => (
                 <tr key={i} className="hover:bg-gray-50">
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 shrink-0 overflow-hidden">
                         {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className="flex items-center justify-center h-full text-sm">🐾</span>}
                       </div>
-                      <p className="text-xs font-medium text-gray-800 truncate max-w-[200px]">{item.productName}</p>
+                      <p className="text-xs font-medium text-gray-800 truncate" title={item.productName}>{item.productName}</p>
                     </div>
                   </td>
-                  <td className="px-5 py-3 text-xs text-gray-600 text-center">{item.quantity}</td>
-                  <td className="px-5 py-3 text-xs text-gray-600 text-right">₹{item.price.toLocaleString()}</td>
-                  <td className="px-5 py-3 text-xs font-bold text-gray-800 text-right">₹{(item.price * item.quantity).toLocaleString()}</td>
+                  <td className="px-3 py-3 text-xs text-gray-600 text-center">{item.quantity}</td>
+                  <td className="px-3 py-3 text-xs text-gray-600 text-right">₹{item.price.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs font-bold text-gray-800 text-right">₹{(item.price * item.quantity).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -315,17 +333,17 @@ const AdminOrderDetails = () => {
       </div>
 
       {/* ─── Billing Summary with GST ─── */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
         <h3 className="text-sm font-bold text-gray-800 mb-3">Billing Summary</h3>
         <div className="space-y-2 text-xs max-w-sm">
           <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="text-gray-700">₹{order.subtotal?.toLocaleString()}</span></div>
           {order.discount > 0 && <div className="flex justify-between"><span className="text-green-500">Discount</span><span className="text-green-500">-₹{order.discount?.toLocaleString()}</span></div>}
-          <div className="flex justify-between"><span className="text-gray-400">GST (18%)</span><span className="text-gray-700">₹{(order.gst || 0).toLocaleString()}</span></div>
           <div className="flex justify-between"><span className="text-gray-400">Shipping Charges</span><span className="text-gray-700">{order.deliveryCharge === 0 ? 'Free' : `₹${order.deliveryCharge}`}</span></div>
           <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100 text-sm">
             <span>Total Amount</span>
             <span>₹{order.total?.toLocaleString()}</span>
           </div>
+          <p className="text-[10px] text-gray-500 text-right">18% GST included</p>
         </div>
       </div>
 

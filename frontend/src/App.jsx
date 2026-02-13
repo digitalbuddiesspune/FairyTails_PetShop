@@ -16,6 +16,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
 import WishlistPage from './pages/WishlistPage';
+import SearchPage from './pages/SearchPage';
 import AdminSignIn from './pages/AdminSignIn';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -42,7 +43,7 @@ const MainLayout = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 pb-20 md:pb-0">
         {children}
       </main>
       <Footer />
@@ -108,6 +109,11 @@ function App() {
         <Route path="/products" element={
           <MainLayout>
             <CategoryProducts />
+          </MainLayout>
+        } />
+        <Route path="/search" element={
+          <MainLayout>
+            <SearchPage />
           </MainLayout>
         } />
         <Route path="/product/:id" element={

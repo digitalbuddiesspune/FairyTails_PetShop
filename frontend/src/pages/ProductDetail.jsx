@@ -109,6 +109,27 @@ const ProductDetail = () => {
     try {
       setBuyingNow(true);
       const modelType = productType ? (ENDPOINT_TO_MODEL[productType] || undefined) : undefined;
+      
+      // Clear cart first to ensure only current product is in checkout
+      try {
+        const cartRes = await axios.get(`${API_BASE}/cart`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (cartRes.data.success && cartRes.data.data.items?.length > 0) {
+          // Delete all items from cart
+          await Promise.all(
+            cartRes.data.data.items.map(item => 
+              axios.delete(`${API_BASE}/cart/${item._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+              })
+            )
+          );
+        }
+      } catch (err) {
+        console.error('Clear cart error:', err);
+      }
+      
+      // Add current product to cart
       await axios.post(
         `${API_BASE}/cart`,
         { productId: id, quantity: 1, selectedSize, productType: modelType },
@@ -152,22 +173,37 @@ const ProductDetail = () => {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Fetch product from all endpoints in parallel — use whichever succeeds
+  // Fetch product — use type from URL when provided, else try endpoints sequentially
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const results = await Promise.allSettled(
-          PRODUCT_ENDPOINTS.map((ep) => axios.get(`${API_BASE}${ep}/${id}`))
-        );
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeParam = urlParams.get('type');
+        // Normalize: "food" or "/food" → "food" for API path
+        const pathSegment = typeParam ? (typeParam.startsWith('/') ? typeParam.slice(1) : typeParam) : null;
 
-        for (let i = 0; i < results.length; i++) {
-          const r = results[i];
-          if (r.status === 'fulfilled' && r.value.data.success) {
-            setProduct(r.value.data.data);
-            setProductType(PRODUCT_ENDPOINTS[i]);
+        // When type is provided, try only that endpoint (single request, no 404s for other categories)
+        if (pathSegment) {
+          const ep = pathSegment.startsWith('/') ? pathSegment : `/${pathSegment}`;
+          const res = await axios.get(`${API_BASE}${ep}/${id}`, { validateStatus: () => true });
+          if (res.status === 200 && res.data?.success) {
+            setProduct(res.data.data);
+            setProductType(ep);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback: try each endpoint sequentially, stop on first success (avoids 6+ parallel 404s)
+        for (const ep of PRODUCT_ENDPOINTS) {
+          const res = await axios.get(`${API_BASE}${ep}/${id}`, { validateStatus: () => true });
+          if (res.status === 200 && res.data?.success) {
+            setProduct(res.data.data);
+            setProductType(ep);
+            setLoading(false);
             return;
           }
         }
@@ -305,8 +341,8 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">
-        <div className="container mx-auto px-4 py-3">
-          <nav className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
+        <div className="container mx-auto px-4 sm:px-6 py-3">
+          <nav className="text-xs sm:text-sm text-gray-500 flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
             <Link to="/" className="hover:text-[#65a30d] transition-colors">Home</Link>
             <span>/</span>
             <Link to={breadcrumb.categoryLink} className="hover:text-[#65a30d] transition-colors">
@@ -321,22 +357,22 @@ const ProductDetail = () => {
               </>
             )}
             <span>/</span>
-            <span className="text-gray-800 font-medium truncate max-w-[200px]">{displayName}</span>
+            <span className="text-gray-800 font-medium truncate max-w-[140px] sm:max-w-[200px]">{displayName}</span>
           </nav>
         </div>
       </div>
 
       {/* Two-Column Layout: Sticky Image Left + Scrollable Details Right */}
-      <section className="py-8 md:py-12">
-        <div className="container mx-auto px-4">
+      <section className="py-4 sm:py-6 md:py-12">
+        <div className="container mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row gap-6">
 
             {/* LEFT — Sticky Image Gallery */}
             <div className="w-full md:w-[45%] lg:w-[40%] flex-shrink-0">
               <div className="md:sticky md:top-24">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   {/* Main Image */}
-                  <div className="aspect-square flex items-center justify-center mb-4 bg-gray-50 rounded-2xl p-8">
+                  <div className="relative aspect-square flex items-center justify-center mb-3 sm:mb-4 bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-8">
                     {images[selectedImage] ? (
                       <img
                         src={images[selectedImage]}
@@ -346,16 +382,35 @@ const ProductDetail = () => {
                     ) : (
                       <span className="text-8xl text-gray-300">🐾</span>
                     )}
+                    {/* Wishlist icon on image */}
+                    <button
+                      onClick={handleToggleWishlist}
+                      disabled={togglingWishlist}
+                      className={`absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:scale-110 transition-all disabled:opacity-60 ${
+                        isInWishlist ? 'text-red-500' : 'text-gray-500 hover:text-red-400'
+                      }`}
+                      title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                    >
+                      {isInWishlist ? (
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                      )}
+                    </button>
                   </div>
 
                   {/* Thumbnail Row */}
                   {images.length > 1 && (
-                    <div className="flex gap-3 justify-center">
+                    <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
                       {images.map((img, i) => (
                         <button
                           key={i}
                           onClick={() => setSelectedImage(i)}
-                          className={`w-16 h-16 rounded-xl border-2 overflow-hidden transition-all ${
+                          className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border-2 overflow-hidden transition-all shrink-0 ${
                             selectedImage === i
                               ? 'border-[#65a30d] shadow-md'
                               : 'border-gray-200 hover:border-gray-300'
@@ -371,10 +426,10 @@ const ProductDetail = () => {
             </div>
 
             {/* RIGHT — Scrollable Product Details */}
-            <div className="w-full md:w-[55%] lg:w-[60%] space-y-6">
+            <div className="w-full md:w-[55%] lg:w-[60%] space-y-4 sm:space-y-6 min-w-0">
 
               {/* Basic Info Card */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8">
                 {/* Badges */}
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <span className="bg-[#65a30d]/10 text-[#65a30d] text-xs font-bold px-3 py-1 rounded-full">
@@ -405,7 +460,7 @@ const ProductDetail = () => {
                 )}
 
                 {/* Name */}
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
                   {displayName}
                 </h1>
 
@@ -427,9 +482,9 @@ const ProductDetail = () => {
 
                 {/* Price */}
                 {currentPrice && (
-                  <div className="bg-gray-50 rounded-xl p-4 mb-5">
-                    <div className="flex items-end gap-3">
-                      <span className="text-3xl font-bold text-gray-900">
+                  <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
+                    <div className="flex items-end gap-2 sm:gap-3 flex-wrap">
+                      <span className="text-2xl sm:text-3xl font-bold text-gray-900">
                         ₹{currentPrice.discountedPrice}
                       </span>
                       {currentPrice.mrp > currentPrice.discountedPrice && (
@@ -594,11 +649,11 @@ const ProductDetail = () => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     onClick={handleAddToCart}
                     disabled={addingToCart || availableStock === 0}
-                    className={`flex-1 font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 ${
+                    className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 ${
                       availableStock === 0
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white hover:from-[#4d7c0f] hover:to-[#3f6212]'
@@ -614,7 +669,7 @@ const ProductDetail = () => {
                   <button
                     onClick={handleBuyNow}
                     disabled={buyingNow || availableStock === 0}
-                    className={`flex-1 font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 ${
+                    className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 ${
                       availableStock === 0
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         : 'bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white hover:from-[#d97706] hover:to-[#b45309]'
@@ -622,24 +677,12 @@ const ProductDetail = () => {
                   >
                     {buyingNow ? 'Processing...' : '⚡ Buy Now'}
                   </button>
-                  <button
-                    onClick={handleToggleWishlist}
-                    disabled={togglingWishlist}
-                    className={`px-5 font-bold py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm border ${
-                      isInWishlist
-                        ? 'bg-red-50 text-red-500 border-red-200 hover:bg-red-100'
-                        : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
-                    } disabled:opacity-60`}
-                    title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                  >
-                    {isInWishlist ? '♥' : '♡'}
-                  </button>
                 </div>
               </div>
 
               {/* Key Features */}
               {product.keyFeatures?.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-[#65a30d]/10 rounded-lg flex items-center justify-center text-sm">✨</span>
                     Key Features
@@ -657,7 +700,7 @@ const ProductDetail = () => {
 
               {/* Health Benefits (Food) */}
               {product.healthBenefits?.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-sm">💚</span>
                     Health Benefits
@@ -675,7 +718,7 @@ const ProductDetail = () => {
 
               {/* Description (string — Health Supplements / Houses / Grooming) */}
               {product.description && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm">📝</span>
                     Description
@@ -686,7 +729,7 @@ const ProductDetail = () => {
 
               {/* Product Details (array — Food / Clothes / Accessories / Toys) */}
               {(product.details?.length > 0 || product.productDetails?.length > 0) && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm">📋</span>
                     Product Details
@@ -704,7 +747,7 @@ const ProductDetail = () => {
 
               {/* Highlights (Health Supplements / Houses) */}
               {product.highlights?.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-sm">⭐</span>
                     Highlights
@@ -722,7 +765,7 @@ const ProductDetail = () => {
 
               {/* Nutrients (Food) */}
               {product.nutrients?.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-sm">🧪</span>
                     Nutritional Info
@@ -739,7 +782,7 @@ const ProductDetail = () => {
 
               {/* Usage / Dosage (Health Supplements) */}
               {product.usage && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center text-sm">💊</span>
                     Usage
@@ -753,7 +796,7 @@ const ProductDetail = () => {
 
               {/* Usage Instructions (Grooming) */}
               {product.usageInstructions?.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center text-sm">📝</span>
                     Usage Instructions
@@ -771,7 +814,7 @@ const ProductDetail = () => {
 
               {/* Care Instructions (Clothes) */}
               {product.careInstructions?.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center text-sm">🧼</span>
                     Care Instructions
@@ -789,7 +832,7 @@ const ProductDetail = () => {
 
               {/* Dimensions (Houses) */}
               {product.dimensions && (
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-sm">📐</span>
                     Dimensions

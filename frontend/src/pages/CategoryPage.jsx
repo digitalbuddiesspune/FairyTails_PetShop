@@ -61,7 +61,7 @@ const sortOptions = [
 ];
 
 // ─── ProductCard ────────────────────────────────────────────────────────────
-const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
+const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const [addingToCart, setAddingToCart] = useState(false);
@@ -128,11 +128,15 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
     if (onWishlistToggle) onWishlistToggle(product._id);
   };
 
+  // Build product detail URL with type parameter (derive from product when apiEndpoint is null, e.g. mixed food+clothes)
+  const derivedEndpoint = !apiEndpoint && product.sizes?.length && !product.prices?.length ? '/clothes' : !apiEndpoint && (product.prices?.length || !product.sizes?.length) ? '/food' : apiEndpoint;
+  const productUrl = derivedEndpoint ? `/product/${product._id}?type=${derivedEndpoint}` : `/product/${product._id}`;
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-w-0">
       <div className="relative overflow-hidden bg-gray-50">
-        <Link to={`/product/${product._id}`}>
-          <div className="aspect-square flex items-center justify-center p-4">
+        <Link to={productUrl}>
+          <div className="aspect-square flex items-center justify-center p-2 sm:p-4">
             {displayImage ? (
               <img src={displayImage} alt={displayName} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
             ) : (
@@ -169,17 +173,17 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
           )}
         </button>
       </div>
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {product.brand && (
           <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">{product.brand}</p>
         )}
-        <Link to={`/product/${product._id}`}>
-          <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5rem] hover:text-[#65a30d] transition-colors">{displayName}</h3>
+        <Link to={productUrl}>
+          <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#65a30d] transition-colors">{displayName}</h3>
         </Link>
-        <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full mb-3">{product.subCategory}</span>
+        <span className="inline-block bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full mb-2 sm:mb-3">{product.subCategory}</span>
         {startingPrice && (
           <div className="flex items-end gap-2 mb-3">
-            <span className="text-xl font-bold text-gray-900">₹{startingPrice.discountedPrice}</span>
+            <span className="text-base sm:text-xl font-bold text-gray-900">₹{startingPrice.discountedPrice}</span>
             {startingPrice.mrp > startingPrice.discountedPrice && (
               <span className="text-sm text-gray-400 line-through">₹{startingPrice.mrp}</span>
             )}
@@ -189,7 +193,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
           </div>
         )}
         <div className="flex gap-2 mt-1">
-          <Link to={`/product/${product._id}`} className="flex-1 text-center bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all duration-200 text-sm">
+          <Link to={productUrl} className="flex-1 text-center bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all duration-200 text-sm">
             View Details
           </Link>
           <button onClick={handleAddToCart} disabled={addingToCart} className="px-4 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all duration-200 text-sm border border-gray-200 disabled:opacity-50" title="Add to Cart">
@@ -215,6 +219,7 @@ const CategoryPage = () => {
   const [total, setTotal] = useState(0);
   const [sortBy, setSortBy] = useState('');
   const [wishlistIds, setWishlistIds] = useState([]);
+  const [currentApiEndpoint, setCurrentApiEndpoint] = useState(null);
 
   const activeSubCategory = searchParams.get('subCategory') || 'All';
   const token = localStorage.getItem('token');
@@ -267,6 +272,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/grooming-essentials');
           }
         } else if (isAccessories) {
           // ── Accessories category ──
@@ -279,6 +285,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/accessories');
           }
         } else if (isHealthSup) {
           // ── Health & Supplement category ──
@@ -291,6 +298,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/health-supplements');
           }
         } else if (isHouse) {
           // ── Beds & House category ──
@@ -303,6 +311,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/houses');
           }
         } else if (isToys) {
           // ── Toys category: subcategories are "Dog" / "Cat" ──
@@ -317,6 +326,7 @@ const CategoryPage = () => {
           if (res.data.success) {
             setProducts(res.data.data);
             setTotal(res.data.total);
+            setCurrentApiEndpoint('/toys');
           }
         } else if (foodCategory) {
           // ── Dogs / Cats categories ──
@@ -330,6 +340,7 @@ const CategoryPage = () => {
             if (res.data.success) {
               setProducts(res.data.data);
               setTotal(res.data.total);
+              setCurrentApiEndpoint('/clothes');
             }
           } else if (isAll) {
             // Fetch food + clothes and combine
@@ -348,6 +359,7 @@ const CategoryPage = () => {
             const combined = [...foodData, ...clothesData];
             setProducts(combined);
             setTotal(combined.length);
+            setCurrentApiEndpoint(null); // Mixed products, no single endpoint
           } else {
             // Food subcategory filter
             const params = { category: foodCategory, subCategory: activeSubCategory };
@@ -356,12 +368,14 @@ const CategoryPage = () => {
             if (res.data.success) {
               setProducts(res.data.data);
               setTotal(res.data.total);
+              setCurrentApiEndpoint('/food');
             }
           }
         } else {
           // Other categories — no products yet
           setProducts([]);
           setTotal(0);
+          setCurrentApiEndpoint(null);
         }
       } catch (err) {
         console.error('Fetch products error:', err);
@@ -441,7 +455,7 @@ const CategoryPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb + Title Bar */}
       <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
           <nav className="text-gray-400 text-sm flex items-center gap-2 mb-2">
             <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             <span>/</span>
@@ -477,7 +491,7 @@ const CategoryPage = () => {
       {/* SubCategory Tabs */}
       {subCategories.length > 0 && (
         <section className="bg-white border-b border-gray-200 sticky top-[108px] z-30">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 sm:px-6">
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-3">
               {subCategoryTabs.map((sub) => (
                 <button
@@ -530,13 +544,14 @@ const CategoryPage = () => {
 
           {!productsLoading && products.length > 0 && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((product) => (
                   <ProductCard
                     key={product._id}
                     product={product}
                     wishlistIds={wishlistIds}
                     onWishlistToggle={handleWishlistToggle}
+                    apiEndpoint={currentApiEndpoint}
                   />
                 ))}
               </div>
@@ -550,7 +565,7 @@ const CategoryPage = () => {
 
       {/* Browse More */}
       <section className="py-10 bg-white border-t border-gray-100">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-xl font-bold text-gray-900 mb-2">Looking for more?</h3>
           <p className="text-gray-500 mb-6">Explore other categories for your pets</p>
           <div className="flex items-center justify-center gap-3 flex-wrap">
