@@ -102,29 +102,36 @@ const AdminDashboard = () => {
             return acc;
         }, {});
 
-        orders.forEach(order => {
-            const orderDate = new Date(order.createdAt);
-            const dateString = orderDate.toDateString();
-            const orderYear = orderDate.getFullYear();
-            const monthKey = orderDate.toLocaleString('default', { month: 'short' });
+  orders.forEach(order => {
+    const orderDate = new Date(order.createdAt);
+    const dateString = orderDate.toDateString();
+    const orderYear = orderDate.getFullYear();
+    const monthKey = orderDate.toLocaleString('default', { month: 'short' });
 
-            // Today's Metrics - only count orders created TODAY
-            if (dateString === todayDateString) {
-                todayOrders++;
-                // Count pending: placed, processing, or shipped
-                if (order.status === 'placed' || order.status === 'processing' || order.status === 'shipped') {
-                    todayPending++;
-                }
-                if (order.status === 'delivered') todayDelivered++;
-                if (order.status === 'cancelled') todayCancelled++;
-            }
+    const isPending =
+        order.status === 'placed' ||
+        order.status === 'processing' ||
+        order.status === 'shipped';
 
-            // Monthly Aggregation - only for selected year
-            if (orderYear === selectedYear && monthlyData[monthKey]) {
-                monthlyData[monthKey].revenue += order.total || 0;
-                monthlyData[monthKey].orders += 1;
-            }
-        });
+    // ⭐ Pending = ANY date
+    if (isPending) {
+        todayPending++;
+    }
+
+    // ⭐ Today-specific stats
+    if (dateString === todayDateString) {
+        todayOrders++;
+
+        if (order.status === 'delivered') todayDelivered++;
+        if (order.status === 'cancelled') todayCancelled++;
+    }
+
+    // Monthly Aggregation
+    if (orderYear === selectedYear && monthlyData[monthKey]) {
+        monthlyData[monthKey].revenue += order.total || 0;
+        monthlyData[monthKey].orders += 1;
+    }
+});
 
         // Convert to array in correct order
         const chartArray = monthsOrder.map(month => monthlyData[month]);
@@ -166,7 +173,7 @@ const AdminDashboard = () => {
                     color="bg-gradient-to-r from-blue-500 to-blue-600"
                 />
                 <StatCard
-                    title="Today's Pending"
+                    title="Pending"
                     value={stats.todayPending}
                     icon={<Clock className="w-6 h-6 text-white" />}
                     color="bg-gradient-to-r from-orange-400 to-orange-500"
