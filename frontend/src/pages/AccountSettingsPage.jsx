@@ -180,7 +180,7 @@ const AccountSettingsPage = () => {
       {/* ── Page Title ─── */}
       <div className="container mx-auto px-4 pt-8 pb-4 relative z-10">
         <div className="flex items-center gap-4">
-          <img src={cattImage} alt="Cat" className="w-14 h-14 object-contain" />
+          <img src={'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976442/catt_na3yls.png'} alt="Cat" className="w-14 h-14 object-contain" />
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Account Settings</h1>
             <p className="text-sm text-gray-400 mt-0.5">Manage your profile & addresses</p>

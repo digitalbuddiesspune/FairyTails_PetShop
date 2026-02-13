@@ -26,6 +26,17 @@ const FEATURED_SOURCES = [
   { endpoint: '/houses', type: 'House' },
 ];
 
+// Map product _type to API endpoint for product detail URL
+const TYPE_TO_ENDPOINT = {
+  Food: '/food',
+  Clothes: '/clothes',
+  Toy: '/toys',
+  Accessory: '/accessories',
+  GroomingEssential: '/grooming-essentials',
+  HealthSupplement: '/health-supplements',
+  House: '/houses',
+};
+
 // Extract a displayable price from any product shape
 const extractPrice = (p) => {
   // Food has prices[], Clothes has sizes[], Toys has variants[], Accessories has variants[]
@@ -133,7 +144,7 @@ const HomePage = () => {
       accentColor: 'bg-amber-500',
       textColor: 'text-amber-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770445933/Untitled_design_9_jtfiba.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976874/Untitled_1080_x_1080_px_7_bcindd.png',
       ]
     },
     {
@@ -146,7 +157,7 @@ const HomePage = () => {
       accentColor: 'bg-purple-500',
       textColor: 'text-purple-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770445459/Untitled_900_x_600_px_1080_x_1080_px_eerbg4.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976261/Untitled_1080_x_1080_px_4_ybjdyo.png',
       ]
     },
     {
@@ -185,7 +196,7 @@ const HomePage = () => {
       accentColor: 'bg-cyan-500',
       textColor: 'text-cyan-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770365101/Untitled_160_x_90_px_600_x_1000_px_600_x_800_px_znz6aj.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976080/Untitled_1080_x_1080_px_1_yupxn6.png',
       ]
     },
     {
@@ -198,7 +209,7 @@ const HomePage = () => {
       accentColor: 'bg-green-500',
       textColor: 'text-green-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360339/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_a7yk4z.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770974498/Untitled_1080_x_1080_px_1600_x_900_px_csu6c4.svg',
       ]
     },
     {
@@ -285,9 +296,11 @@ const HomePage = () => {
                 const discount = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
                 const name = product.productName || product.name || 'Product';
 
+                const typeEndpoint = TYPE_TO_ENDPOINT[product._type];
+                const productLink = typeEndpoint ? `/product/${product._id}?type=${typeEndpoint}` : `/product/${product._id}`;
                 return (
                   <Link
-                    to={`/product/${product._id}`}
+                    to={productLink}
                     key={product._id}
                     className="bg-gray-50 rounded-2xl p-4 hover:shadow-lg transition-all group relative overflow-hidden"
                   >
@@ -345,10 +358,10 @@ const HomePage = () => {
                 <span className={`inline-block px-4 py-1 rounded-full text-sm font-semibold ${section.accentColor} text-white`}>
                   {section.name}
                 </span>
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
                   {section.title}
                 </h2>
-                <p className="text-gray-600 text-lg leading-relaxed">
+                <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
                   {section.description}
                 </p>
                 <ul className="space-y-3">
@@ -382,7 +395,7 @@ const HomePage = () => {
                     <img
                       src={section.images[0]}
                       alt={section.name}
-                      className="w-72 h-72 md:w-96 md:h-96 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+                      className="w-56 h-56 sm:w-72 sm:h-72 md:w-96 md:h-96 object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
@@ -468,7 +481,7 @@ const HomePage = () => {
             {/* Right — Image Only */}
             <div className="flex-1 flex justify-center">
               <img
-                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770878069/Untitled_1080_x_1080_px_1_ok1teu.svg"
+                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770975792/Untitled_1080_x_1080_px_3_njsxp7.png"
                 alt="Vet Consultation"
                 className="w-full max-w-md object-contain"
               />
