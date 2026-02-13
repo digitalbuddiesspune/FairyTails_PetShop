@@ -195,6 +195,9 @@ const sortOptions = [
   { value: 'name-desc', label: 'Name: Z to A' },
 ];
 
+// Map category param → category slug for redirect
+const categoryToSlug = { 'Dog': 'dogs', 'Cat': 'cats' };
+
 // ─── Main CategoryProducts Page ──────────────────────────────────────────────
 const CategoryProducts = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -203,6 +206,15 @@ const CategoryProducts = () => {
   // Read params from URL
   const category = searchParams.get('category') || '';
   const subCategory = searchParams.get('subCategory') || '';
+
+  // Redirect to CategoryPage when category is Dog/Cat so subcategory view matches main category layout
+  const categorySlug = categoryToSlug[category];
+  useEffect(() => {
+    if (categorySlug) {
+      const target = subCategory ? `/category/${categorySlug}?subCategory=${encodeURIComponent(subCategory)}` : `/category/${categorySlug}`;
+      navigate(target, { replace: true });
+    }
+  }, [categorySlug, subCategory, navigate]);
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -307,6 +319,15 @@ const CategoryProducts = () => {
   const handleSortChange = (e) => {
     setSortBy(e.target.value);
   };
+
+  // Don't render "X Food Products" layout — redirecting to CategoryPage
+  if (categorySlug) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-8 h-8 border-2 border-[#65a30d] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   // Title based on category
   const pageTitle = category

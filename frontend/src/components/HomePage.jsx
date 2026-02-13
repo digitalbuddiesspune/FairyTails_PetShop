@@ -133,7 +133,7 @@ const HomePage = () => {
       accentColor: 'bg-amber-500',
       textColor: 'text-amber-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770445933/Untitled_design_9_jtfiba.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976874/Untitled_1080_x_1080_px_7_bcindd.png',
       ]
     },
     {
@@ -146,7 +146,7 @@ const HomePage = () => {
       accentColor: 'bg-purple-500',
       textColor: 'text-purple-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770445459/Untitled_900_x_600_px_1080_x_1080_px_eerbg4.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976261/Untitled_1080_x_1080_px_4_ybjdyo.png',
       ]
     },
     {
@@ -185,7 +185,7 @@ const HomePage = () => {
       accentColor: 'bg-cyan-500',
       textColor: 'text-cyan-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770365101/Untitled_160_x_90_px_600_x_1000_px_600_x_800_px_znz6aj.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976080/Untitled_1080_x_1080_px_1_yupxn6.png',
       ]
     },
     {
@@ -198,7 +198,7 @@ const HomePage = () => {
       accentColor: 'bg-green-500',
       textColor: 'text-green-600',
       images: [
-        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770360339/Untitled_1600_x_600_px_1080_x_1080_px_1080_x_600_px_1080_x_600_px_1000_x_600_px_a7yk4z.svg',
+        'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770974498/Untitled_1080_x_1080_px_1600_x_900_px_csu6c4.svg',
       ]
     },
     {
@@ -468,7 +468,7 @@ const HomePage = () => {
             {/* Right — Image Only */}
             <div className="flex-1 flex justify-center">
               <img
-                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770878069/Untitled_1080_x_1080_px_1_ok1teu.svg"
+                src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770975792/Untitled_1080_x_1080_px_3_njsxp7.png"
                 alt="Vet Consultation"
                 className="w-full max-w-md object-contain"
               />
