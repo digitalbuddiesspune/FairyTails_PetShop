@@ -243,8 +243,8 @@ const AdminDashboard = () => {
                     </select>
                 </div>
 
-                <div className="h-[400px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                <div className="h-[280px] sm:h-[350px] lg:h-[400px] w-full min-w-[280px] min-h-[280px]">
+                    <ResponsiveContainer width="100%" height="100%" minHeight={280} initialDimension={{ width: 400, height: 350 }}>
                         <BarChart
                             data={chartData}
                             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}

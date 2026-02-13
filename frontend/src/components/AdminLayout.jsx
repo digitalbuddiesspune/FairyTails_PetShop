@@ -54,6 +54,7 @@ const AdminLayout = () => {
         if (location.pathname.includes('/admin/dashboard')) return 'Dashboard';
         if (location.pathname.includes('/admin/categories')) return 'Categories';
         if (location.pathname.includes('/admin/orders')) return 'Orders';
+        if (location.pathname.includes('/admin/order-details')) return 'Order Details';
         if (location.pathname.includes('/admin/users')) return 'Users';
         if (location.pathname.includes('/admin/settings')) return 'Settings';
         return 'Dashboard';

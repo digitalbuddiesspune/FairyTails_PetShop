@@ -60,10 +60,10 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
     : 0;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-w-0">
       {/* Image Section */}
       <div className="relative overflow-hidden bg-gray-50">
-        <div className="aspect-square flex items-center justify-center p-4">
+        <div className="aspect-square flex items-center justify-center p-2 sm:p-4">
           {product.images?.[0] ? (
             <img
               src={product.images[0]}
@@ -113,14 +113,14 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
       </div>
 
       {/* Content Section */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {/* Brand */}
         <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">
           {product.brand}
         </p>
 
         {/* Product Name */}
-        <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5rem]">
+        <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem]">
           {product.productName}
         </h3>
 
@@ -132,7 +132,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
         {/* Pricing */}
         {startingPrice && (
           <div className="flex items-end gap-2 mb-3">
-            <span className="text-xl font-bold text-gray-900">
+            <span className="text-base sm:text-xl font-bold text-gray-900">
               ₹{startingPrice.discountedPrice}
             </span>
             {startingPrice.mrp > startingPrice.discountedPrice && (
@@ -165,7 +165,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
         {/* Action Buttons */}
         <div className="flex gap-2 mt-1">
           <button
-            onClick={() => navigate(`/product/${product._id}`)}
+            onClick={() => navigate(`/product/${product._id}?type=/food`)}
             className="flex-1 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all duration-200 text-sm"
           >
             View Details
@@ -478,7 +478,7 @@ const CategoryProducts = () => {
           {/* Product Grid */}
           {!loading && !error && products.length > 0 && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((product) => (
                   <ProductCard
                     key={product._id}

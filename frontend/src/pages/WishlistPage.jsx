@@ -156,7 +156,7 @@ const WishlistPage = () => {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {items.map((product) => {
                 if (!product) return null;
                 const startingPrice = product.prices?.reduce(
@@ -172,12 +172,12 @@ const WishlistPage = () => {
                 return (
                   <div
                     key={product._id}
-                    className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl transition-all duration-300 ${isRemoving ? 'opacity-50 scale-95' : ''}`}
+                    className={`bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl transition-all duration-300 min-w-0 ${isRemoving ? 'opacity-50 scale-95' : ''}`}
                   >
                     {/* Image */}
                     <div className="relative overflow-hidden bg-gray-50">
                       <Link to={`/product/${product._id}`}>
-                        <div className="aspect-square flex items-center justify-center p-4">
+                        <div className="aspect-square flex items-center justify-center p-2 sm:p-4">
                           {product.images?.[0] ? (
                             <img
                               src={product.images[0]}
@@ -209,10 +209,10 @@ const WishlistPage = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="p-4">
+                    <div className="p-3 sm:p-4">
                       <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">{product.brand}</p>
                       <Link to={`/product/${product._id}`}>
-                        <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5rem] hover:text-[#65a30d] transition-colors">
+                        <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#65a30d] transition-colors">
                           {product.productName}
                         </h3>
                       </Link>
@@ -223,7 +223,7 @@ const WishlistPage = () => {
 
                       {startingPrice && (
                         <div className="flex items-end gap-2 mb-4">
-                          <span className="text-xl font-bold text-gray-900">₹{startingPrice.discountedPrice}</span>
+                          <span className="text-base sm:text-xl font-bold text-gray-900">₹{startingPrice.discountedPrice}</span>
                           {startingPrice.mrp > startingPrice.discountedPrice && (
                             <span className="text-sm text-gray-400 line-through">₹{startingPrice.mrp}</span>
                           )}

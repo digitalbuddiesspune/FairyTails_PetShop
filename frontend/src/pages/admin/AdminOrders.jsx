@@ -89,18 +89,56 @@ const AdminOrders = () => {
         ))}
       </div>
 
-      {/* Orders Table */}
+      {/* Orders Table / Cards */}
       {filteredOrders.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-8 sm:p-12 text-center">
           <span className="text-4xl mb-3 block">📦</span>
           <p className="text-gray-400 text-sm font-medium">
             {filter === 'all' ? 'No orders yet' : `No ${STATUS_CONFIG[filter]?.label.toLowerCase()} orders`}
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <>
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-3">
+            {filteredOrders.map(order => {
+              const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.placed;
+              const pay = PAYMENT_CONFIG[order.paymentStatus] || PAYMENT_CONFIG.unpaid;
+              const userName = order.user?.name || 'Unknown';
+              const totalQty = (order.items || []).reduce((s, i) => s + i.quantity, 0);
+              const displayOrderId = order.orderNumber || parseInt(order._id.slice(-8), 16);
+              return (
+                <div
+                  key={order._id}
+                  onClick={() => navigate(`/admin/order-details/${order._id}`)}
+                  className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 active:bg-gray-50 cursor-pointer"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <p className="text-xs font-bold text-gray-800">#{displayOrderId}</p>
+                      <p className="text-sm font-semibold text-gray-800 mt-0.5">{userName}</p>
+                    </div>
+                    <div className="flex flex-col gap-1 items-end shrink-0">
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${st.bg}`}>{st.label}</span>
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${pay.bg}`}>{pay.label}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>{totalQty} item{totalQty !== 1 ? 's' : ''}</span>
+                    <span className="font-bold text-gray-800">₹{order.total?.toLocaleString()}</span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-2">
+                    {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}, {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left min-w-[800px]">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
                   <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Order ID</th>
@@ -185,6 +223,7 @@ const AdminOrders = () => {
             </table>
           </div>
         </div>
+        </>
       )}
 
       <style>{`
