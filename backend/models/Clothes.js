@@ -73,7 +73,7 @@ const clothesSchema = new mongoose.Schema(
 
     productDetails: {
       type: [String],
-      required: true,
+      
     },
 
     keyFeatures: {

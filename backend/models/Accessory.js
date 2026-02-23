@@ -75,7 +75,7 @@ const accessoriesSchema = new mongoose.Schema(
 
     productDetails: {
       type: [String],
-      required: true,
+      
     },
 
     keyFeatures: {
