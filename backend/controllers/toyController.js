@@ -14,8 +14,8 @@ export const getAllToys = async (req, res) => {
     if (suitableFor) filter.suitableFor = suitableFor;
 
     let sortObj = { createdAt: -1 };
-    if (sort === 'price-low') sortObj = { discountedPrice: 1, price: 1 };
-    if (sort === 'price-high') sortObj = { discountedPrice: -1, price: -1 };
+    if (sort === 'price-low') sortObj = { discountPrice: 1 };
+    if (sort === 'price-high') sortObj = { discountPrice: -1 };
     if (sort === 'name-asc') sortObj = { productName: 1 };
     if (sort === 'name-desc') sortObj = { productName: -1 };
 
@@ -76,22 +76,32 @@ export const getToyById = async (req, res) => {
 export const createToy = async (req, res) => {
   try {
     const {
-      productName, brand, category, subCategory, price, discountedPrice,
-      discountPercentage, size, availableStock, material, color,
-      productDetails, keyFeatures, suitableFor, images, isReturnable,
+      category, subCategory, productName, mrp, discountPrice,
+      discountType, availableStock, baseUnit, taxes, images,
+      // Optional fields
+      itemCode, hsn, brand, size, material, color,
+      productDetails, keyFeatures, suitableFor, isReturnable,
     } = req.body;
 
-    if (!productName || !brand || !subCategory) {
+    // Basic validation - only required fields (baseUnit and taxes have defaults in schema)
+    if (!productName || !subCategory || 
+        mrp === undefined || mrp === null || mrp === '' ||
+        discountPrice === undefined || discountPrice === null || discountPrice === '' ||
+        !discountType || 
+        availableStock === undefined || availableStock === null || availableStock === '' ||
+        !images || images.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide productName, brand, and subCategory',
+        message: 'Please provide all required fields: productName, subCategory, mrp, discountPrice, discountType, availableStock, and at least one image',
       });
     }
 
     const toy = await Toy.create({
-      productName, brand, category, subCategory, price, discountedPrice,
-      discountPercentage, size, availableStock, material, color,
-      productDetails, keyFeatures, suitableFor, images, isReturnable,
+      category, subCategory, productName, mrp, discountPrice,
+      discountType, availableStock, baseUnit, taxes, images,
+      // Optional fields
+      itemCode, hsn, brand, size, material, color,
+      productDetails, keyFeatures, suitableFor, isReturnable,
     });
 
     res.status(201).json({

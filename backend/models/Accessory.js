@@ -1,30 +1,5 @@
 import mongoose from "mongoose";
 
-/* Size + Stock schema */
-const sizeSchema = new mongoose.Schema(
-  {
-    size: {
-      type: String,
-      enum: ["XS", "S", "M", "L", "XL", "One Size"],
-      required: true,
-    },
-    mrp: {
-      type: Number,
-      required: true,
-    },
-    discountedPrice: {
-      type: Number,
-      required: true,
-    },
-    availableStock: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-  },
-  { _id: false }
-);
-
 /* Main Accessories schema */
 const accessoriesSchema = new mongoose.Schema(
   {
@@ -48,38 +23,36 @@ const accessoriesSchema = new mongoose.Schema(
       trim: true,
     },
 
-    brand: {
+    mrp: {
+      type: Number,
+      required: true,
+    },
+
+    discountPrice: {
+      type: Number,
+      required: true,
+    },
+
+    discountType: {
       type: String,
       required: true,
-      trim: true,
     },
 
-    sizes: {
-      type: [sizeSchema],
+    availableStock: {
+      type: Number,
       required: true,
-      validate: [
-        (v) => v.length > 0,
-        "At least one size option is required",
-      ],
+      min: 0,
     },
 
-    material: {
+    taxes: {
+      type: Number,
+      default: 18, // GST @ 18%
+      required: true,
+    },
+
+    baseUnit: {
       type: String,
-      trim: true,
-    },
-
-    color: {
-      type: [String],
-      required: true,
-    },
-
-    productDetails: {
-      type: [String],
-      required: true,
-    },
-
-    keyFeatures: {
-      type: [String],
+      default: 'pieces',
       required: true,
     },
 
@@ -90,6 +63,44 @@ const accessoriesSchema = new mongoose.Schema(
         (v) => v.length > 0,
         "At least one image is required",
       ],
+    },
+
+    // Optional fields
+    itemCode: {
+      type: String,
+      trim: true,
+    },
+
+    hsn: {
+      type: String,
+      trim: true,
+    },
+
+    size: {
+      type: String,
+      trim: true,
+    },
+
+    brand: {
+      type: String,
+      trim: true,
+    },
+
+    material: {
+      type: String,
+      trim: true,
+    },
+
+    color: {
+      type: [String],
+    },
+
+    productDetails: {
+      type: [String],
+    },
+
+    keyFeatures: {
+      type: [String],
     },
 
     isReturnable: {

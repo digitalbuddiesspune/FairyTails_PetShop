@@ -1,23 +1,5 @@
 import mongoose from 'mongoose';
 
-const priceSchema = new mongoose.Schema(
-  {
-    capacity: {
-      type: String, // e.g. "1kg", "3kg", "400g"
-      required: true,
-    },
-    mrp: {
-      type: Number,
-      required: true,
-    },
-    discountedPrice: {
-      type: Number,
-      required: true,
-    },
-  },
-  { _id: false }
-);
-
 const reviewSchema = new mongoose.Schema(
   {
     user: {
@@ -45,38 +27,10 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
 
-    brand: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    prices: {
-      type: [priceSchema],
-      required: true,
-      validate: [(v) => v.length > 0, 'At least one price option is required'],
-    },
-
-    availableStock: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-
-    details: {
-      type: [String],
-      required: true,
-    },
-
-    keyFeatures: {
-      type: [String],
-      required: true,
-    },
-
     category: {
       type: String,
       required: true,
-      enum: ['Dog', 'Cat', 'Bird', 'Fish','Other'],
+      enum: ['Dog', 'Cat', 'Bird', 'Fish', 'Other'],
     },
 
     subCategory: {
@@ -85,8 +39,46 @@ const productSchema = new mongoose.Schema(
       enum: ['Dry Food', 'Wet Food', 'Treats'],
     },
 
+    capacity: {
+      type: String, // e.g. "1kg", "3kg", "400g"
+      required: true,
+    },
+
+    mrp: {
+      type: Number,
+      required: true,
+    },
+
+    discountPrice: {
+      type: Number,
+      required: true,
+    },
+
+    discountType: {
+      type: String,
+      required: true,
+    },
+
+    availableStock: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
     expiryDate: {
       type: Date,
+      required: true,
+    },
+
+    baseUnit: {
+      type: String,
+      default: 'pieces',
+      required: true,
+    },
+
+    taxes: {
+      type: Number,
+      default: 18, // GST @ 18%
       required: true,
     },
 
@@ -96,9 +88,32 @@ const productSchema = new mongoose.Schema(
       validate: [(v) => v.length > 0, 'At least one image is required'],
     },
 
+    // Optional fields
+    itemCode: {
+      type: String,
+      trim: true,
+    },
+
+    hsn: {
+      type: String,
+      trim: true,
+    },
+
+    brand: {
+      type: String,
+      trim: true,
+    },
+
+    details: {
+      type: [String],
+    },
+
+    keyFeatures: {
+      type: [String],
+    },
+
     flavours: {
       type: [String],
-      required: true,
     },
 
     nutrients: {

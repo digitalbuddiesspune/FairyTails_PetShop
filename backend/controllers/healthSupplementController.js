@@ -11,10 +11,10 @@ export const getAllHealthSupplements = async (req, res) => {
     if (subCategory) filter.subCategory = subCategory.toLowerCase(); // "dog" or "cat"
 
     let sortObj = { createdAt: -1 };
-    if (sort === 'price-low') sortObj = { discountPrice: 1, price: 1 };
-    if (sort === 'price-high') sortObj = { discountPrice: -1, price: -1 };
-    if (sort === 'name-asc') sortObj = { name: 1 };
-    if (sort === 'name-desc') sortObj = { name: -1 };
+    if (sort === 'price-low') sortObj = { discountPrice: 1 };
+    if (sort === 'price-high') sortObj = { discountPrice: -1 };
+    if (sort === 'name-asc') sortObj = { productName: 1 };
+    if (sort === 'name-desc') sortObj = { productName: -1 };
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -73,22 +73,31 @@ export const getHealthSupplementById = async (req, res) => {
 export const createHealthSupplement = async (req, res) => {
   try {
     const {
-      category, subCategory, name, price, discountPrice,
-      discountPercentage, highlights, description, usage,
-      expiryDate, availableStock, image,
+      category, subCategory, productName, mrp, discountPrice,
+      discountType, availableStock, expiryDate, baseUnit, taxes, images,
+      // Optional fields
+      itemCode, hsn, size, description, highlights, usage,
     } = req.body;
 
-    if (!name || !subCategory || !price) {
+    // Basic validation - only required fields (baseUnit and taxes have defaults in schema)
+    if (!productName || !subCategory || 
+        mrp === undefined || mrp === null || mrp === '' ||
+        discountPrice === undefined || discountPrice === null || discountPrice === '' ||
+        !discountType || 
+        availableStock === undefined || availableStock === null || availableStock === '' ||
+        !expiryDate ||
+        !images || images.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide name, subCategory, and price',
+        message: 'Please provide all required fields: productName, subCategory, mrp, discountPrice, discountType, availableStock, expiryDate, and at least one image',
       });
     }
 
     const supplement = await HealthSupplement.create({
-      category, subCategory, name, price, discountPrice,
-      discountPercentage, highlights, description, usage,
-      expiryDate, availableStock, image,
+      category, subCategory, productName, mrp, discountPrice,
+      discountType, availableStock, expiryDate, baseUnit, taxes, images,
+      // Optional fields
+      itemCode, hsn, size, description, highlights, usage,
     });
 
     res.status(201).json({

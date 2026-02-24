@@ -228,15 +228,83 @@ const ProductDetail = () => {
   // Price options: food=prices, clothes/accessories=sizes, grooming=variants, toys/health/house=flat
   const priceOptions = product?.prices || product?.sizes || product?.variants || [];
   const isFlatPrice = ['Toy', 'health-supplement', 'house'].includes(category);
+  
+  // Check if it's a food product with new structure (flat fields instead of prices array)
+  const isFoodWithNewStructure = category === 'Dog' || category === 'Cat' || category === 'Bird' || category === 'Fish' || category === 'Other' 
+    ? (product?.mrp !== undefined && product?.discountPrice !== undefined && product?.capacity !== undefined)
+    : false;
+  
+  // Check if it's an accessory product with new structure (flat fields instead of sizes array)
+  // Also check by productType from URL or by having mrp/discountPrice without sizes array
+  const isAccessory = category === 'accessories' || productType === '/accessories' || (product?.mrp !== undefined && product?.discountPrice !== undefined && !product?.sizes);
+  const isAccessoryWithNewStructure = isAccessory && product?.mrp !== undefined && product?.discountPrice !== undefined;
+  
+  // Check if it's a toy, health, grooming, or house product with new structure (flat fields instead of price/discountedPrice/variants)
+  const isToyWithNewStructure = category === 'Toy' && product?.mrp !== undefined && product?.discountPrice !== undefined;
+  const isHealthWithNewStructure = category === 'health-supplement' && product?.mrp !== undefined && product?.discountPrice !== undefined;
+  const isGroomingWithNewStructure = category === 'grooming-essentials' && product?.mrp !== undefined && product?.discountPrice !== undefined;
+  const isHouseWithNewStructure = category === 'house' && product?.mrp !== undefined && product?.discountPrice !== undefined;
 
   const currentPrice = useMemo(() => {
     if (!product) return null;
-    if (isFlatPrice) {
-      const mrp = product.price;
-      const disc = product.discountedPrice || product.discountPrice || mrp;
+    
+    // New food structure (flat fields: capacity, mrp, discountPrice)
+    if (isFoodWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc, label: product.capacity || '' };
+    }
+    
+    // New accessory structure (flat fields: mrp, discountPrice)
+    if (isAccessoryWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc, label: product.size || '' };
+    }
+    
+    // New toy structure (flat fields: mrp, discountPrice)
+    if (isToyWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc, label: product.size || '' };
+    }
+    
+    // New health structure (flat fields: mrp, discountPrice)
+    if (isHealthWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc, label: product.size || '' };
+    }
+    
+    // New grooming structure (flat fields: mrp, discountPrice)
+    if (isGroomingWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc, label: product.size || '' };
+    }
+    
+    // New house structure (flat fields: mrp, discountPrice)
+    if (isHouseWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
       if (!mrp) return null;
       return { mrp, discountedPrice: disc, label: '' };
     }
+    
+    // Flat price products (old structures)
+    if (isFlatPrice && !isHealthWithNewStructure && !isGroomingWithNewStructure && !isHouseWithNewStructure) {
+      const mrp = product.price || product.mrp;
+      const disc = product.discountedPrice || product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc, label: product.size || '' };
+    }
+    
+    // Old structure with prices/sizes/variants array
     if (priceOptions.length === 0) return null;
     const p = priceOptions[selectedSize];
     return {
@@ -244,7 +312,7 @@ const ProductDetail = () => {
       discountedPrice: p.discountedPrice,
       label: p.capacity || p.size || p.volume || '',
     };
-  }, [product, selectedSize, priceOptions, isFlatPrice]);
+  }, [product, selectedSize, priceOptions, isFlatPrice, isFoodWithNewStructure, isAccessoryWithNewStructure, isToyWithNewStructure, isHealthWithNewStructure, isGroomingWithNewStructure, isHouseWithNewStructure]);
 
   const discountPercent = useMemo(() => {
     if (!currentPrice) return 0;
@@ -255,16 +323,28 @@ const ProductDetail = () => {
   // Compute available stock — flat-price products store it at root, multi-option products per option
   const availableStock = useMemo(() => {
     if (!product) return null;
-    // Flat-price products (Toys, Health Supplements, Houses)
-    if (isFlatPrice) return product.availableStock ?? null;
-    // Multi-option products (Food/Clothes/Accessories/Grooming)
+    // New food structure (flat fields, stock at root level)
+    if (isFoodWithNewStructure) return product.availableStock ?? null;
+    // New accessory structure (flat fields, stock at root level)
+    if (isAccessoryWithNewStructure) return product.availableStock ?? null;
+    // New toy structure (flat fields, stock at root level)
+    if (isToyWithNewStructure) return product.availableStock ?? null;
+    // New health structure (flat fields, stock at root level)
+    if (isHealthWithNewStructure) return product.availableStock ?? null;
+    // New grooming structure (flat fields, stock at root level)
+    if (isGroomingWithNewStructure) return product.availableStock ?? null;
+    // New house structure (flat fields, stock at root level)
+    if (isHouseWithNewStructure) return product.availableStock ?? null;
+    // Flat-price products (old structures)
+    if (isFlatPrice && !isHealthWithNewStructure && !isGroomingWithNewStructure && !isHouseWithNewStructure) return product.availableStock ?? null;
+    // Multi-option products (Food/Clothes/Accessories/Grooming) - old structure
     if (priceOptions.length > 0 && priceOptions[selectedSize]?.availableStock !== undefined) {
       return priceOptions[selectedSize].availableStock;
     }
     // Fallback to root-level stock
     if (product.availableStock !== undefined) return product.availableStock;
     return null;
-  }, [product, isFlatPrice, priceOptions, selectedSize]);
+  }, [product, isFlatPrice, isFoodWithNewStructure, isAccessoryWithNewStructure, priceOptions, selectedSize]);
 
   // Average rating (only food has reviews)
   const avgRating = useMemo(() => {
@@ -483,26 +563,26 @@ const ProductDetail = () => {
                 {/* Price */}
                 {currentPrice && (
                   <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
-                    <div className="flex items-end gap-2 sm:gap-3 flex-wrap">
+                    <div className="flex items-end gap-2 sm:gap-3 flex-wrap mb-2">
                       <span className="text-2xl sm:text-3xl font-bold text-gray-900">
                         ₹{currentPrice.discountedPrice}
                       </span>
                       {currentPrice.mrp > currentPrice.discountedPrice && (
-                        <span className="text-lg text-gray-400 line-through pb-0.5">
-                          ₹{currentPrice.mrp}
-                        </span>
+                        <>
+                          <span className="text-lg text-gray-400 line-through pb-0.5">
+                            ₹{currentPrice.mrp}
+                          </span>
+                          <span className="text-sm font-semibold text-red-600 bg-red-50 px-2 py-1 rounded">
+                            MRP
+                          </span>
+                        </>
                       )}
                     </div>
-                    {currentPrice.label && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        MRP (incl. of all taxes) for {currentPrice.label}
-                      </p>
-                    )}
                   </div>
                 )}
 
                 {/* Size / Variant Options (for products with multiple options) */}
-                {!isFlatPrice && priceOptions.length > 1 && (
+                {!isFlatPrice && !isFoodWithNewStructure && !isAccessoryWithNewStructure && priceOptions.length > 1 && (
                   <div className="mb-5">
                     <p className="text-sm font-semibold text-gray-700 mb-2">Select Option:</p>
                     <div className="flex flex-wrap gap-3">
@@ -554,6 +634,34 @@ const ProductDetail = () => {
                   </div>
                 )}
 
+                {/* Capacity (Food) */}
+                {isFoodWithNewStructure && (
+                  <div className="mb-5">
+                    <p className="text-bold font-semibold text-gray-700 mb-2">Capacity:</p>
+                    {product.capacity ? (
+                      <span className="inline-block bg-amber-50 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full border border-amber-200">
+                        {product.capacity}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">Not specified</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Size (Accessories) */}
+                {isAccessory && (
+                  <div className="mb-5">
+                    <p className="text-bold font-semibold text-gray-700 mb-2">Size:</p>
+                    {product.size ? (
+                      <span className="inline-block bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-200">
+                        {product.size}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">Not specified</span>
+                    )}
+                  </div>
+                )}
+
                 {/* Colors (Clothes / Accessories / Toys) */}
                 {product.color?.length > 0 && (
                   <div className="mb-5">
@@ -586,8 +694,10 @@ const ProductDetail = () => {
                     </div>
                   )}
 
-                  {/* Size (Toys — single size like "One Size") */}
-                  {typeof product.size === 'string' && product.size && (
+                  {/* Capacity (Food) */}
+                  
+                  {/* Size (Toys — single size like "One Size", "Large", etc.) - Accessories size shown in dedicated section above */}
+                  {typeof product.size === 'string' && product.size && !isAccessory && !isFoodWithNewStructure && (
                     <div className="text-sm">
                       <span className="font-semibold text-gray-700">Size: </span>
                       <span className="text-gray-600">{product.size}</span>

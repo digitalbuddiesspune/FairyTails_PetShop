@@ -3,18 +3,6 @@ import mongoose from "mongoose";
 /* Main Toy schema */
 const toySchema = new mongoose.Schema(
   {
-    productName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    brand: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
     category: {
       type: String,
       required: true,
@@ -28,30 +16,73 @@ const toySchema = new mongoose.Schema(
       enum: ["Dog", "Cat"],
     },
 
-    price: {
+    productName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    mrp: {
       type: Number,
       required: true,
     },
 
-    discountedPrice: {
+    discountPrice: {
       type: Number,
+      required: true,
     },
 
-    discountPercentage: {
-      type: Number,
-      min: 0,
-      max: 100,
-    },
-
-    size: {
+    discountType: {
       type: String,
-      default: "One Size",
+      required: true,
     },
 
     availableStock: {
       type: Number,
       required: true,
       min: 0,
+    },
+
+    taxes: {
+      type: Number,
+      default: 18, // GST @ 18%
+      required: true,
+    },
+
+    baseUnit: {
+      type: String,
+      default: 'pieces',
+      required: true,
+    },
+
+    images: {
+      type: [String],
+      required: true,
+      validate: [
+        (v) => v.length > 0,
+        "At least one image is required",
+      ],
+    },
+
+    // Optional fields
+    itemCode: {
+      type: String,
+      trim: true,
+    },
+
+    hsn: {
+      type: String,
+      trim: true,
+    },
+
+    brand: {
+      type: String,
+      trim: true,
+    },
+
+    size: {
+      type: String,
+      trim: true,
     },
 
     material: {
@@ -65,27 +96,16 @@ const toySchema = new mongoose.Schema(
 
     productDetails: {
       type: [String],
-      required: true,
     },
 
     keyFeatures: {
       type: [String],
-      required: true,
     },
 
     suitableFor: {
       type: String,
       enum: ["Puppy", "Adult", "All"],
       default: "All",
-    },
-
-    images: {
-      type: [String],
-      required: true,
-      validate: [
-        (v) => v.length > 0,
-        "At least one image is required",
-      ],
     },
 
     isReturnable: {

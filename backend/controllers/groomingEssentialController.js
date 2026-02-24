@@ -12,8 +12,8 @@ export const getAllGroomingEssentials = async (req, res) => {
     if (brand) filter.brand = { $regex: brand, $options: 'i' };
 
     let sortObj = { createdAt: -1 };
-    if (sort === 'price-low') sortObj = { 'variants.0.discountedPrice': 1 };
-    if (sort === 'price-high') sortObj = { 'variants.0.discountedPrice': -1 };
+    if (sort === 'price-low') sortObj = { discountPrice: 1 };
+    if (sort === 'price-high') sortObj = { discountPrice: -1 };
     if (sort === 'name-asc') sortObj = { productName: 1 };
     if (sort === 'name-desc') sortObj = { productName: -1 };
 
@@ -74,22 +74,32 @@ export const getGroomingEssentialById = async (req, res) => {
 export const createGroomingEssential = async (req, res) => {
   try {
     const {
-      category, subCategory, productName, brand, variants,
-      description, keyFeatures, suitableFor, usageInstructions,
-      images, isReturnable,
+      category, subCategory, productName, mrp, discountPrice,
+      discountType, availableStock, baseUnit, taxes, images,
+      // Optional fields
+      itemCode, hsn, size, expiryDate, brand, description,
+      keyFeatures, suitableFor, usageInstructions, isReturnable,
     } = req.body;
 
-    if (!productName || !brand || !subCategory) {
+    // Basic validation - only required fields (baseUnit and taxes have defaults in schema)
+    if (!productName || !subCategory || 
+        mrp === undefined || mrp === null || mrp === '' ||
+        discountPrice === undefined || discountPrice === null || discountPrice === '' ||
+        !discountType || 
+        availableStock === undefined || availableStock === null || availableStock === '' ||
+        !images || images.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide productName, brand, and subCategory',
+        message: 'Please provide all required fields: productName, subCategory, mrp, discountPrice, discountType, availableStock, and at least one image',
       });
     }
 
     const product = await GroomingEssential.create({
-      category, subCategory, productName, brand, variants,
-      description, keyFeatures, suitableFor, usageInstructions,
-      images, isReturnable,
+      category, subCategory, productName, mrp, discountPrice,
+      discountType, availableStock, baseUnit, taxes, images,
+      // Optional fields
+      itemCode, hsn, size, expiryDate, brand, description,
+      keyFeatures, suitableFor, usageInstructions, isReturnable,
     });
 
     res.status(201).json({
