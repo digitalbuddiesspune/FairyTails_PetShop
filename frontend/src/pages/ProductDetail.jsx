@@ -634,6 +634,20 @@ const ProductDetail = () => {
                   </div>
                 )}
 
+                {/* Capacity (Food) */}
+                {isFoodWithNewStructure && (
+                  <div className="mb-5">
+                    <p className="text-bold font-semibold text-gray-700 mb-2">Capacity:</p>
+                    {product.capacity ? (
+                      <span className="inline-block bg-amber-50 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full border border-amber-200">
+                        {product.capacity}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">Not specified</span>
+                    )}
+                  </div>
+                )}
+
                 {/* Size (Accessories) */}
                 {isAccessory && (
                   <div className="mb-5">
@@ -680,8 +694,10 @@ const ProductDetail = () => {
                     </div>
                   )}
 
+                  {/* Capacity (Food) */}
+                  
                   {/* Size (Toys — single size like "One Size", "Large", etc.) - Accessories size shown in dedicated section above */}
-                  {typeof product.size === 'string' && product.size && !isAccessory && (
+                  {typeof product.size === 'string' && product.size && !isAccessory && !isFoodWithNewStructure && (
                     <div className="text-sm">
                       <span className="font-semibold text-gray-700">Size: </span>
                       <span className="text-gray-600">{product.size}</span>
