@@ -5,19 +5,15 @@ const dimensionsSchema = new mongoose.Schema(
   {
     height: {
       type: String,
-      required: true,
     },
     width: {
       type: String,
-      required: true,
     },
     depth: {
       type: String,
-      required: true,
     },
     weight: {
       type: String,
-      required: true,
     },
   },
   { _id: false }
@@ -40,13 +36,13 @@ const houseSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    name: {
+    productName: {
       type: String,
       required: true,
       trim: true,
     },
 
-    price: {
+    mrp: {
       type: Number,
       required: true,
     },
@@ -56,26 +52,8 @@ const houseSchema = new mongoose.Schema(
       required: true,
     },
 
-    discountPercentage: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100,
-    },
-
-    highlights: {
-      type: [String],
-      required: true,
-    },
-
-    description: {
+    discountType: {
       type: String,
-      
-      trim: true,
-    },
-
-    dimensions: {
-      type: dimensionsSchema,
       required: true,
     },
 
@@ -85,9 +63,49 @@ const houseSchema = new mongoose.Schema(
       min: 0,
     },
 
-    image: {
-      type: String,
+    taxes: {
+      type: Number,
+      default: 18, // GST @ 18%
       required: true,
+    },
+
+    baseUnit: {
+      type: String,
+      default: 'pieces',
+      required: true,
+    },
+
+    images: {
+      type: [String],
+      required: true,
+      validate: [
+        (v) => v.length > 0,
+        "At least one image is required",
+      ],
+    },
+
+    // Optional fields
+    itemCode: {
+      type: String,
+      trim: true,
+    },
+
+    hsn: {
+      type: String,
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      trim: true,
+    },
+
+    highlights: {
+      type: [String],
+    },
+
+    dimensions: {
+      type: dimensionsSchema,
     },
   },
   {

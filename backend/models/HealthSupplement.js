@@ -5,11 +5,9 @@ const usageSchema = new mongoose.Schema(
   {
     dosage: {
       type: String,
-      required: true,
     },
     ageGroup: {
       type: String,
-      required: true,
     },
   },
   { _id: false }
@@ -32,13 +30,13 @@ const healthSupplementSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    name: {
+    productName: {
       type: String,
       required: true,
       trim: true,
     },
 
-    price: {
+    mrp: {
       type: Number,
       required: true,
     },
@@ -48,30 +46,8 @@ const healthSupplementSchema = new mongoose.Schema(
       required: true,
     },
 
-    discountPercentage: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100,
-    },
-
-    highlights: {
-      type: [String],
-      required: true,
-    },
-
-    description: {
+    discountType: {
       type: String,
-  
-    },
-
-    usage: {
-      type: usageSchema,
-      required: true,
-    },
-
-    expiryDate: {
-      type: Date,
       required: true,
     },
 
@@ -81,9 +57,59 @@ const healthSupplementSchema = new mongoose.Schema(
       min: 0,
     },
 
-    image: {
-      type: String,
+    expiryDate: {
+      type: Date,
       required: true,
+    },
+
+    taxes: {
+      type: Number,
+      default: 18, // GST @ 18%
+      required: true,
+    },
+
+    baseUnit: {
+      type: String,
+      default: 'pieces',
+      required: true,
+    },
+
+    images: {
+      type: [String],
+      required: true,
+      validate: [
+        (v) => v.length > 0,
+        "At least one image is required",
+      ],
+    },
+
+    // Optional fields
+    itemCode: {
+      type: String,
+      trim: true,
+    },
+
+    hsn: {
+      type: String,
+      trim: true,
+    },
+
+    size: {
+      type: String,
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      trim: true,
+    },
+
+    highlights: {
+      type: [String],
+    },
+
+    usage: {
+      type: usageSchema,
     },
   },
   {

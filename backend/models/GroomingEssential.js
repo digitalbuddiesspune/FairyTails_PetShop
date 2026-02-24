@@ -1,34 +1,5 @@
 import mongoose from "mongoose";
 
-/* Volume + Price + Stock schema */
-const variantSchema = new mongoose.Schema(
-  {
-    volume: {
-      type: String, // e.g. "250ml", "500ml"
-      required: true,
-    },
-    mrp: {
-      type: Number,
-      required: true,
-    },
-    discountedPrice: {
-      type: Number,
-      required: true,
-    },
-    discountPercentage: {
-      type: Number,
-      min: 0,
-      max: 100,
-    },
-    availableStock: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-  },
-  { _id: false }
-);
-
 /* Main Grooming Essentials schema */
 const groomingEssentialSchema = new mongoose.Schema(
   {
@@ -52,30 +23,80 @@ const groomingEssentialSchema = new mongoose.Schema(
       trim: true,
     },
 
-    brand: {
-      type: String,
+    mrp: {
+      type: Number,
       required: true,
-      trim: true,
     },
 
-    variants: {
-      type: [variantSchema],
+    discountPrice: {
+      type: Number,
+      required: true,
+    },
+
+    discountType: {
+      type: String,
+      required: true,
+    },
+
+    availableStock: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    taxes: {
+      type: Number,
+      default: 18, // GST @ 18%
+      required: true,
+    },
+
+    baseUnit: {
+      type: String,
+      default: 'pieces',
+      required: true,
+    },
+
+    images: {
+      type: [String],
       required: true,
       validate: [
         (v) => v.length > 0,
-        "At least one variant is required",
+        "At least one image is required",
       ],
+    },
+
+    // Optional fields
+    itemCode: {
+      type: String,
+      trim: true,
+    },
+
+    hsn: {
+      type: String,
+      trim: true,
+    },
+
+    size: {
+      type: String,
+      trim: true,
+    },
+
+    expiryDate: {
+      type: Date,
+    },
+
+    brand: {
+      type: String,
+      trim: true,
     },
 
     description: {
       type: String,
-      
       trim: true,
     },
 
     keyFeatures: {
       type: [String],
-      required: true,
     },
 
     suitableFor: {
@@ -86,15 +107,6 @@ const groomingEssentialSchema = new mongoose.Schema(
 
     usageInstructions: {
       type: [String],
-    },
-
-    images: {
-      type: [String],
-      required: true,
-      validate: [
-        (v) => v.length > 0,
-        "At least one image is required",
-      ],
     },
 
     isReturnable: {

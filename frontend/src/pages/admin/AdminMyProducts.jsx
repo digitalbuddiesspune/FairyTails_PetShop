@@ -20,13 +20,22 @@ const SINGLE_CATEGORIES = CATEGORIES.filter(c => c.key !== 'all');
 // Detect category type from product data
 const detectCategoryType = (product) => {
   if (product._catKey) return product._catKey;
+  // Check category field first
+  if (product.category === 'accessories') return 'accessories';
+  if (product.category === 'Toy') return 'toys';
+  if (product.category === 'health-supplement') return 'health';
+  if (product.category === 'house') return 'houses';
+  if (product.category === 'grooming-essentials') return 'grooming';
+  // Check by structure
   if (product.prices && product.flavours) return 'food';
   if (product.sizes && product.careInstructions !== undefined) return 'clothes';
   if (product.variants && product.usageInstructions !== undefined) return 'grooming';
   if (product.usage && product.highlights) return 'health';
   if (product.dimensions) return 'houses';
   if (product.suitableFor !== undefined && product.material !== undefined && !product.sizes) return 'toys';
-  if (product.sizes && product.productDetails) return 'accessories';
+  // New accessory structure (has mrp, discountPrice, but no sizes array)
+  if (product.mrp !== undefined && product.discountPrice !== undefined && product.category === 'accessories') return 'accessories';
+  if (product.sizes && product.productDetails && !product.careInstructions) return 'accessories';
   return 'food';
 };
 
@@ -492,7 +501,12 @@ const ProductDetailModal = ({ product, onClose }) => {
   };
 
   // Group fields intelligently
-  const allFields = Object.entries(product).filter(([k]) => !SKIP.has(k));
+  let allFields = Object.entries(product).filter(([k]) => !SKIP.has(k));
+  
+  // Ensure size field is shown for accessories even if empty
+  if (catKey === 'accessories' && !allFields.some(([k]) => k === 'size')) {
+    allFields.push(['size', product.size || '']);
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-2 sm:p-4" onClick={onClose}>
@@ -571,8 +585,71 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
     if (!p.images && p.image) p.images = [p.image];
     if (!Array.isArray(p.images)) p.images = [''];
     if (p.expiryDate) p.expiryDate = new Date(p.expiryDate).toISOString().split('T')[0];
+    
+    // Handle migration for food and accessories
+    if (catKey === 'food' && p.prices && Array.isArray(p.prices) && p.prices.length > 0) {
+      const firstPrice = p.prices[0];
+      p.capacity = firstPrice.capacity || '';
+      p.mrp = firstPrice.mrp || '';
+      p.discountPrice = firstPrice.discountedPrice || '';
+    }
+    
+    if (catKey === 'accessories' && p.sizes && Array.isArray(p.sizes) && p.sizes.length > 0) {
+      const firstSize = p.sizes[0];
+      p.mrp = firstSize.mrp || '';
+      p.discountPrice = firstSize.discountedPrice || '';
+      p.availableStock = firstSize.availableStock || '';
+    }
+    
+    // Handle toy price migration (if old format exists)
+    if (catKey === 'toys' && p.price !== undefined && !p.mrp) {
+      p.mrp = p.price || '';
+      p.discountPrice = p.discountedPrice || '';
+      // Calculate discount type from discountPercentage if available
+      if (p.discountPercentage) {
+        p.discountType = `${p.discountPercentage}%`;
+      }
+    }
+    
+    // Handle health supplement migration (if old format exists)
+    if (catKey === 'health') {
+      if (p.name && !p.productName) p.productName = p.name;
+      if (p.price !== undefined && !p.mrp) p.mrp = p.price;
+      if (p.discountPercentage && !p.discountType) {
+        p.discountType = `${p.discountPercentage}%`;
+      }
+      if (p.image && (!p.images || p.images.length === 0)) {
+        p.images = [p.image];
+      }
+    }
+    
+    // Handle grooming variants migration (if old format exists)
+    if (catKey === 'grooming' && p.variants && Array.isArray(p.variants) && p.variants.length > 0) {
+      const firstVariant = p.variants[0];
+      p.mrp = firstVariant.mrp || '';
+      p.discountPrice = firstVariant.discountedPrice || '';
+      p.availableStock = firstVariant.availableStock || '';
+      p.size = firstVariant.volume || '';
+      // Calculate discount type from discountPercentage if available
+      if (firstVariant.discountPercentage) {
+        p.discountType = `${firstVariant.discountPercentage}%`;
+      }
+    }
+    
+    // Handle house migration (if old format exists)
+    if (catKey === 'houses') {
+      if (p.name && !p.productName) p.productName = p.name;
+      if (p.price !== undefined && !p.mrp) p.mrp = p.price;
+      if (p.discountPercentage && !p.discountType) {
+        p.discountType = `${p.discountPercentage}%`;
+      }
+      if (p.image && (!p.images || p.images.length === 0)) {
+        p.images = [p.image];
+      }
+    }
+    
     if (p.prices) p.prices = p.prices.map(x => ({ ...x }));
-    if (p.sizes) p.sizes = p.sizes.map(x => ({ ...x }));
+    if (p.sizes && catKey !== 'accessories') p.sizes = p.sizes.map(x => ({ ...x }));
     if (p.variants) p.variants = p.variants.map(x => ({ ...x }));
     if (p.dimensions) p.dimensions = { ...p.dimensions };
     if (p.usage) p.usage = { ...p.usage };
@@ -587,7 +664,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
     if (Array.isArray(p.highlights)) p.highlights = [...p.highlights];
     if (Array.isArray(p.usageInstructions)) p.usageInstructions = [...p.usageInstructions];
     setForm(p);
-  }, [product]);
+  }, [product, catKey]);
 
   const set = (field, val) => setForm(prev => ({ ...prev, [field]: val }));
   const setNested = (parent, field, val) => setForm(prev => ({ ...prev, [parent]: { ...prev[parent], [field]: val } }));
@@ -611,11 +688,106 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
       if (Array.isArray(payload[k])) payload[k] = payload[k].filter(v => v && String(v).trim());
     });
 
-    if (payload.prices) payload.prices = payload.prices.map(p => ({ capacity: p.capacity, mrp: Number(p.mrp), discountedPrice: Number(p.discountedPrice) }));
-    if (payload.sizes) payload.sizes = payload.sizes.map(s => ({ size: s.size, mrp: Number(s.mrp), discountedPrice: Number(s.discountedPrice), availableStock: Number(s.availableStock) }));
+    // Handle food and accessories new structure
+    if (catKey === 'food') {
+      if (payload.mrp !== undefined && payload.mrp !== '') payload.mrp = Number(payload.mrp);
+      if (payload.discountPrice !== undefined && payload.discountPrice !== '') payload.discountPrice = Number(payload.discountPrice);
+      if (payload.taxes !== undefined && payload.taxes !== '') payload.taxes = Number(payload.taxes);
+      if (payload.availableStock !== undefined && payload.availableStock !== '') payload.availableStock = Number(payload.availableStock);
+      // Remove old prices array if exists
+      delete payload.prices;
+    }
+    
+    if (catKey === 'accessories') {
+      if (payload.mrp !== undefined && payload.mrp !== '') payload.mrp = Number(payload.mrp);
+      if (payload.discountPrice !== undefined && payload.discountPrice !== '') payload.discountPrice = Number(payload.discountPrice);
+      if (payload.taxes !== undefined && payload.taxes !== '') payload.taxes = Number(payload.taxes);
+      if (payload.availableStock !== undefined && payload.availableStock !== '') payload.availableStock = Number(payload.availableStock);
+      // Remove old sizes array if exists
+      delete payload.sizes;
+      // Remove empty optional fields
+      ['size', 'brand', 'material', 'itemCode', 'hsn'].forEach(k => {
+        if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+      });
+    }
+    
+    if (catKey === 'toys') {
+      if (payload.mrp !== undefined && payload.mrp !== '') payload.mrp = Number(payload.mrp);
+      if (payload.discountPrice !== undefined && payload.discountPrice !== '') payload.discountPrice = Number(payload.discountPrice);
+      if (payload.taxes !== undefined && payload.taxes !== '') payload.taxes = Number(payload.taxes);
+      if (payload.availableStock !== undefined && payload.availableStock !== '') payload.availableStock = Number(payload.availableStock);
+      // Remove old price/discountedPrice fields if exists
+      delete payload.price;
+      delete payload.discountedPrice;
+      delete payload.discountPercentage;
+      // Remove empty optional fields
+      ['itemCode', 'hsn', 'brand', 'size', 'material'].forEach(k => {
+        if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+      });
+    }
+    
+    if (catKey === 'health') {
+      if (payload.mrp !== undefined && payload.mrp !== '') payload.mrp = Number(payload.mrp);
+      if (payload.discountPrice !== undefined && payload.discountPrice !== '') payload.discountPrice = Number(payload.discountPrice);
+      if (payload.taxes !== undefined && payload.taxes !== '') payload.taxes = Number(payload.taxes);
+      if (payload.availableStock !== undefined && payload.availableStock !== '') payload.availableStock = Number(payload.availableStock);
+      // Remove old price/discountPercentage fields if exists
+      delete payload.price;
+      delete payload.discountPercentage;
+      // Remove empty optional fields
+      ['itemCode', 'hsn', 'size', 'description', 'highlights'].forEach(k => {
+        if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+      });
+      // Remove usage if empty
+      if (payload.usage && (!payload.usage.dosage && !payload.usage.ageGroup)) delete payload.usage;
+      // Convert image to images array if needed
+      if (payload.image && (!payload.images || payload.images.length === 0)) {
+        payload.images = [payload.image];
+      }
+      delete payload.image;
+    }
+    
+    if (catKey === 'grooming') {
+      if (payload.mrp !== undefined && payload.mrp !== '') payload.mrp = Number(payload.mrp);
+      if (payload.discountPrice !== undefined && payload.discountPrice !== '') payload.discountPrice = Number(payload.discountPrice);
+      if (payload.taxes !== undefined && payload.taxes !== '') payload.taxes = Number(payload.taxes);
+      if (payload.availableStock !== undefined && payload.availableStock !== '') payload.availableStock = Number(payload.availableStock);
+      // Remove old variants array if exists
+      delete payload.variants;
+      // Remove empty optional fields
+      ['itemCode', 'hsn', 'size', 'expiryDate', 'brand', 'description', 'keyFeatures'].forEach(k => {
+        if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+      });
+    }
+    
+    if (catKey === 'houses') {
+      if (payload.mrp !== undefined && payload.mrp !== '') payload.mrp = Number(payload.mrp);
+      if (payload.discountPrice !== undefined && payload.discountPrice !== '') payload.discountPrice = Number(payload.discountPrice);
+      if (payload.taxes !== undefined && payload.taxes !== '') payload.taxes = Number(payload.taxes);
+      if (payload.availableStock !== undefined && payload.availableStock !== '') payload.availableStock = Number(payload.availableStock);
+      // Remove old price/discountPercentage fields if exists
+      delete payload.price;
+      delete payload.discountPercentage;
+      // Remove empty optional fields
+      ['itemCode', 'hsn', 'description', 'highlights'].forEach(k => {
+        if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+      });
+      // Remove dimensions if all fields are empty
+      if (payload.dimensions && (!payload.dimensions.height && !payload.dimensions.width && !payload.dimensions.depth && !payload.dimensions.weight)) {
+        delete payload.dimensions;
+      }
+      // Convert image to images array if needed
+      if (payload.image && (!payload.images || payload.images.length === 0)) {
+        payload.images = [payload.image];
+      }
+      delete payload.image;
+    }
+    
+    if (payload.prices && catKey !== 'food') payload.prices = payload.prices.map(p => ({ capacity: p.capacity, mrp: Number(p.mrp), discountedPrice: Number(p.discountedPrice) }));
+    if (payload.sizes && catKey !== 'accessories') payload.sizes = payload.sizes.map(s => ({ size: s.size, mrp: Number(s.mrp), discountedPrice: Number(s.discountedPrice), availableStock: Number(s.availableStock) }));
     if (payload.variants) payload.variants = payload.variants.map(v => ({ volume: v.volume, mrp: Number(v.mrp), discountedPrice: Number(v.discountedPrice), discountPercentage: Number(v.discountPercentage || 0), availableStock: Number(v.availableStock) }));
 
-    ['price', 'discountedPrice', 'discountPrice', 'discountPercentage', 'availableStock', 'expectedDeliveryDays'].forEach(f => {
+    ['price', 'discountedPrice', 'discountPercentage', 'expectedDeliveryDays'].forEach(f => {
       if (payload[f] !== undefined && payload[f] !== '' && payload[f] !== null) payload[f] = Number(payload[f]);
     });
     if (payload.expiryDate) payload.expiryDate = new Date(payload.expiryDate);
@@ -697,17 +869,29 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
 
           {/* ─── TOYS FIELDS ─── */}
           {catKey === 'toys' && <>
-            <Row><Input label="Product Name" value={form.productName} onChange={v => set('productName', v)} /><Input label="Brand" value={form.brand} onChange={v => set('brand', v)} /></Row>
+            <Row><Input label="Product Name" value={form.productName} onChange={v => set('productName', v)} /><Select label="Sub-Category (Pet)" value={form.subCategory} onChange={v => set('subCategory', v)} options={['Dog','Cat']} /></Row>
             <Row>
-              <Select label="For" value={form.subCategory} onChange={v => set('subCategory', v)} options={['Dog','Cat']} />
-              <Select label="Suitable For" value={form.suitableFor} onChange={v => set('suitableFor', v)} options={['Puppy','Adult','All']} />
+              <Input label="MRP" type="number" value={form.mrp} onChange={v => set('mrp', v)} />
+              <Input label="Discount Price" type="number" value={form.discountPrice} onChange={v => set('discountPrice', v)} />
             </Row>
             <Row>
-              <Input label="Price (MRP)" type="number" value={form.price} onChange={v => set('price', v)} />
-              <Input label="Discounted Price" type="number" value={form.discountedPrice} onChange={v => set('discountedPrice', v)} />
-              <Input label="Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} />
+              <Input label="Discount Type" value={form.discountType} onChange={v => set('discountType', v)} />
+              <Input label="Available Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} />
             </Row>
-            <Row><Input label="Material" value={form.material} onChange={v => set('material', v)} /><Input label="Size" value={form.size} onChange={v => set('size', v)} /></Row>
+            <Row>
+              <Input label="Base Unit" value={form.baseUnit || 'pieces'} onChange={v => set('baseUnit', v)} />
+              <Input label="Taxes (GST %)" type="number" value={form.taxes || 18} onChange={v => set('taxes', v)} />
+            </Row>
+            <Row>
+              <Input label="Item Code" value={form.itemCode} onChange={v => set('itemCode', v)} />
+              <Input label="HSN" value={form.hsn} onChange={v => set('hsn', v)} />
+            </Row>
+            <Row>
+              <Input label="Brand" value={form.brand} onChange={v => set('brand', v)} />
+              <Input label="Size" value={form.size} onChange={v => set('size', v)} />
+            </Row>
+            <Input label="Material" value={form.material} onChange={v => set('material', v)} />
+            <Select label="Suitable For" value={form.suitableFor || 'All'} onChange={v => set('suitableFor', v)} options={['Puppy','Adult','All']} />
             <ArrayField label="Colors" items={form.color} onChange={(i,v) => setArr('color',i,v)} onAdd={() => addArr('color')} onRemove={i => rmArr('color',i)} placeholder="Color" />
             <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
             <ArrayField label="Product Details" items={form.productDetails} onChange={(i,v) => setArr('productDetails',i,v)} onAdd={() => addArr('productDetails')} onRemove={i => rmArr('productDetails',i)} placeholder="Detail" />
@@ -716,16 +900,27 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
 
           {/* ─── HOUSES FIELDS ─── */}
           {catKey === 'houses' && <>
-            <Row><Input label="Name" value={form.name} onChange={v => set('name', v)} /><Select label="For" value={form.subCategory} onChange={v => set('subCategory', v)} options={['dog','cat']} /></Row>
+            <Row><Input label="Product Name" value={form.productName || form.name} onChange={v => { set('productName', v); set('name', v); }} /><Select label="Sub-Category (Pet)" value={form.subCategory} onChange={v => set('subCategory', v)} options={['dog','cat']} /></Row>
             <Row>
-              <Input label="Price (MRP)" type="number" value={form.price} onChange={v => set('price', v)} />
+              <Input label="MRP" type="number" value={form.mrp || form.price} onChange={v => { set('mrp', v); set('price', v); }} />
               <Input label="Discount Price" type="number" value={form.discountPrice} onChange={v => set('discountPrice', v)} />
-              <Input label="Discount %" type="number" value={form.discountPercentage} onChange={v => set('discountPercentage', v)} />
             </Row>
-            <Input label="Available Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} />
+            <Row>
+              <Input label="Discount Type" value={form.discountType || (form.discountPercentage ? `${form.discountPercentage}%` : '')} onChange={v => set('discountType', v)} />
+              <Input label="Available Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} />
+            </Row>
+            <Row>
+              <Input label="Base Unit" value={form.baseUnit || 'pieces'} onChange={v => set('baseUnit', v)} />
+              <Input label="Taxes (GST %)" type="number" value={form.taxes || 18} onChange={v => set('taxes', v)} />
+            </Row>
+            <Row>
+              <Input label="Item Code" value={form.itemCode} onChange={v => set('itemCode', v)} />
+              <Input label="HSN" value={form.hsn} onChange={v => set('hsn', v)} />
+            </Row>
             <Textarea label="Description" value={form.description} onChange={v => set('description', v)} />
+            <ArrayField label="Highlights" items={form.highlights} onChange={(i,v) => setArr('highlights',i,v)} onAdd={() => addArr('highlights')} onRemove={i => rmArr('highlights',i)} placeholder="Highlight" />
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Dimensions</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Dimensions (Optional)</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {['height','width','depth','weight'].map(d => (
                   <input key={d} type="text" placeholder={d.charAt(0).toUpperCase()+d.slice(1)} value={form.dimensions?.[d] || ''}
@@ -733,17 +928,27 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
                 ))}
               </div>
             </div>
-            <Input label="Image URL" value={(form.images && form.images[0]) || form.image || ''} onChange={v => { set('image', v); set('images', [v]); }} />
-            <ArrayField label="Highlights" items={form.highlights} onChange={(i,v) => setArr('highlights',i,v)} onAdd={() => addArr('highlights')} onRemove={i => rmArr('highlights',i)} placeholder="Highlight" />
+            <ArrayField label="Images" items={form.images || (form.image ? [form.image] : [])} onChange={(i,v) => { setArr('images',i,v); if (i === 0) set('image', v); }} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
           </>}
 
           {/* ─── ACCESSORIES FIELDS ─── */}
           {catKey === 'accessories' && <>
             <Row><Input label="Product Name" value={form.productName} onChange={v => set('productName', v)} /><Input label="Brand" value={form.brand} onChange={v => set('brand', v)} /></Row>
             <Select label="For" value={form.subCategory} onChange={v => set('subCategory', v)} options={['dog','cat']} />
+            <Row>
+              <Input label="MRP" type="number" value={form.mrp} onChange={v => set('mrp', v)} />
+              <Input label="Discount Price" type="number" value={form.discountPrice} onChange={v => set('discountPrice', v)} />
+            </Row>
+            <Row>
+              <Input label="Discount Type" value={form.discountType} onChange={v => set('discountType', v)} />
+              <Input label="Available Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} />
+            </Row>
+            <Row>
+              <Input label="Base Unit" value={form.baseUnit || 'pieces'} onChange={v => set('baseUnit', v)} />
+              <Input label="Taxes (GST %)" type="number" value={form.taxes || 18} onChange={v => set('taxes', v)} />
+            </Row>
+            <Input label="Size" value={form.size} onChange={v => set('size', v)} placeholder="e.g. S, XL, Large, Medium, Size01, 1kg, 250ml, etc." />
             <Input label="Material" value={form.material} onChange={v => set('material', v)} />
-            <SubArrayField label="Sizes" items={form.sizes || []} fields={[{key:'size',placeholder:'Size',w:'w-full sm:w-24',type:'select',options:['XS','S','M','L','XL','One Size']},{key:'mrp',placeholder:'MRP',type:'number',w:'w-full sm:w-24'},{key:'discountedPrice',placeholder:'Sale',type:'number',w:'w-full sm:w-24'},{key:'availableStock',placeholder:'Stock',type:'number',w:'w-full sm:w-20'}]}
-              onChange={(i,k,v) => setSubArr('sizes',i,k,v)} onAdd={() => addSubArr('sizes',{size:'One Size',mrp:'',discountedPrice:'',availableStock:''})} onRemove={i => rmSubArr('sizes',i)} />
             <ArrayField label="Colors" items={form.color} onChange={(i,v) => setArr('color',i,v)} onAdd={() => addArr('color')} onRemove={i => rmArr('color',i)} placeholder="Color" />
             <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
             <ArrayField label="Product Details" items={form.productDetails} onChange={(i,v) => setArr('productDetails',i,v)} onAdd={() => addArr('productDetails')} onRemove={i => rmArr('productDetails',i)} placeholder="Detail" />
@@ -752,14 +957,30 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
 
           {/* ─── GROOMING FIELDS ─── */}
           {catKey === 'grooming' && <>
-            <Row><Input label="Product Name" value={form.productName} onChange={v => set('productName', v)} /><Input label="Brand" value={form.brand} onChange={v => set('brand', v)} /></Row>
+            <Row><Input label="Product Name" value={form.productName} onChange={v => set('productName', v)} /><Select label="Sub-Category (Pet)" value={form.subCategory} onChange={v => set('subCategory', v)} options={['dog','cat']} /></Row>
             <Row>
-              <Select label="For" value={form.subCategory} onChange={v => set('subCategory', v)} options={['dog','cat']} />
-              <Select label="Suitable For" value={form.suitableFor} onChange={v => set('suitableFor', v)} options={['Dogs','Cats','Both']} />
+              <Input label="MRP" type="number" value={form.mrp} onChange={v => set('mrp', v)} />
+              <Input label="Discount Price" type="number" value={form.discountPrice} onChange={v => set('discountPrice', v)} />
             </Row>
+            <Row>
+              <Input label="Discount Type" value={form.discountType} onChange={v => set('discountType', v)} />
+              <Input label="Available Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} />
+            </Row>
+            <Row>
+              <Input label="Base Unit" value={form.baseUnit || 'pieces'} onChange={v => set('baseUnit', v)} />
+              <Input label="Taxes (GST %)" type="number" value={form.taxes || 18} onChange={v => set('taxes', v)} />
+            </Row>
+            <Row>
+              <Input label="Item Code" value={form.itemCode} onChange={v => set('itemCode', v)} />
+              <Input label="HSN" value={form.hsn} onChange={v => set('hsn', v)} />
+            </Row>
+            <Row>
+              <Input label="Size" value={form.size} onChange={v => set('size', v)} placeholder="e.g. 250ml, 500ml, 1L, Small, Large, etc." />
+              <Input label="Expiry Date" type="date" value={form.expiryDate} onChange={v => set('expiryDate', v)} />
+            </Row>
+            <Input label="Brand" value={form.brand} onChange={v => set('brand', v)} />
+            <Select label="Suitable For" value={form.suitableFor || 'Both'} onChange={v => set('suitableFor', v)} options={['Dogs','Cats','Both']} />
             <Textarea label="Description" value={form.description} onChange={v => set('description', v)} />
-            <SubArrayField label="Variants" items={form.variants || []} fields={[{key:'volume',placeholder:'Volume',w:'flex-1'},{key:'mrp',placeholder:'MRP',type:'number',w:'w-full sm:w-20'},{key:'discountedPrice',placeholder:'Sale',type:'number',w:'w-full sm:w-20'},{key:'availableStock',placeholder:'Stock',type:'number',w:'w-full sm:w-20'}]}
-              onChange={(i,k,v) => setSubArr('variants',i,k,v)} onAdd={() => addSubArr('variants',{volume:'',mrp:'',discountedPrice:'',discountPercentage:'',availableStock:''})} onRemove={i => rmSubArr('variants',i)} />
             <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
             <ArrayField label="Key Features" items={form.keyFeatures} onChange={(i,v) => setArr('keyFeatures',i,v)} onAdd={() => addArr('keyFeatures')} onRemove={i => rmArr('keyFeatures',i)} placeholder="Feature" />
             <ArrayField label="Usage Instructions" items={form.usageInstructions} onChange={(i,v) => setArr('usageInstructions',i,v)} onAdd={() => addArr('usageInstructions')} onRemove={i => rmArr('usageInstructions',i)} placeholder="Instruction" />
@@ -767,23 +988,35 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
 
           {/* ─── HEALTH SUPPLEMENT FIELDS ─── */}
           {catKey === 'health' && <>
-            <Row><Input label="Name" value={form.name} onChange={v => set('name', v)} /><Select label="For" value={form.subCategory} onChange={v => set('subCategory', v)} options={['dog','cat']} /></Row>
+            <Row><Input label="Product Name" value={form.productName || form.name} onChange={v => { set('productName', v); set('name', v); }} /><Select label="Sub-Category (Pet)" value={form.subCategory} onChange={v => set('subCategory', v)} options={['dog','cat']} /></Row>
             <Row>
-              <Input label="Price (MRP)" type="number" value={form.price} onChange={v => set('price', v)} />
+              <Input label="MRP" type="number" value={form.mrp || form.price} onChange={v => { set('mrp', v); set('price', v); }} />
               <Input label="Discount Price" type="number" value={form.discountPrice} onChange={v => set('discountPrice', v)} />
-              <Input label="Discount %" type="number" value={form.discountPercentage} onChange={v => set('discountPercentage', v)} />
             </Row>
-            <Row><Input label="Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} /><Input label="Expiry Date" type="date" value={form.expiryDate} onChange={v => set('expiryDate', v)} /></Row>
+            <Row>
+              <Input label="Discount Type" value={form.discountType || (form.discountPercentage ? `${form.discountPercentage}%` : '')} onChange={v => set('discountType', v)} />
+              <Input label="Available Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} />
+            </Row>
+            <Row>
+              <Input label="Base Unit" value={form.baseUnit || 'pieces'} onChange={v => set('baseUnit', v)} />
+              <Input label="Taxes (GST %)" type="number" value={form.taxes || 18} onChange={v => set('taxes', v)} />
+            </Row>
+            <Input label="Expiry Date" type="date" value={form.expiryDate} onChange={v => set('expiryDate', v)} />
+            <Row>
+              <Input label="Item Code" value={form.itemCode} onChange={v => set('itemCode', v)} />
+              <Input label="HSN" value={form.hsn} onChange={v => set('hsn', v)} />
+            </Row>
+            <Input label="Size" value={form.size} onChange={v => set('size', v)} placeholder="e.g. 250ml, 500ml, 1L, Small, Large, kg, etc." />
             <Textarea label="Description" value={form.description} onChange={v => set('description', v)} />
+            <ArrayField label="Highlights" items={form.highlights} onChange={(i,v) => setArr('highlights',i,v)} onAdd={() => addArr('highlights')} onRemove={i => rmArr('highlights',i)} placeholder="Highlight" />
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Usage</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Usage (Optional)</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input type="text" placeholder="Dosage" value={form.usage?.dosage || ''} onChange={e => setNested('usage','dosage',e.target.value)} className="inp" />
                 <input type="text" placeholder="Age Group" value={form.usage?.ageGroup || ''} onChange={e => setNested('usage','ageGroup',e.target.value)} className="inp" />
               </div>
             </div>
-            <Input label="Image URL" value={(form.images && form.images[0]) || form.image || ''} onChange={v => { set('image', v); set('images', [v]); }} />
-            <ArrayField label="Highlights" items={form.highlights} onChange={(i,v) => setArr('highlights',i,v)} onAdd={() => addArr('highlights')} onRemove={i => rmArr('highlights',i)} placeholder="Highlight" />
+            <ArrayField label="Images" items={form.images || (form.image ? [form.image] : [])} onChange={(i,v) => { setArr('images',i,v); if (i === 0) set('image', v); }} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
           </>}
         </form>
 

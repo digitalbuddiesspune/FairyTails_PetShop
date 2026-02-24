@@ -20,6 +20,7 @@ import accessoryRoutes from './routes/accessoryRoutes.js';
 import groomingEssentialRoutes from './routes/groomingEssentialRoutes.js';
 import addressRoutes from './routes/addressRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import searchRoutes from './routes/searchRoutes.js';
 
 const app = express();
 
@@ -76,6 +77,9 @@ app.use('/api/v1/addresses', addressRoutes);
 
 // Order routes
 app.use('/api/v1/orders', orderRoutes);
+
+// Search routes
+app.use('/api/v1/search', searchRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

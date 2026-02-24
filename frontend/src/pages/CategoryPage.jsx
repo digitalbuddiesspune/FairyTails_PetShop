@@ -76,24 +76,76 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
   const isAccessory = product.category === 'accessories';
   const isGrooming = product.category === 'grooming-essentials';
   const hasFlatPrice = isToyProduct || isHealthSupplement || isHouseProduct;
+  
+  // Check if it's a food, accessory, toy, health, grooming, or house product with new structure (flat fields instead of prices/sizes/variants array)
+  const isFoodWithNewStructure = product.mrp !== undefined && product.discountPrice !== undefined && product.capacity !== undefined;
+  const isAccessoryWithNewStructure = isAccessory && product.mrp !== undefined && product.discountPrice !== undefined;
+  const isToyWithNewStructure = isToyProduct && product.mrp !== undefined && product.discountPrice !== undefined;
+  const isHealthWithNewStructure = isHealthSupplement && product.mrp !== undefined && product.discountPrice !== undefined;
+  const isGroomingWithNewStructure = isGrooming && product.mrp !== undefined && product.discountPrice !== undefined;
+  const isHouseWithNewStructure = isHouseProduct && product.mrp !== undefined && product.discountPrice !== undefined;
 
   // Normalised display fields
   const displayName = product.productName || product.name || 'Unnamed Product';
   const displayImage = product.images?.[0] || product.image || null;
 
   const startingPrice = useMemo(() => {
-    if (hasFlatPrice) {
-      const mrp = product.price;
+    // New food structure (flat fields)
+    if (isFoodWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc };
+    }
+    // New accessory structure (flat fields)
+    if (isAccessoryWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc };
+    }
+    // New toy structure (flat fields)
+    if (isToyWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc };
+    }
+    // New health structure (flat fields)
+    if (isHealthWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc };
+    }
+    // New grooming structure (flat fields)
+    if (isGroomingWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc };
+    }
+    // New house structure (flat fields)
+    if (isHouseWithNewStructure) {
+      const mrp = product.mrp;
+      const disc = product.discountPrice || mrp;
+      if (!mrp) return null;
+      return { mrp, discountedPrice: disc };
+    }
+    // Flat price products (old structures)
+    if (hasFlatPrice && !isHealthWithNewStructure && !isGroomingWithNewStructure && !isHouseWithNewStructure) {
+      const mrp = product.price || product.mrp;
       const disc = product.discountedPrice || product.discountPrice || mrp;
       if (!mrp) return null;
       return { mrp, discountedPrice: disc };
     }
+    // Old structure with prices/sizes array
     if (priceOptions.length === 0) return null;
     return priceOptions.reduce(
       (min, p) => (p.discountedPrice < min.discountedPrice ? p : min),
       priceOptions[0]
     );
-  }, [priceOptions, hasFlatPrice, product.price, product.discountedPrice, product.discountPrice]);
+  }, [priceOptions, hasFlatPrice, isFoodWithNewStructure, isAccessoryWithNewStructure, isToyWithNewStructure, isHealthWithNewStructure, isGroomingWithNewStructure, isHouseWithNewStructure, product.mrp, product.discountPrice, product.price, product.discountedPrice]);
 
   const discountPercent = startingPrice
     ? Math.round(((startingPrice.mrp - startingPrice.discountedPrice) / startingPrice.mrp) * 100)
@@ -128,14 +180,15 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
     if (onWishlistToggle) onWishlistToggle(product._id);
   };
 
-  // Build product detail URL with type parameter
-  const productUrl = apiEndpoint ? `/product/${product._id}?type=${apiEndpoint}` : `/product/${product._id}`;
+  // Build product detail URL with type parameter (derive from product when apiEndpoint is null, e.g. mixed food+clothes)
+  const derivedEndpoint = !apiEndpoint && product.sizes?.length && !product.prices?.length ? '/clothes' : !apiEndpoint && (product.prices?.length || !product.sizes?.length) ? '/food' : apiEndpoint;
+  const productUrl = derivedEndpoint ? `/product/${product._id}?type=${derivedEndpoint}` : `/product/${product._id}`;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-w-0">
       <div className="relative overflow-hidden bg-gray-50">
         <Link to={productUrl}>
-          <div className="aspect-square flex items-center justify-center p-4">
+          <div className="aspect-square flex items-center justify-center p-2 sm:p-4">
             {displayImage ? (
               <img src={displayImage} alt={displayName} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
             ) : (
@@ -172,21 +225,28 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
           )}
         </button>
       </div>
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         {product.brand && (
           <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">{product.brand}</p>
         )}
         <Link to={productUrl}>
-          <h3 className="font-bold text-gray-900 text-sm leading-tight mb-2 line-clamp-2 min-h-[2.5rem] hover:text-[#65a30d] transition-colors">{displayName}</h3>
+          <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#65a30d] transition-colors">{displayName}</h3>
         </Link>
-        <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full mb-3">{product.subCategory}</span>
+        <span className="inline-block bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full mb-2 sm:mb-3">{product.subCategory}</span>
+        {/* Show capacity for food or size for accessories */}
+        {(isFoodWithNewStructure && product.capacity) && (
+          <p className="text-xs text-gray-500 mb-1">Capacity: {product.capacity}</p>
+        )}
+        {(isAccessoryWithNewStructure && product.size) && (
+          <p className="text-xs text-gray-500 mb-1">Size: {product.size}</p>
+        )}
         {startingPrice && (
           <div className="flex items-end gap-2 mb-3">
-            <span className="text-xl font-bold text-gray-900">₹{startingPrice.discountedPrice}</span>
+            <span className="text-base sm:text-xl font-bold text-gray-900">₹{startingPrice.discountedPrice}</span>
             {startingPrice.mrp > startingPrice.discountedPrice && (
               <span className="text-sm text-gray-400 line-through">₹{startingPrice.mrp}</span>
             )}
-            {priceOptions.length > 1 && (
+            {!isFoodWithNewStructure && !isAccessoryWithNewStructure && priceOptions.length > 1 && (
               <span className="text-xs text-gray-500 ml-auto">{priceOptions.length} sizes</span>
             )}
           </div>
@@ -454,7 +514,7 @@ const CategoryPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Breadcrumb + Title Bar */}
       <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-4">
           <nav className="text-gray-400 text-sm flex items-center gap-2 mb-2">
             <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             <span>/</span>
@@ -490,7 +550,7 @@ const CategoryPage = () => {
       {/* SubCategory Tabs */}
       {subCategories.length > 0 && (
         <section className="bg-white border-b border-gray-200 sticky top-[108px] z-30">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 sm:px-6">
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-3">
               {subCategoryTabs.map((sub) => (
                 <button
@@ -543,7 +603,7 @@ const CategoryPage = () => {
 
           {!productsLoading && products.length > 0 && (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {products.map((product) => (
                   <ProductCard
                     key={product._id}
@@ -564,7 +624,7 @@ const CategoryPage = () => {
 
       {/* Browse More */}
       <section className="py-10 bg-white border-t border-gray-100">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 sm:px-6 text-center">
           <h3 className="text-xl font-bold text-gray-900 mb-2">Looking for more?</h3>
           <p className="text-gray-500 mb-6">Explore other categories for your pets</p>
           <div className="flex items-center justify-center gap-3 flex-wrap">
