@@ -15,8 +15,8 @@ export const getAllFood = async (req, res) => {
 
     // Build sort object
     let sortObj = { createdAt: -1 }; // default: newest first
-    if (sort === 'price-low') sortObj = { 'prices.0.discountedPrice': 1 };
-    if (sort === 'price-high') sortObj = { 'prices.0.discountedPrice': -1 };
+    if (sort === 'price-low') sortObj = { discountPrice: 1 };
+    if (sort === 'price-high') sortObj = { discountPrice: -1 };
     if (sort === 'rating') sortObj = { 'reviews.rating': -1 };
     if (sort === 'name-asc') sortObj = { productName: 1 };
     if (sort === 'name-desc') sortObj = { productName: -1 };
@@ -78,22 +78,31 @@ export const getFoodById = async (req, res) => {
 export const createFood = async (req, res) => {
   try {
     const {
-      productName, brand, prices, availableStock, details, keyFeatures,
-      category, subCategory, expiryDate, images, flavours,
+      productName, category, subCategory, capacity, mrp, discountPrice,
+      discountType, availableStock, expiryDate, baseUnit, taxes, images,
+      // Optional fields
+      itemCode, hsn, brand, details, keyFeatures, flavours,
       nutrients, healthBenefits,
     } = req.body;
 
-    // Basic validation
-    if (!productName || !brand || !category || !subCategory) {
+    // Basic validation - only required fields (baseUnit and taxes have defaults in schema)
+    if (!productName || !category || !subCategory || !capacity || 
+        mrp === undefined || mrp === null || mrp === '' ||
+        discountPrice === undefined || discountPrice === null || discountPrice === '' ||
+        !discountType || 
+        availableStock === undefined || availableStock === null || availableStock === '' ||
+        !expiryDate || !images || images.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide productName, brand, category, and subCategory',
+        message: 'Please provide all required fields: productName, category, subCategory, capacity, mrp, discountPrice, discountType, availableStock, expiryDate, and at least one image',
       });
     }
 
     const food = await Food.create({
-      productName, brand, prices, availableStock, details, keyFeatures,
-      category, subCategory, expiryDate, images, flavours,
+      productName, category, subCategory, capacity, mrp, discountPrice,
+      discountType, availableStock, expiryDate, baseUnit, taxes, images,
+      // Optional fields
+      itemCode, hsn, brand, details, keyFeatures, flavours,
       nutrients, healthBenefits,
     });
 

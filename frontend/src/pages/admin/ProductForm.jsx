@@ -6,14 +6,27 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const INITIAL = {
   food: {
-    productName: '', brand: '',
-    category: 'Dog', subCategory: 'Dry Food',
-    prices: [{ capacity: '', mrp: '', discountedPrice: '' }],
+    productName: '',
+    category: 'Dog',
+    subCategory: 'Dry Food',
+    capacity: '',
+    mrp: '',
+    discountPrice: '',
+    discountType: '',
     availableStock: '',
-    details: [''], keyFeatures: [''],
     expiryDate: '',
+    baseUnit: 'pieces',
+    taxes: 18,
     images: [''],
-    flavours: [''], nutrients: [''], healthBenefits: [''],
+    // Optional fields
+    itemCode: '',
+    hsn: '',
+    brand: '',
+    details: [''],
+    keyFeatures: [''],
+    flavours: [''],
+    nutrients: [''],
+    healthBenefits: [''],
   },
   clothes: {
     productName: '', brand: '',
@@ -25,10 +38,12 @@ const INITIAL = {
     isReturnable: true, expectedDeliveryDays: '',
   },
   toy: {
-    productName: '', brand: '',
-    category: 'Toy', subCategory: 'Dog',
-    price: '', discountedPrice: '', discountPercentage: '',
-    size: 'One Size', availableStock: '',
+    productName: '', subCategory: 'Dog',
+    category: 'Toy',
+    mrp: '', discountPrice: '', discountType: '',
+    availableStock: '', baseUnit: 'pieces', taxes: 18,
+    // Optional fields
+    itemCode: '', hsn: '', brand: '', size: '',
     material: '', color: [''],
     productDetails: [''], keyFeatures: [''],
     suitableFor: 'All',
@@ -36,41 +51,87 @@ const INITIAL = {
     isReturnable: true,
   },
   accessory: {
-    category: 'accessories', subCategory: 'dog',
-    productName: '', brand: '',
-    sizes: [{ size: 'One Size', mrp: '', discountedPrice: '', availableStock: '' }],
-    material: '', color: [''],
-    productDetails: [''], keyFeatures: [''],
+    category: 'accessories',
+    subCategory: 'dog',
+    productName: '',
+    mrp: '',
+    discountPrice: '',
+    discountType: '',
+    availableStock: '',
+    baseUnit: 'pieces',
+    taxes: 18,
     images: [''],
+    // Optional fields
+    itemCode: '',
+    hsn: '',
+    size: '',
+    brand: '',
+    material: '',
+    color: [''],
+    productDetails: [''],
+    keyFeatures: [''],
     isReturnable: true,
   },
   grooming: {
-    category: 'grooming-essentials', subCategory: 'dog',
-    productName: '', brand: '',
-    variants: [{ volume: '', mrp: '', discountedPrice: '', discountPercentage: '', availableStock: '' }],
-    description: '', keyFeatures: [''],
+    category: 'grooming-essentials',
+    subCategory: 'dog',
+    productName: '',
+    mrp: '',
+    discountPrice: '',
+    discountType: '',
+    availableStock: '',
+    baseUnit: 'pieces',
+    taxes: 18,
+    images: [''],
+    // Optional fields
+    itemCode: '',
+    hsn: '',
+    size: '',
+    expiryDate: '',
+    brand: '',
+    description: '',
+    keyFeatures: [''],
     suitableFor: 'Both',
     usageInstructions: [''],
-    images: [''],
     isReturnable: true,
   },
   health: {
-    category: 'health-supplement', subCategory: 'dog',
-    name: '',
-    price: '', discountPrice: '', discountPercentage: '',
-    highlights: [''], description: '',
+    category: 'health-supplement',
+    subCategory: 'dog',
+    productName: '',
+    mrp: '',
+    discountPrice: '',
+    discountType: '',
+    availableStock: '',
+    expiryDate: '',
+    baseUnit: 'pieces',
+    taxes: 18,
+    images: [''],
+    // Optional fields
+    itemCode: '',
+    hsn: '',
+    size: '',
+    description: '',
+    highlights: [''],
     usage: { dosage: '', ageGroup: '' },
-    expiryDate: '', availableStock: '',
-    image: '',
   },
   house: {
-    category: 'house', subCategory: 'dog',
-    name: '',
-    price: '', discountPrice: '', discountPercentage: '',
-    highlights: [''], description: '',
-    dimensions: { height: '', width: '', depth: '', weight: '' },
+    category: 'house',
+    subCategory: 'dog',
+    productName: '',
+    mrp: '',
+    discountPrice: '',
+    discountType: '',
     availableStock: '',
-    image: '',
+    baseUnit: 'pieces',
+    taxes: 18,
+    images: [''],
+    // Optional fields
+    itemCode: '',
+    hsn: '',
+    description: '',
+    highlights: [''],
+    dimensions: { height: '', width: '', depth: '', weight: '' },
   },
 };
 
@@ -106,12 +167,12 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
       const merged = { ...init, ...existingProduct };
 
       // Normalise images → always array for UI
-      if (type === 'health' || type === 'house') {
+      if (type === 'house') {
         merged.image = existingProduct.image || '';
       } else {
         merged.images = Array.isArray(existingProduct.images)
           ? (existingProduct.images.length ? existingProduct.images : [''])
-          : [existingProduct.image || ''];
+          : (existingProduct.image ? [existingProduct.image] : ['']);
       }
 
       // Normalise date
@@ -119,10 +180,76 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         merged.expiryDate = new Date(merged.expiryDate).toISOString().split('T')[0];
       }
 
-      // Ensure sub-arrays exist
-      ['prices', 'sizes', 'variants'].forEach((k) => {
-        if (init[k] && (!merged[k] || !merged[k].length)) merged[k] = init[k];
-      });
+      // Ensure sub-arrays exist (food, accessory, health, and grooming no longer use prices/sizes/variants arrays)
+      if (type !== 'food' && type !== 'accessory' && type !== 'health' && type !== 'grooming') {
+        ['sizes', 'variants'].forEach((k) => {
+          if (init[k] && (!merged[k] || !merged[k].length)) merged[k] = init[k];
+        });
+      }
+      
+      // Handle food prices migration (if old format exists)
+      if (type === 'food' && existingProduct.prices && Array.isArray(existingProduct.prices) && existingProduct.prices.length > 0) {
+        const firstPrice = existingProduct.prices[0];
+        merged.capacity = firstPrice.capacity || '';
+        merged.mrp = firstPrice.mrp || '';
+        merged.discountPrice = firstPrice.discountedPrice || '';
+      }
+      
+      // Handle accessory sizes migration (if old format exists)
+      if (type === 'accessory' && existingProduct.sizes && Array.isArray(existingProduct.sizes) && existingProduct.sizes.length > 0) {
+        const firstSize = existingProduct.sizes[0];
+        merged.mrp = firstSize.mrp || '';
+        merged.discountPrice = firstSize.discountedPrice || '';
+        merged.availableStock = firstSize.availableStock || '';
+      }
+      
+      // Handle toy price migration (if old format exists)
+      if (type === 'toy' && existingProduct.price !== undefined && !existingProduct.mrp) {
+        merged.mrp = existingProduct.price || '';
+        merged.discountPrice = existingProduct.discountedPrice || '';
+        // Calculate discount type from discountPercentage if available
+        if (existingProduct.discountPercentage) {
+          merged.discountType = `${existingProduct.discountPercentage}%`;
+        }
+      }
+      
+      // Handle health supplement migration (if old format exists)
+      if (type === 'health') {
+        if (existingProduct.name && !merged.productName) merged.productName = existingProduct.name;
+        if (existingProduct.price !== undefined && !merged.mrp) merged.mrp = existingProduct.price;
+        if (existingProduct.discountPercentage && !merged.discountType) {
+          merged.discountType = `${existingProduct.discountPercentage}%`;
+        }
+        if (existingProduct.image && (!merged.images || merged.images.length === 0)) {
+          merged.images = [existingProduct.image];
+        }
+      }
+      
+      // Handle grooming variants migration (if old format exists)
+      if (type === 'grooming' && existingProduct.variants && Array.isArray(existingProduct.variants) && existingProduct.variants.length > 0) {
+        const firstVariant = existingProduct.variants[0];
+        merged.mrp = firstVariant.mrp || '';
+        merged.discountPrice = firstVariant.discountedPrice || '';
+        merged.availableStock = firstVariant.availableStock || '';
+        merged.size = firstVariant.volume || '';
+        // Calculate discount type from discountPercentage if available
+        if (firstVariant.discountPercentage) {
+          merged.discountType = `${firstVariant.discountPercentage}%`;
+        }
+      }
+      
+      // Handle house migration (if old format exists)
+      if (type === 'house') {
+        if (existingProduct.name && !merged.productName) merged.productName = existingProduct.name;
+        if (existingProduct.price !== undefined && !merged.mrp) merged.mrp = existingProduct.price;
+        if (existingProduct.discountPercentage && !merged.discountType) {
+          merged.discountType = `${existingProduct.discountPercentage}%`;
+        }
+        if (existingProduct.image && (!merged.images || merged.images.length === 0)) {
+          merged.images = [existingProduct.image];
+        }
+      }
+      
       ['details', 'keyFeatures', 'productDetails', 'careInstructions', 'flavours', 'nutrients', 'healthBenefits', 'highlights', 'usageInstructions', 'color'].forEach((k) => {
         if (init[k] !== undefined) {
           merged[k] = Array.isArray(merged[k]) && merged[k].length ? merged[k] : (init[k] || ['']);
@@ -184,8 +311,16 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         if (payload[k] !== undefined && payload[k] !== '') payload[k] = Number(payload[k]);
       });
 
+      // Convert food, accessory, toy, health, grooming, and house pricing fields to numbers
+      if (type === 'food' || type === 'accessory' || type === 'toy' || type === 'health' || type === 'grooming' || type === 'house') {
+        if (payload.mrp !== undefined && payload.mrp !== '') payload.mrp = Number(payload.mrp);
+        if (payload.discountPrice !== undefined && payload.discountPrice !== '') payload.discountPrice = Number(payload.discountPrice);
+        if (payload.taxes !== undefined && payload.taxes !== '') payload.taxes = Number(payload.taxes);
+        if (payload.availableStock !== undefined && payload.availableStock !== '') payload.availableStock = Number(payload.availableStock);
+      }
+      
       // Convert sub-array numbers
-      if (payload.prices) {
+      if (payload.prices && type !== 'food') {
         payload.prices = payload.prices.map((p) => ({
           ...p, mrp: Number(p.mrp), discountedPrice: Number(p.discountedPrice),
         }));
@@ -212,6 +347,54 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
       ].forEach((k) => {
         if (Array.isArray(payload[k])) payload[k] = payload[k].filter((v) => v && v.toString().trim());
       });
+
+      // Remove empty optional string fields
+      if (type === 'food') {
+        ['brand', 'itemCode', 'hsn'].forEach((k) => {
+          if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+        });
+      }
+      if (type === 'accessory') {
+        ['size', 'brand', 'material', 'itemCode', 'hsn'].forEach((k) => {
+          if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+        });
+      }
+      if (type === 'toy') {
+        ['itemCode', 'hsn', 'brand', 'size', 'material'].forEach((k) => {
+          if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+        });
+      }
+      if (type === 'health') {
+        ['itemCode', 'hsn', 'size', 'description', 'highlights'].forEach((k) => {
+          if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+        });
+        // Remove usage if empty
+        if (payload.usage && (!payload.usage.dosage && !payload.usage.ageGroup)) delete payload.usage;
+      }
+      if (type === 'grooming') {
+        ['itemCode', 'hsn', 'size', 'expiryDate', 'brand', 'description', 'keyFeatures'].forEach((k) => {
+          if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+        });
+        // Remove old variants array if exists
+        delete payload.variants;
+      }
+      if (type === 'house') {
+        ['itemCode', 'hsn', 'description', 'highlights'].forEach((k) => {
+          if (payload[k] === '' || payload[k] === undefined) delete payload[k];
+        });
+        // Remove old price/discountPercentage fields if exists
+        delete payload.price;
+        delete payload.discountPercentage;
+        // Remove dimensions if all fields are empty
+        if (payload.dimensions && (!payload.dimensions.height && !payload.dimensions.width && !payload.dimensions.depth && !payload.dimensions.weight)) {
+          delete payload.dimensions;
+        }
+        // Convert image to images array if needed
+        if (payload.image && (!payload.images || payload.images.length === 0)) {
+          payload.images = [payload.image];
+        }
+        delete payload.image;
+      }
 
       const url = existingProduct
         ? `${API_BASE}/${categoryData.endpoint}/${existingProduct._id}`
@@ -287,65 +470,91 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
           <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Royal Canin Adult" required />
         </div>
         <div>
-          <Label required>Brand</Label>
-          <input className="input-field" value={formData.brand} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. Royal Canin" required />
+          <Label>Brand</Label>
+          <input className="input-field" value={formData.brand || ''} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. Royal Canin" />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label required>Pet Category</Label>
-          <select className="input-field" value={formData.category} onChange={(e) => set('category', e.target.value)}>
+          <select className="input-field" value={formData.category} onChange={(e) => set('category', e.target.value)} required>
             {PET_CATEGORIES_FOOD.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>
           <Label required>Sub-Category</Label>
-          <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)}>
+          <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)} required>
             {SUB_CATEGORIES.food.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
       </div>
 
-      {/* Pricing Packs */}
-      <SectionTitle icon="💰">Pricing Packs</SectionTitle>
-      {formData.prices.map((p, i) => (
-        <div key={i} className="flex gap-2 items-end">
-          <div className="flex-1">
-            {i === 0 && <Label required>Capacity</Label>}
-            <input className="input-field" placeholder="e.g. 1kg" value={p.capacity} onChange={(e) => subArrSet('prices', i, 'capacity', e.target.value)} />
-          </div>
-          <div className="w-24">
-            {i === 0 && <Label required>MRP</Label>}
-            <input className="input-field" type="number" placeholder="MRP" value={p.mrp} onChange={(e) => subArrSet('prices', i, 'mrp', e.target.value)} />
-          </div>
-          <div className="w-28">
-            {i === 0 && <Label required>Sale Price</Label>}
-            <input className="input-field" type="number" placeholder="Sale Price" value={p.discountedPrice} onChange={(e) => subArrSet('prices', i, 'discountedPrice', e.target.value)} />
-          </div>
-          {i > 0 && <button type="button" onClick={() => subArrRemove('prices', i)} className="text-red-400 hover:text-red-600 text-lg pb-2">×</button>}
+      {/* Pricing */}
+      <SectionTitle icon="💰">Pricing</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Capacity</Label>
+          <input className="input-field" placeholder="e.g. 1kg" value={formData.capacity || ''} onChange={(e) => set('capacity', e.target.value)} required />
         </div>
-      ))}
-      <button type="button" onClick={() => subArrAdd('prices', { capacity: '', mrp: '', discountedPrice: '' })} className="text-xs text-purple-600 hover:text-purple-800 font-medium">+ Add Pack</button>
+        <div>
+          <Label required>MRP</Label>
+          <input className="input-field" type="number" placeholder="MRP" value={formData.mrp || ''} onChange={(e) => set('mrp', e.target.value)} required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Discount Price</Label>
+          <input className="input-field" type="number" placeholder="Discount Price" value={formData.discountPrice || ''} onChange={(e) => set('discountPrice', e.target.value)} required />
+        </div>
+        <div>
+          <Label required>Discount Type</Label>
+          <input className="input-field" placeholder="e.g. Percentage, Fixed" value={formData.discountType || ''} onChange={(e) => set('discountType', e.target.value)} required />
+        </div>
+      </div>
 
       {/* Stock & Expiry */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label required>Available Stock</Label>
-          <input className="input-field" type="number" min="0" value={formData.availableStock} onChange={(e) => set('availableStock', e.target.value)} placeholder="e.g. 100" />
+          <input className="input-field" type="number" min="0" value={formData.availableStock || ''} onChange={(e) => set('availableStock', e.target.value)} placeholder="e.g. 100" required />
         </div>
         <div>
           <Label required>Expiry Date</Label>
-          <input className="input-field" type="date" value={formData.expiryDate} onChange={(e) => set('expiryDate', e.target.value)} />
+          <input className="input-field" type="date" value={formData.expiryDate || ''} onChange={(e) => set('expiryDate', e.target.value)} required />
+        </div>
+      </div>
+
+      {/* Base Unit & Taxes */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Base Unit</Label>
+          <input className="input-field" value={formData.baseUnit || 'pieces'} onChange={(e) => set('baseUnit', e.target.value)} placeholder="e.g. pieces" required />
+        </div>
+        <div>
+          <Label required>Taxes (GST %)</Label>
+          <input className="input-field" type="number" value={formData.taxes || 18} onChange={(e) => set('taxes', e.target.value)} placeholder="18" required />
+        </div>
+      </div>
+
+      {/* Item Code & HSN */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Item Code</Label>
+          <input className="input-field" value={formData.itemCode || ''} onChange={(e) => set('itemCode', e.target.value)} placeholder="e.g. FD001" />
+        </div>
+        <div>
+          <Label>HSN</Label>
+          <input className="input-field" value={formData.hsn || ''} onChange={(e) => set('hsn', e.target.value)} placeholder="e.g. 23091000" />
         </div>
       </div>
 
       {/* Arrays */}
       <SectionTitle icon="📋">Details</SectionTitle>
-      {renderStringArrayField('details', 'Details', 'Product detail...', true)}
-      {renderStringArrayField('keyFeatures', 'Key Features', 'Feature...', true)}
-      {renderStringArrayField('flavours', 'Flavours', 'e.g. Chicken', true)}
-      {renderStringArrayField('nutrients', 'Nutrients', 'e.g. Protein 28%')}
-      {renderStringArrayField('healthBenefits', 'Health Benefits', 'e.g. Strong muscles')}
+      {renderStringArrayField('details', 'Details', 'Product detail...', false)}
+      {renderStringArrayField('keyFeatures', 'Key Features', 'Feature...', false)}
+      {renderStringArrayField('flavours', 'Flavours', 'e.g. Chicken', false)}
+      {renderStringArrayField('nutrients', 'Nutrients', 'e.g. Protein 28%', false)}
+      {renderStringArrayField('healthBenefits', 'Health Benefits', 'e.g. Strong muscles', false)}
 
       {/* Images */}
       <SectionTitle icon="🖼️">Images</SectionTitle>
@@ -453,73 +662,94 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
   const renderToyForm = () => (
     <>
+      {/* Basic Info */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label required>Product Name</Label>
           <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Squeaky Ball" required />
         </div>
         <div>
-          <Label required>Brand</Label>
-          <input className="input-field" value={formData.brand} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. PawPlay" required />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
           <Label required>Sub-Category (Pet)</Label>
           <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)}>
             {SUB_CATEGORIES.toy.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
-        <div>
-          <Label>Suitable For</Label>
-          <select className="input-field" value={formData.suitableFor} onChange={(e) => set('suitableFor', e.target.value)}>
-            {['Puppy', 'Adult', 'All'].map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
       </div>
 
-      {/* Pricing */}
+      {/* Pricing & Stock */}
       <SectionTitle icon="💰">Pricing & Stock</SectionTitle>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label required>Price (MRP)</Label>
-          <input className="input-field" type="number" value={formData.price} onChange={(e) => set('price', e.target.value)} placeholder="₹" />
+          <Label required>MRP</Label>
+          <input className="input-field" type="number" value={formData.mrp} onChange={(e) => set('mrp', e.target.value)} placeholder="₹" required />
         </div>
         <div>
-          <Label>Discounted Price</Label>
-          <input className="input-field" type="number" value={formData.discountedPrice} onChange={(e) => set('discountedPrice', e.target.value)} placeholder="₹" />
+          <Label required>Discount Price</Label>
+          <input className="input-field" type="number" value={formData.discountPrice} onChange={(e) => set('discountPrice', e.target.value)} placeholder="₹" required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Discount Type</Label>
+          <input className="input-field" value={formData.discountType} onChange={(e) => set('discountType', e.target.value)} placeholder="e.g. 15, 20, 25%" required />
         </div>
         <div>
-          <Label>Discount %</Label>
-          <input className="input-field" type="number" min="0" max="100" value={formData.discountPercentage} onChange={(e) => set('discountPercentage', e.target.value)} placeholder="%" />
+          <Label required>Available Stock</Label>
+          <input className="input-field" type="number" min="0" value={formData.availableStock} onChange={(e) => set('availableStock', e.target.value)} placeholder="Qty" required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Base Unit</Label>
+          <input className="input-field" value={formData.baseUnit || 'pieces'} onChange={(e) => set('baseUnit', e.target.value)} placeholder="pieces" required />
         </div>
         <div>
-          <Label required>Stock</Label>
-          <input className="input-field" type="number" min="0" value={formData.availableStock} onChange={(e) => set('availableStock', e.target.value)} placeholder="Qty" />
+          <Label required>Taxes (GST %)</Label>
+          <input className="input-field" type="number" value={formData.taxes || 18} onChange={(e) => set('taxes', e.target.value)} placeholder="18" required />
         </div>
       </div>
 
-      {/* Physical */}
-      <SectionTitle icon="🎨">Physical Details</SectionTitle>
-      <div className="grid grid-cols-3 gap-4">
+      {/* Optional Fields */}
+      <SectionTitle icon="📝">Additional Information (Optional)</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Item Code</Label>
+          <input className="input-field" value={formData.itemCode || ''} onChange={(e) => set('itemCode', e.target.value)} placeholder="e.g. TOY001" />
+        </div>
+        <div>
+          <Label>HSN</Label>
+          <input className="input-field" value={formData.hsn || ''} onChange={(e) => set('hsn', e.target.value)} placeholder="e.g. 12345678" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Brand</Label>
+          <input className="input-field" value={formData.brand || ''} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. PawPlay" />
+        </div>
         <div>
           <Label>Size</Label>
-          <input className="input-field" value={formData.size} onChange={(e) => set('size', e.target.value)} placeholder="e.g. One Size" />
+          <input className="input-field" value={formData.size || ''} onChange={(e) => set('size', e.target.value)} placeholder="e.g. One Size, Large, etc." />
         </div>
-        <div>
-          <Label>Material</Label>
-          <input className="input-field" value={formData.material} onChange={(e) => set('material', e.target.value)} placeholder="e.g. Rubber" />
-        </div>
-        <div>
-          <Label>Colors (comma sep.)</Label>
-          <input className="input-field" value={(formData.color || []).join(', ')} onChange={(e) => set('color', e.target.value.split(',').map((c) => c.trim()))} placeholder="Red, Blue" />
-        </div>
+      </div>
+      <div>
+        <Label>Material</Label>
+        <input className="input-field" value={formData.material || ''} onChange={(e) => set('material', e.target.value)} placeholder="e.g. Rubber" />
+      </div>
+      <div>
+        <Label>Colors (comma separated)</Label>
+        <input className="input-field" value={(formData.color || []).join(', ')} onChange={(e) => set('color', e.target.value.split(',').map((c) => c.trim()))} placeholder="Red, Blue" />
+      </div>
+      <div>
+        <Label>Suitable For</Label>
+        <select className="input-field" value={formData.suitableFor || 'All'} onChange={(e) => set('suitableFor', e.target.value)}>
+          {['Puppy', 'Adult', 'All'].map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
       </div>
 
       {/* Details */}
       <SectionTitle icon="📋">Details</SectionTitle>
-      {renderStringArrayField('productDetails', 'Product Details', 'Detail...', true)}
-      {renderStringArrayField('keyFeatures', 'Key Features', 'Feature...', true)}
+      {renderStringArrayField('productDetails', 'Product Details', 'Detail...')}
+      {renderStringArrayField('keyFeatures', 'Key Features', 'Feature...')}
 
       <div className="flex items-center gap-2 pt-2">
         <input type="checkbox" checked={formData.isReturnable} onChange={(e) => set('isReturnable', e.target.checked)} className="w-4 h-4 accent-purple-600" />
@@ -536,67 +766,104 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
   const renderAccessoryForm = () => (
     <>
+      {/* Basic Info */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label required>Product Name</Label>
           <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Nylon Dog Collar" required />
         </div>
         <div>
-          <Label required>Brand</Label>
-          <input className="input-field" value={formData.brand} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. PawGear" required />
+          <Label>Brand</Label>
+          <input className="input-field" value={formData.brand || ''} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. PawGear" />
         </div>
       </div>
       <div>
         <Label required>Sub-Category (Pet)</Label>
-        <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)}>
+        <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)} required>
           {SUB_CATEGORIES.accessory.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
         </select>
       </div>
 
-      {/* Sizes */}
-      <SectionTitle icon="📏">Sizes & Pricing</SectionTitle>
-      {formData.sizes.map((s, i) => (
-        <div key={i} className="flex gap-2 items-end">
-          <div className="w-28">
-            {i === 0 && <Label required>Size</Label>}
-            <select className="input-field" value={s.size} onChange={(e) => subArrSet('sizes', i, 'size', e.target.value)}>
-              {['XS', 'S', 'M', 'L', 'XL', 'One Size'].map((sz) => <option key={sz} value={sz}>{sz}</option>)}
-            </select>
-          </div>
-          <div className="w-24">
-            {i === 0 && <Label required>MRP</Label>}
-            <input className="input-field" type="number" placeholder="MRP" value={s.mrp} onChange={(e) => subArrSet('sizes', i, 'mrp', e.target.value)} />
-          </div>
-          <div className="w-24">
-            {i === 0 && <Label required>Price</Label>}
-            <input className="input-field" type="number" placeholder="Price" value={s.discountedPrice} onChange={(e) => subArrSet('sizes', i, 'discountedPrice', e.target.value)} />
-          </div>
-          <div className="w-24">
-            {i === 0 && <Label required>Stock</Label>}
-            <input className="input-field" type="number" placeholder="Stock" value={s.availableStock} onChange={(e) => subArrSet('sizes', i, 'availableStock', e.target.value)} />
-          </div>
-          {i > 0 && <button type="button" onClick={() => subArrRemove('sizes', i)} className="text-red-400 hover:text-red-600 text-lg pb-2">×</button>}
+      {/* Pricing */}
+      <SectionTitle icon="💰">Pricing</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>MRP</Label>
+          <input className="input-field" type="number" placeholder="MRP" value={formData.mrp || ''} onChange={(e) => set('mrp', e.target.value)} required />
         </div>
-      ))}
-      <button type="button" onClick={() => subArrAdd('sizes', { size: 'One Size', mrp: '', discountedPrice: '', availableStock: '' })} className="text-xs text-purple-600 hover:text-purple-800 font-medium">+ Add Size</button>
+        <div>
+          <Label required>Discount Price</Label>
+          <input className="input-field" type="number" placeholder="Discount Price" value={formData.discountPrice || ''} onChange={(e) => set('discountPrice', e.target.value)} required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Discount Type</Label>
+          <input className="input-field" placeholder="e.g. 15, 20, 25%" value={formData.discountType || ''} onChange={(e) => set('discountType', e.target.value)} required />
+        </div>
+        <div>
+          <Label required>Available Stock</Label>
+          <input className="input-field" type="number" min="0" placeholder="Stock" value={formData.availableStock || ''} onChange={(e) => set('availableStock', e.target.value)} required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Base Unit</Label>
+          <input className="input-field" value={formData.baseUnit || 'pieces'} onChange={(e) => set('baseUnit', e.target.value)} placeholder="pieces" required />
+        </div>
+        <div>
+          <Label required>Taxes (GST %)</Label>
+          <input className="input-field" type="number" value={formData.taxes || 18} onChange={(e) => set('taxes', e.target.value)} placeholder="18" required />
+        </div>
+      </div>
+
+      {/* Optional Fields */}
+      <SectionTitle icon="📝">Additional Information (Optional)</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Item Code</Label>
+          <input className="input-field" value={formData.itemCode || ''} onChange={(e) => set('itemCode', e.target.value)} placeholder="e.g. ACC001" />
+        </div>
+        <div>
+          <Label>HSN</Label>
+          <input className="input-field" value={formData.hsn || ''} onChange={(e) => set('hsn', e.target.value)} placeholder="e.g. 12345678" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Size</Label>
+          <input className="input-field" value={formData.size || ''} onChange={(e) => set('size', e.target.value)} placeholder="e.g. S, XL, Large, Medium, Size01, 1kg, 250ml, etc." />
+        </div>
+        <div>
+          <Label>Material</Label>
+          <input className="input-field" value={formData.material || ''} onChange={(e) => set('material', e.target.value)} placeholder="e.g. Nylon" />
+        </div>
+      </div>
+
+      {/* Size */}
+      <div>
+        <Label>Size</Label>
+        <input className="input-field" value={formData.size || ''} onChange={(e) => set('size', e.target.value)} placeholder="e.g. S, XL, Large, Medium, Size01, Size02, 1kg, 250ml, etc." />
+        <p className="text-xs text-gray-500 mt-1">Enter any size format: S/XL/Large/Medium, Size01/Size02, kg, ml, etc.</p>
+      </div>
 
       {/* Appearance */}
       <SectionTitle icon="🎨">Appearance</SectionTitle>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Material</Label>
-          <input className="input-field" value={formData.material} onChange={(e) => set('material', e.target.value)} placeholder="e.g. Stainless Steel" />
+          <input className="input-field" value={formData.material || ''} onChange={(e) => set('material', e.target.value)} placeholder="e.g. Stainless Steel" />
         </div>
         <div>
-          <Label required>Colors (comma separated)</Label>
+          <Label>Colors (comma separated)</Label>
           <input className="input-field" value={(formData.color || []).join(', ')} onChange={(e) => set('color', e.target.value.split(',').map((c) => c.trim()))} placeholder="Silver, Black" />
         </div>
       </div>
 
       {/* Details */}
       <SectionTitle icon="📋">Details</SectionTitle>
-      {renderStringArrayField('productDetails', 'Product Details', 'Detail...', true)}
-      {renderStringArrayField('keyFeatures', 'Key Features', 'Feature...', true)}
+      {renderStringArrayField('productDetails', 'Product Details', 'Detail...', false)}
+      {renderStringArrayField('keyFeatures', 'Key Features', 'Feature...', false)}
 
       <div className="flex items-center gap-2 pt-2">
         <input type="checkbox" checked={formData.isReturnable} onChange={(e) => set('isReturnable', e.target.checked)} className="w-4 h-4 accent-purple-600" />
@@ -613,67 +880,93 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
   const renderGroomingForm = () => (
     <>
+      {/* Basic Info */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label required>Product Name</Label>
           <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Aloe Vera Shampoo" required />
         </div>
         <div>
-          <Label required>Brand</Label>
-          <input className="input-field" value={formData.brand} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. PetFresh" required />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
           <Label required>Sub-Category (Pet)</Label>
           <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)}>
             {SUB_CATEGORIES.grooming.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
           </select>
         </div>
+      </div>
+
+      {/* Pricing & Stock */}
+      <SectionTitle icon="💰">Pricing & Stock</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label>Suitable For</Label>
-          <select className="input-field" value={formData.suitableFor} onChange={(e) => set('suitableFor', e.target.value)}>
-            {['Dogs', 'Cats', 'Both'].map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <Label required>MRP</Label>
+          <input className="input-field" type="number" value={formData.mrp} onChange={(e) => set('mrp', e.target.value)} placeholder="₹" required />
+        </div>
+        <div>
+          <Label required>Discount Price</Label>
+          <input className="input-field" type="number" value={formData.discountPrice} onChange={(e) => set('discountPrice', e.target.value)} placeholder="₹" required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Discount Type</Label>
+          <input className="input-field" value={formData.discountType} onChange={(e) => set('discountType', e.target.value)} placeholder="e.g. 15, 20, 25%" required />
+        </div>
+        <div>
+          <Label required>Available Stock</Label>
+          <input className="input-field" type="number" min="0" value={formData.availableStock} onChange={(e) => set('availableStock', e.target.value)} placeholder="Qty" required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Base Unit</Label>
+          <input className="input-field" value={formData.baseUnit || 'pieces'} onChange={(e) => set('baseUnit', e.target.value)} placeholder="pieces" required />
+        </div>
+        <div>
+          <Label required>Taxes (GST %)</Label>
+          <input className="input-field" type="number" value={formData.taxes || 18} onChange={(e) => set('taxes', e.target.value)} placeholder="18" required />
         </div>
       </div>
 
-      {/* Variants */}
-      <SectionTitle icon="💰">Variants (Volume & Pricing)</SectionTitle>
-      {formData.variants.map((v, i) => (
-        <div key={i} className="flex gap-2 items-end flex-wrap">
-          <div className="w-28">
-            {i === 0 && <Label required>Volume</Label>}
-            <input className="input-field" placeholder="e.g. 250ml" value={v.volume} onChange={(e) => subArrSet('variants', i, 'volume', e.target.value)} />
-          </div>
-          <div className="w-24">
-            {i === 0 && <Label required>MRP</Label>}
-            <input className="input-field" type="number" placeholder="MRP" value={v.mrp} onChange={(e) => subArrSet('variants', i, 'mrp', e.target.value)} />
-          </div>
-          <div className="w-24">
-            {i === 0 && <Label required>Price</Label>}
-            <input className="input-field" type="number" placeholder="Price" value={v.discountedPrice} onChange={(e) => subArrSet('variants', i, 'discountedPrice', e.target.value)} />
-          </div>
-          <div className="w-20">
-            {i === 0 && <Label>Disc %</Label>}
-            <input className="input-field" type="number" min="0" max="100" placeholder="%" value={v.discountPercentage} onChange={(e) => subArrSet('variants', i, 'discountPercentage', e.target.value)} />
-          </div>
-          <div className="w-24">
-            {i === 0 && <Label required>Stock</Label>}
-            <input className="input-field" type="number" placeholder="Stock" value={v.availableStock} onChange={(e) => subArrSet('variants', i, 'availableStock', e.target.value)} />
-          </div>
-          {i > 0 && <button type="button" onClick={() => subArrRemove('variants', i)} className="text-red-400 hover:text-red-600 text-lg pb-2">×</button>}
+      {/* Optional Fields */}
+      <SectionTitle icon="📝">Additional Information (Optional)</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Item Code</Label>
+          <input className="input-field" value={formData.itemCode || ''} onChange={(e) => set('itemCode', e.target.value)} placeholder="e.g. GRM001" />
         </div>
-      ))}
-      <button type="button" onClick={() => subArrAdd('variants', { volume: '', mrp: '', discountedPrice: '', discountPercentage: '', availableStock: '' })} className="text-xs text-purple-600 hover:text-purple-800 font-medium">+ Add Variant</button>
+        <div>
+          <Label>HSN</Label>
+          <input className="input-field" value={formData.hsn || ''} onChange={(e) => set('hsn', e.target.value)} placeholder="e.g. 12345678" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Size</Label>
+          <input className="input-field" value={formData.size || ''} onChange={(e) => set('size', e.target.value)} placeholder="e.g. 250ml, 500ml, 1L, Small, Large, etc." />
+        </div>
+        <div>
+          <Label>Expiry Date</Label>
+          <input className="input-field" type="date" value={formData.expiryDate || ''} onChange={(e) => set('expiryDate', e.target.value)} />
+        </div>
+      </div>
+      <div>
+        <Label>Brand</Label>
+        <input className="input-field" value={formData.brand || ''} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. PawSpa" />
+      </div>
+      <div>
+        <Label>Suitable For</Label>
+        <select className="input-field" value={formData.suitableFor || 'Both'} onChange={(e) => set('suitableFor', e.target.value)}>
+          {['Dogs', 'Cats', 'Both'].map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      </div>
 
-      {/* Description & Features */}
+      {/* Details */}
       <SectionTitle icon="📋">Details</SectionTitle>
       <div>
-        <Label required>Description</Label>
-        <textarea className="input-field" rows={3} value={formData.description} onChange={(e) => set('description', e.target.value)} placeholder="Product description..." />
+        <Label>Description</Label>
+        <textarea className="input-field" rows={3} value={formData.description || ''} onChange={(e) => set('description', e.target.value)} placeholder="Product description..." />
       </div>
-      {renderStringArrayField('keyFeatures', 'Key Features', 'Feature...', true)}
+      {renderStringArrayField('keyFeatures', 'Key Features', 'Feature...')}
       {renderStringArrayField('usageInstructions', 'Usage Instructions', 'Step...')}
 
       <div className="flex items-center gap-2 pt-2">
@@ -691,10 +984,11 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
   const renderHealthForm = () => (
     <>
+      {/* Basic Info */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label required>Product Name</Label>
-          <input className="input-field" value={formData.name} onChange={(e) => set('name', e.target.value)} placeholder="e.g. Joint Care Tablets" required />
+          <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Joint Care Tablets" required />
         </div>
         <div>
           <Label required>Sub-Category (Pet)</Label>
@@ -704,59 +998,84 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         </div>
       </div>
 
-      {/* Pricing */}
+      {/* Pricing & Stock */}
       <SectionTitle icon="💰">Pricing & Stock</SectionTitle>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label required>Price (MRP)</Label>
-          <input className="input-field" type="number" value={formData.price} onChange={(e) => set('price', e.target.value)} placeholder="₹" />
+          <Label required>MRP</Label>
+          <input className="input-field" type="number" value={formData.mrp} onChange={(e) => set('mrp', e.target.value)} placeholder="₹" required />
         </div>
         <div>
           <Label required>Discount Price</Label>
-          <input className="input-field" type="number" value={formData.discountPrice} onChange={(e) => set('discountPrice', e.target.value)} placeholder="₹" />
-        </div>
-        <div>
-          <Label required>Discount %</Label>
-          <input className="input-field" type="number" min="0" max="100" value={formData.discountPercentage} onChange={(e) => set('discountPercentage', e.target.value)} placeholder="%" />
-        </div>
-        <div>
-          <Label required>Stock</Label>
-          <input className="input-field" type="number" min="0" value={formData.availableStock} onChange={(e) => set('availableStock', e.target.value)} placeholder="Qty" />
+          <input className="input-field" type="number" value={formData.discountPrice} onChange={(e) => set('discountPrice', e.target.value)} placeholder="₹" required />
         </div>
       </div>
-
-      {/* Usage */}
-      <SectionTitle icon="💊">Usage</SectionTitle>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label required>Dosage</Label>
-          <input className="input-field" value={formData.usage?.dosage || ''} onChange={(e) => setNested('usage', 'dosage', e.target.value)} placeholder="e.g. 2 tablets daily" />
+          <Label required>Discount Type</Label>
+          <input className="input-field" value={formData.discountType} onChange={(e) => set('discountType', e.target.value)} placeholder="e.g. 15, 20, 25%" required />
         </div>
         <div>
-          <Label required>Age Group</Label>
-          <input className="input-field" value={formData.usage?.ageGroup || ''} onChange={(e) => setNested('usage', 'ageGroup', e.target.value)} placeholder="e.g. Adults (1-7 years)" />
+          <Label required>Available Stock</Label>
+          <input className="input-field" type="number" min="0" value={formData.availableStock} onChange={(e) => set('availableStock', e.target.value)} placeholder="Qty" required />
         </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Base Unit</Label>
+          <input className="input-field" value={formData.baseUnit || 'pieces'} onChange={(e) => set('baseUnit', e.target.value)} placeholder="pieces" required />
+        </div>
+        <div>
+          <Label required>Taxes (GST %)</Label>
+          <input className="input-field" type="number" value={formData.taxes || 18} onChange={(e) => set('taxes', e.target.value)} placeholder="18" required />
+        </div>
+      </div>
+      <div>
+        <Label required>Expiry Date</Label>
+        <input className="input-field" type="date" value={formData.expiryDate} onChange={(e) => set('expiryDate', e.target.value)} required />
+      </div>
+
+      {/* Optional Fields */}
+      <SectionTitle icon="📝">Additional Information (Optional)</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Item Code</Label>
+          <input className="input-field" value={formData.itemCode || ''} onChange={(e) => set('itemCode', e.target.value)} placeholder="e.g. HLT001" />
+        </div>
+        <div>
+          <Label>HSN</Label>
+          <input className="input-field" value={formData.hsn || ''} onChange={(e) => set('hsn', e.target.value)} placeholder="e.g. 12345678" />
+        </div>
+      </div>
+      <div>
+        <Label>Size</Label>
+        <input className="input-field" value={formData.size || ''} onChange={(e) => set('size', e.target.value)} placeholder="e.g. 250ml, 500ml, 1L, Small, Large, kg, etc." />
       </div>
 
       {/* Details */}
       <SectionTitle icon="📋">Details</SectionTitle>
       <div>
-        <Label required>Description</Label>
-        <textarea className="input-field" rows={3} value={formData.description} onChange={(e) => set('description', e.target.value)} placeholder="Product description..." />
+        <Label>Description</Label>
+        <textarea className="input-field" rows={3} value={formData.description || ''} onChange={(e) => set('description', e.target.value)} placeholder="Product description..." />
       </div>
-      {renderStringArrayField('highlights', 'Highlights', 'Highlight...', true)}
+      {renderStringArrayField('highlights', 'Highlights', 'Highlight...')}
+      
+      {/* Usage */}
+      <SectionTitle icon="💊">Usage (Optional)</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Dosage</Label>
+          <input className="input-field" value={formData.usage?.dosage || ''} onChange={(e) => setNested('usage', 'dosage', e.target.value)} placeholder="e.g. 2 tablets daily" />
+        </div>
+        <div>
+          <Label>Age Group</Label>
+          <input className="input-field" value={formData.usage?.ageGroup || ''} onChange={(e) => setNested('usage', 'ageGroup', e.target.value)} placeholder="e.g. Adults (1-7 years)" />
+        </div>
+      </div>
 
-      <div>
-        <Label required>Expiry Date</Label>
-        <input className="input-field" type="date" value={formData.expiryDate} onChange={(e) => set('expiryDate', e.target.value)} />
-      </div>
-
-      {/* Image (single) */}
-      <SectionTitle icon="🖼️">Image</SectionTitle>
-      <div>
-        <Label required>Image URL</Label>
-        <input className="input-field" value={formData.image} onChange={(e) => set('image', e.target.value)} placeholder="https://..." />
-      </div>
+      {/* Images */}
+      <SectionTitle icon="🖼️">Images</SectionTitle>
+      {renderStringArrayField('images', 'Image URLs', 'https://...', true)}
     </>
   );
 
@@ -764,10 +1083,11 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
   const renderHouseForm = () => (
     <>
+      {/* Basic Info */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label required>Product Name</Label>
-          <input className="input-field" value={formData.name} onChange={(e) => set('name', e.target.value)} placeholder="e.g. Cozy Pet Bed" required />
+          <input className="input-field" value={formData.productName || formData.name} onChange={(e) => { set('productName', e.target.value); set('name', e.target.value); }} placeholder="e.g. Cozy Pet Bed" required />
         </div>
         <div>
           <Label required>Sub-Category (Pet)</Label>
@@ -777,62 +1097,84 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         </div>
       </div>
 
-      {/* Pricing */}
+      {/* Pricing & Stock */}
       <SectionTitle icon="💰">Pricing & Stock</SectionTitle>
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label required>Price (MRP)</Label>
-          <input className="input-field" type="number" value={formData.price} onChange={(e) => set('price', e.target.value)} placeholder="₹" />
+          <Label required>MRP</Label>
+          <input className="input-field" type="number" value={formData.mrp || formData.price} onChange={(e) => { set('mrp', e.target.value); set('price', e.target.value); }} placeholder="₹" required />
         </div>
         <div>
           <Label required>Discount Price</Label>
-          <input className="input-field" type="number" value={formData.discountPrice} onChange={(e) => set('discountPrice', e.target.value)} placeholder="₹" />
+          <input className="input-field" type="number" value={formData.discountPrice} onChange={(e) => set('discountPrice', e.target.value)} placeholder="₹" required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Discount Type</Label>
+          <input className="input-field" value={formData.discountType || (formData.discountPercentage ? `${formData.discountPercentage}%` : '')} onChange={(e) => set('discountType', e.target.value)} placeholder="e.g. 15, 20, 25%" required />
         </div>
         <div>
-          <Label required>Discount %</Label>
-          <input className="input-field" type="number" min="0" max="100" value={formData.discountPercentage} onChange={(e) => set('discountPercentage', e.target.value)} placeholder="%" />
+          <Label required>Available Stock</Label>
+          <input className="input-field" type="number" min="0" value={formData.availableStock} onChange={(e) => set('availableStock', e.target.value)} placeholder="Qty" required />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Base Unit</Label>
+          <input className="input-field" value={formData.baseUnit || 'pieces'} onChange={(e) => set('baseUnit', e.target.value)} placeholder="pieces" required />
         </div>
         <div>
-          <Label required>Stock</Label>
-          <input className="input-field" type="number" min="0" value={formData.availableStock} onChange={(e) => set('availableStock', e.target.value)} placeholder="Qty" />
+          <Label required>Taxes (GST %)</Label>
+          <input className="input-field" type="number" value={formData.taxes || 18} onChange={(e) => set('taxes', e.target.value)} placeholder="18" required />
         </div>
       </div>
 
-      {/* Dimensions */}
-      <SectionTitle icon="📐">Dimensions</SectionTitle>
-      <div className="grid grid-cols-4 gap-3">
+      {/* Optional Fields */}
+      <SectionTitle icon="📝">Additional Information (Optional)</SectionTitle>
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label required>Height</Label>
-          <input className="input-field" value={formData.dimensions?.height || ''} onChange={(e) => setNested('dimensions', 'height', e.target.value)} placeholder="e.g. 45cm" />
+          <Label>Item Code</Label>
+          <input className="input-field" value={formData.itemCode || ''} onChange={(e) => set('itemCode', e.target.value)} placeholder="e.g. HSE001" />
         </div>
         <div>
-          <Label required>Width</Label>
-          <input className="input-field" value={formData.dimensions?.width || ''} onChange={(e) => setNested('dimensions', 'width', e.target.value)} placeholder="e.g. 60cm" />
-        </div>
-        <div>
-          <Label required>Depth</Label>
-          <input className="input-field" value={formData.dimensions?.depth || ''} onChange={(e) => setNested('dimensions', 'depth', e.target.value)} placeholder="e.g. 20cm" />
-        </div>
-        <div>
-          <Label required>Weight</Label>
-          <input className="input-field" value={formData.dimensions?.weight || ''} onChange={(e) => setNested('dimensions', 'weight', e.target.value)} placeholder="e.g. 2.5kg" />
+          <Label>HSN</Label>
+          <input className="input-field" value={formData.hsn || ''} onChange={(e) => set('hsn', e.target.value)} placeholder="e.g. 12345678" />
         </div>
       </div>
 
       {/* Details */}
       <SectionTitle icon="📋">Details</SectionTitle>
       <div>
-        <Label required>Description</Label>
-        <textarea className="input-field" rows={3} value={formData.description} onChange={(e) => set('description', e.target.value)} placeholder="Product description..." />
+        <Label>Description</Label>
+        <textarea className="input-field" rows={3} value={formData.description || ''} onChange={(e) => set('description', e.target.value)} placeholder="Product description..." />
       </div>
-      {renderStringArrayField('highlights', 'Highlights', 'Highlight...', true)}
+      {renderStringArrayField('highlights', 'Highlights', 'Highlight...')}
 
-      {/* Image (single) */}
-      <SectionTitle icon="🖼️">Image</SectionTitle>
-      <div>
-        <Label required>Image URL</Label>
-        <input className="input-field" value={formData.image} onChange={(e) => set('image', e.target.value)} placeholder="https://..." />
+      {/* Dimensions */}
+      <SectionTitle icon="📐">Dimensions (Optional)</SectionTitle>
+      <div className="grid grid-cols-4 gap-3">
+        <div>
+          <Label>Height</Label>
+          <input className="input-field" value={formData.dimensions?.height || ''} onChange={(e) => setNested('dimensions', 'height', e.target.value)} placeholder="e.g. 45cm" />
+        </div>
+        <div>
+          <Label>Width</Label>
+          <input className="input-field" value={formData.dimensions?.width || ''} onChange={(e) => setNested('dimensions', 'width', e.target.value)} placeholder="e.g. 60cm" />
+        </div>
+        <div>
+          <Label>Depth</Label>
+          <input className="input-field" value={formData.dimensions?.depth || ''} onChange={(e) => setNested('dimensions', 'depth', e.target.value)} placeholder="e.g. 20cm" />
+        </div>
+        <div>
+          <Label>Weight</Label>
+          <input className="input-field" value={formData.dimensions?.weight || ''} onChange={(e) => setNested('dimensions', 'weight', e.target.value)} placeholder="e.g. 2.5kg" />
+        </div>
       </div>
+
+      {/* Images */}
+      <SectionTitle icon="🖼️">Images</SectionTitle>
+      {renderStringArrayField('images', 'Image URLs', 'https://...', true)}
     </>
   );
 
