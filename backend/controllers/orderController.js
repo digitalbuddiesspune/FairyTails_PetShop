@@ -93,7 +93,6 @@ export const placeOrder = async (req, res) => {
     const discount = mrpTotal - subtotal;
     const deliveryCharge = subtotal >= 500 ? 0 : 50;
     const total = subtotal + deliveryCharge;  // GST already included in product prices
-    const amountInPaise = Math.round(total * 100);
 
     const order = await Order.create({
       user: req.user._id,
@@ -103,7 +102,7 @@ export const placeOrder = async (req, res) => {
       subtotal,
       mrpTotal,
       discount,
-      gst: 0,
+      gst: 0,  // GST is already included in product prices, not added separately
       deliveryCharge,
       total,
       status: 'placed',
@@ -333,7 +332,7 @@ export const updateOrderStatus = async (req, res) => {
 export const updatePaymentStatus = async (req, res) => {
   try {
     const { paymentStatus } = req.body;
-    if (!['unpaid', 'paid'].includes(paymentStatus)) {
+    if (!['unpaid', 'paid', 'failed'].includes(paymentStatus)) {
       return res.status(400).json({ success: false, message: 'Invalid payment status' });
     }
 

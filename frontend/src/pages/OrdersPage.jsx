@@ -134,6 +134,7 @@ const OrdersPage = () => {
               {orders.map((order) => {
                 const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.placed;
                 const displayOrderId = order.orderNumber || parseInt(order._id.slice(-8), 16);
+                const isPaymentFailed = order.paymentStatus === 'failed';
                 return (
                   <div key={order._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     {/* Order Header */}
@@ -145,9 +146,15 @@ const OrdersPage = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${st.color}`}>
-                          {st.icon} {st.label}
-                        </span>
+                        {isPaymentFailed ? (
+                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                            ❌ Order Failed
+                          </span>
+                        ) : (
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${st.color}`}>
+                            {st.icon} {st.label}
+                          </span>
+                        )}
                         <span className="text-lg font-bold text-gray-900">₹{order.total?.toLocaleString()}</span>
                       </div>
                     </div>

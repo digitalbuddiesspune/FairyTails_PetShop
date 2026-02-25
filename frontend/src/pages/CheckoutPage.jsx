@@ -297,7 +297,8 @@ const CheckoutPage = () => {
   const mrpTotal = cartItems.reduce((s, i) => s + getItemPricing(i).mrp * i.quantity, 0);
   const savings = mrpTotal - subtotal;
   const delivery = subtotal >= 500 ? 0 : 50;
-  const total = subtotal + delivery;  // GST already included in product prices
+  const gst = Math.round(subtotal * 0.18);  // 18% GST on subtotal
+  const total = subtotal + gst + delivery;
 
   // ─── States ────────────────────────────────────────────────────────────────
   if (!token) return null;
@@ -559,7 +560,7 @@ const CheckoutPage = () => {
 
                 <div className="border-t border-gray-100 pt-4 space-y-2.5 text-sm">
                   <div className="flex justify-between text-gray-600">
-                    <span>Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</span>
+                    <span>MRP ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</span>
                     <span>₹{mrpTotal.toLocaleString()}</span>
                   </div>
                   {savings > 0 && (
@@ -568,6 +569,14 @@ const CheckoutPage = () => {
                       <span>- ₹{savings.toLocaleString()}</span>
                     </div>
                   )}
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>₹{subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>GST (18%)</span>
+                    <span>₹{gst.toLocaleString()}</span>
+                  </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery</span>
                     <span className={delivery === 0 ? 'text-green-600 font-medium' : ''}>{delivery === 0 ? 'Free' : `₹${delivery}`}</span>
@@ -579,7 +588,6 @@ const CheckoutPage = () => {
                     <span>Total</span>
                     <span>₹{total.toLocaleString()}</span>
                   </div>
-                  <p className="text-[11px] text-gray-400 mt-0.5">18% GST included</p>
                   {savings > 0 && (
                     <p className="text-xs text-green-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
                   )}
