@@ -116,10 +116,7 @@ const AdminPayments = () => {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
-          <p className="text-sm text-gray-500 mt-1">Track payment details for all orders</p>
-        </div>
+       
         <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium">
           <Download size={16} />
           Download XLS

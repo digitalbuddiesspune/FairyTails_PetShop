@@ -559,10 +559,7 @@ const CheckoutPage = () => {
                 </div>
 
                 <div className="border-t border-gray-100 pt-4 space-y-2.5 text-sm">
-                  <div className="flex justify-between text-gray-600">
-                    <span>MRP ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</span>
-                    <span>₹{mrpTotal.toLocaleString()}</span>
-                  </div>
+                 
                   {savings > 0 && (
                     <div className="flex justify-between text-green-600">
                       <span>Discount</span>
