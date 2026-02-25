@@ -67,7 +67,7 @@ const ProductDetail = () => {
         });
         if (res.data.success) {
           const items = res.data.data.items || [];
-          setIsInWishlist(items.some((item) => (item._id || item) === id));
+          setIsInWishlist(items.some((item) => String(item._id || item) === id));
         }
       } catch (err) {
         // silently fail
@@ -93,8 +93,13 @@ const ProductDetail = () => {
       window.dispatchEvent(new Event('cart-wishlist-update'));
       setTimeout(() => setCartMessage(''), 2500);
     } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/signin');
+        return;
+      }
       console.error('Add to cart error:', err);
-      setCartMessage('Failed to add');
+      setCartMessage(err.response?.data?.message || 'Failed to add');
       setTimeout(() => setCartMessage(''), 2500);
     } finally {
       setAddingToCart(false);
@@ -138,8 +143,13 @@ const ProductDetail = () => {
       window.dispatchEvent(new Event('cart-wishlist-update'));
       navigate('/checkout');
     } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/signin');
+        return;
+      }
       console.error('Buy now error:', err);
-      setCartMessage('Failed to add');
+      setCartMessage(err.response?.data?.message || 'Failed to add');
       setTimeout(() => setCartMessage(''), 2500);
     } finally {
       setBuyingNow(false);
@@ -163,6 +173,11 @@ const ProductDetail = () => {
         window.dispatchEvent(new Event('cart-wishlist-update'));
       }
     } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/signin');
+        return;
+      }
       console.error('Toggle wishlist error:', err);
     } finally {
       setTogglingWishlist(false);

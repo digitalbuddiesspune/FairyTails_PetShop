@@ -31,7 +31,7 @@ export const toggleWishlist = async (req, res) => {
       wishlist = await Wishlist.create({ user: req.user._id, items: [] });
     }
 
-    const index = wishlist.items.indexOf(productId);
+    const index = wishlist.items.findIndex((id) => id.toString() === productId);
     let action;
 
     if (index > -1) {
@@ -63,7 +63,7 @@ export const removeFromWishlist = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Wishlist not found' });
     }
 
-    const index = wishlist.items.indexOf(productId);
+    const index = wishlist.items.findIndex((id) => id.toString() === productId);
     if (index > -1) {
       wishlist.items.splice(index, 1);
       await wishlist.save();

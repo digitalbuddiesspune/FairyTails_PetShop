@@ -32,15 +32,26 @@ const AdminSignIn = () => {
         body: JSON.stringify({ email: formData.email, password: formData.password })
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
-      if (data.success) {
+      if (response.ok && data.success) {
         localStorage.setItem('adminToken', data.data.token);
         localStorage.setItem('admin', JSON.stringify(data.data));
         navigate('/admin/dashboard');
-      } else {
-        setError(data.message || 'Login failed');
+        return;
       }
+
+      // 401 = invalid credentials (no admin with this email or wrong password)
+      if (response.status === 401) {
+        setError(data.message || 'Invalid email or password. Check your credentials or create an admin via API.');
+        return;
+      }
+      setError(data.message || 'Login failed. Please try again.');
     } catch (err) {
       setError('Server error. Please try again later.');
       console.error('Admin signin error:', err);
@@ -137,7 +148,13 @@ const AdminSignIn = () => {
           </form>
         </div>
 
-        <div className="mt-8 text-center animate-fadeInUp delay-200">
+        <div className="mt-6 text-center animate-fadeInUp delay-200">
+          <p className="text-slate-500 text-xs max-w-sm mx-auto">
+            If you get &quot;Invalid email or password&quot;, use an existing admin account or create one via{' '}
+            <code className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">POST /api/v1/admin/signup</code> (e.g. Postman).
+          </p>
+        </div>
+        <div className="mt-6 text-center animate-fadeInUp delay-200">
           <p className="text-slate-500 text-sm">
             &copy; {new Date().getFullYear()} FairyTails. All rights reserved.
           </p>
