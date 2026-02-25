@@ -197,28 +197,38 @@ const OrderDetailsPage = () => {
       <section className="relative z-10 py-8">
         <div className="container mx-auto px-4 max-w-3xl">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
-            <img src={cattImg} alt="" className="w-20 h-20 object-contain" />
-            <div>
-              
-              <h1 className="text-2xl font-bold text-gray-900">
-                Order #{displayOrderId}
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${STATUS_CONFIG[order.status]?.color || 'bg-gray-100'}`}>
-                  {STATUS_CONFIG[order.status]?.label}
-                </span>
-                {order.status === 'placed' && (
-                  <button
-                    onClick={handleCancel}
-                    disabled={cancellingId}
-                    className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 text-xs font-bold rounded-full hover:bg-red-100 transition-colors disabled:opacity-50"
-                  >
-                    {cancellingId ? 'Cancelling...' : 'Cancel Order'}
-                  </button>
-                )}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <img src={cattImg} alt="" className="w-20 h-20 object-contain" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Order #{displayOrderId}
+                </h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${STATUS_CONFIG[order.status]?.color || 'bg-gray-100'}`}>
+                    {STATUS_CONFIG[order.status]?.label}
+                  </span>
+                  {order.status === 'placed' && (
+                    <button
+                      onClick={handleCancel}
+                      disabled={cancellingId}
+                      className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 text-xs font-bold rounded-full hover:bg-red-100 transition-colors disabled:opacity-50"
+                    >
+                      {cancellingId ? 'Cancelling...' : 'Cancel Order'}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
+            <button
+              onClick={() => window.open(`/invoice/${order._id}`, '_blank')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#65a30d]/25 hover:from-[#4d7c0f] hover:to-[#3f6212] hover:shadow-[#65a30d]/30 active:scale-[0.98] transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              View Invoice
+            </button>
           </div>
 
           {/* Progress Bar */}
@@ -308,19 +318,28 @@ const OrderDetailsPage = () => {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="text-gray-800">₹{order.subtotal?.toLocaleString()}</span></div>
               {order.discount > 0 && <div className="flex justify-between"><span className="text-green-500">Discount</span><span className="text-green-500">-₹{order.discount?.toLocaleString()}</span></div>}
+              <div className="flex justify-between"><span className="text-gray-400">GST (18%)</span><span className="text-gray-800">₹{order.gst?.toLocaleString()}</span></div>
               <div className="flex justify-between"><span className="text-gray-400">Delivery</span><span className="text-gray-800">{order.deliveryCharge === 0 ? 'Free' : `₹${order.deliveryCharge}`}</span></div>
               <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100">
                 <span>Total</span>
                 <span>₹{order.total?.toLocaleString()}</span>
               </div>
-              <p className="text-xs text-gray-500 text-right">18% GST included</p>
             </div>
 
             <div className="mt-3 pt-3 border-t border-gray-100">
-              <p className="text-xs text-gray-400">Payment Method</p>
-              <p className="text-sm font-medium text-gray-800">
-                {order.paymentMethod === 'cash_on_delivery' ? '💵 Cash on Delivery' : '💳 Online'}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-gray-400">Payment Method</p>
+                  <p className="text-sm font-medium text-gray-800">
+                    {order.paymentMethod === 'cash_on_delivery' ? '💵 Cash on Delivery' : '💳 Online'}
+                  </p>
+                </div>
+                {order.paymentStatus === 'failed' && (
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    Payment Failed
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

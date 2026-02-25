@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Food from '../models/Food.js';
@@ -7,6 +8,7 @@ import House from '../models/House.js';
 import Accessory from '../models/Accessory.js';
 import GroomingEssential from '../models/GroomingEssential.js';
 import HealthSupplement from '../models/HealthSupplement.js';
+import Razorpay from 'razorpay';
 
 const MODEL_MAP = {
   Food,
@@ -52,9 +54,8 @@ export const placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Shipping address and payment method are required' });
     }
 
-    // Only COD for now
-    if (paymentMethod !== 'cash_on_delivery') {
-      return res.status(400).json({ success: false, message: 'Only Cash on Delivery is available right now' });
+    if (!['cash_on_delivery', 'online'].includes(paymentMethod)) {
+      return res.status(400).json({ success: false, message: 'Invalid payment method' });
     }
 
     // Get user cart with populated products
@@ -91,7 +92,8 @@ export const placeOrder = async (req, res) => {
 
     const discount = mrpTotal - subtotal;
     const deliveryCharge = subtotal >= 500 ? 0 : 50;
-    const total = subtotal + deliveryCharge;  // GST already included in product prices
+    const gst = Math.round(subtotal * 0.18);  // 18% GST on subtotal
+    const total = subtotal + gst + deliveryCharge;
 
     const order = await Order.create({
       user: req.user._id,
@@ -101,18 +103,45 @@ export const placeOrder = async (req, res) => {
       subtotal,
       mrpTotal,
       discount,
-      gst: 0,  // GST is already included in product prices, not added separately
+      gst,
       deliveryCharge,
       total,
       status: 'placed',
-      paymentStatus: 'unpaid',
+      paymentStatus: paymentMethod === 'online' ? 'unpaid' : 'unpaid',
     });
 
-    // Clear the cart after order is placed
-    cart.items = [];
-    await cart.save();
+    if (paymentMethod === 'cash_on_delivery') {
+      cart.items = [];
+      await cart.save();
+      return res.status(201).json({ success: true, data: order });
+    }
 
-    res.status(201).json({ success: true, data: order });
+    // Online payment: create Razorpay order and return key + order id (cart cleared after payment verification)
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !keySecret) {
+      await Order.findByIdAndDelete(order._id);
+      return res.status(500).json({ success: false, message: 'Online payment is not configured' });
+    }
+
+    const amountInPaise = Math.round(total * 100);  // Convert to paise
+    const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+    const razorpayOrder = await razorpay.orders.create({
+      amount: amountInPaise,
+      currency: 'INR',
+      receipt: order._id.toString(),
+    });
+
+    order.razorpayOrderId = razorpayOrder.id;
+    await order.save();
+
+    res.status(201).json({
+      success: true,
+      data: order,
+      razorpayOrderId: razorpayOrder.id,
+      keyId,
+      amountInPaise,
+    });
   } catch (err) {
     if (err.name === 'ValidationError') {
       const messages = Object.values(err.errors).map((e) => e.message);
@@ -167,6 +196,59 @@ export const cancelOrder = async (req, res) => {
     await order.save();
     res.status(200).json({ success: true, data: order });
   } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// @desc    Verify Razorpay payment and mark order paid (user)
+// @route   POST /api/v1/orders/:id/verify-payment
+// @access  Private
+export const verifyPayment = async (req, res) => {
+  try {
+    const { razorpayPaymentId, razorpaySignature } = req.body;
+    if (!razorpayPaymentId || !razorpaySignature) {
+      return res.status(400).json({ success: false, message: 'Payment ID and signature are required' });
+    }
+
+    const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+    if (order.paymentMethod !== 'online' || !order.razorpayOrderId) {
+      return res.status(400).json({ success: false, message: 'This order is not an online payment order' });
+    }
+    if (order.paymentStatus === 'paid') {
+      return res.status(200).json({ success: true, data: order, message: 'Already verified' });
+    }
+
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keySecret) {
+      return res.status(500).json({ success: false, message: 'Payment verification not configured' });
+    }
+
+    const expectedSignature = crypto
+      .createHmac('sha256', keySecret)
+      .update(`${order.razorpayOrderId}|${razorpayPaymentId}`)
+      .digest('hex');
+
+    if (expectedSignature !== razorpaySignature) {
+      return res.status(400).json({ success: false, message: 'Invalid payment signature' });
+    }
+
+    order.paymentStatus = 'paid';
+    order.razorpayPaymentId = razorpayPaymentId;
+    await order.save();
+
+    // Clear cart after successful payment
+    const cart = await Cart.findOne({ user: req.user._id });
+    if (cart) {
+      cart.items = [];
+      await cart.save();
+    }
+
+    res.status(200).json({ success: true, data: order, message: 'Payment verified successfully' });
+  } catch (err) {
+    console.error('Verify payment error:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -252,7 +334,7 @@ export const updateOrderStatus = async (req, res) => {
 export const updatePaymentStatus = async (req, res) => {
   try {
     const { paymentStatus } = req.body;
-    if (!['unpaid', 'paid'].includes(paymentStatus)) {
+    if (!['unpaid', 'paid', 'failed'].includes(paymentStatus)) {
       return res.status(400).json({ success: false, message: 'Invalid payment status' });
     }
 

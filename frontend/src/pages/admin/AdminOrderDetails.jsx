@@ -15,6 +15,7 @@ const STATUS_CONFIG = {
 const PAYMENT_CONFIG = {
   unpaid: { label: 'Unpaid', selectBg: 'bg-orange-50 border-orange-300 text-orange-700' },
   paid:   { label: 'Paid',   selectBg: 'bg-green-50 border-green-300 text-green-700' },
+  failed: { label: 'Failed', selectBg: 'bg-red-50 border-red-300 text-red-700' },
 };
 
 const formatDate = (d) => {
@@ -33,10 +34,20 @@ const AdminOrderDetails = () => {
   const [updating, setUpdating] = useState(false);
 
   const fetchOrder = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/admin/orders/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('admin');
+        window.location.href = '/admin/signin';
+        return;
+      }
       const data = await res.json();
       if (data.success) setOrder(data.data);
     } catch (err) {
@@ -130,7 +141,7 @@ const AdminOrderDetails = () => {
               <select
                 value={order.status}
                 onChange={(e) => handleStatusChange(e.target.value)}
-                disabled={updating || order.status === 'delivered' || order.status === 'cancelled'}
+                disabled={updating || order.status === 'delivered' || order.status === 'cancelled' || order.paymentStatus === 'failed'}
                 className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${STATUS_CONFIG[order.status]?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
               >
                 {STATUS_FLOW.map(s => (
@@ -145,11 +156,12 @@ const AdminOrderDetails = () => {
               <select
                 value={order.paymentStatus || 'unpaid'}
                 onChange={(e) => handlePaymentChange(e.target.value)}
-                disabled={updating || order.paymentStatus === 'paid'}
+                disabled={updating || order.paymentStatus === 'paid' || order.paymentStatus === 'failed'}
                 className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${PAYMENT_CONFIG[order.paymentStatus || 'unpaid']?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
               >
                 <option value="unpaid">Unpaid</option>
                 <option value="paid">Paid</option>
+                <option value="failed">Failed</option>
               </select>
             </div>
           </div>
@@ -246,8 +258,12 @@ const AdminOrderDetails = () => {
           </div>
           <div>
             <p className="text-gray-400 font-semibold uppercase mb-0.5">Payment Status</p>
-            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'}`}>
-              {order.paymentStatus === 'paid' ? 'Paid' : 'Unpaid'}
+            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+              order.paymentStatus === 'paid' ? 'bg-green-100 text-green-600' : 
+              order.paymentStatus === 'failed' ? 'bg-red-100 text-red-600' : 
+              'bg-orange-100 text-orange-600'
+            }`}>
+              {order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus === 'failed' ? 'Failed' : 'Unpaid'}
             </span>
           </div>
         </div>
@@ -338,12 +354,12 @@ const AdminOrderDetails = () => {
         <div className="space-y-2 text-xs max-w-sm">
           <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="text-gray-700">₹{order.subtotal?.toLocaleString()}</span></div>
           {order.discount > 0 && <div className="flex justify-between"><span className="text-green-500">Discount</span><span className="text-green-500">-₹{order.discount?.toLocaleString()}</span></div>}
+          <div className="flex justify-between"><span className="text-gray-400">GST (18%)</span><span className="text-gray-700">₹{order.gst?.toLocaleString()}</span></div>
           <div className="flex justify-between"><span className="text-gray-400">Shipping Charges</span><span className="text-gray-700">{order.deliveryCharge === 0 ? 'Free' : `₹${order.deliveryCharge}`}</span></div>
           <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100 text-sm">
             <span>Total Amount</span>
             <span>₹{order.total?.toLocaleString()}</span>
           </div>
-          <p className="text-[10px] text-gray-500 text-right">18% GST included</p>
         </div>
       </div>
 

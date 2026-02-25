@@ -27,10 +27,20 @@ const AdminOrders = () => {
   const token = localStorage.getItem('adminToken');
 
   const fetchOrders = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/admin/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('admin');
+        window.location.href = '/admin/signin';
+        return;
+      }
       const data = await res.json();
       if (data.success) setOrders(data.data || []);
     } catch (err) {
@@ -104,6 +114,8 @@ const AdminOrders = () => {
             {filteredOrders.map(order => {
               const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.placed;
               const pay = PAYMENT_CONFIG[order.paymentStatus] || PAYMENT_CONFIG.unpaid;
+              const isPaymentFailed = order.paymentStatus === 'failed' || 
+                (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
               const userName = order.user?.name || 'Unknown';
               const totalQty = (order.items || []).reduce((s, i) => s + i.quantity, 0);
               const displayOrderId = order.orderNumber || parseInt(order._id.slice(-8), 16);
@@ -119,8 +131,17 @@ const AdminOrders = () => {
                       <p className="text-sm font-semibold text-gray-800 mt-0.5">{userName}</p>
                     </div>
                     <div className="flex flex-col gap-1 items-end shrink-0">
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${st.bg}`}>{st.label}</span>
-                      <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${pay.bg}`}>{pay.label}</span>
+                      {isPaymentFailed ? (
+                        <>
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border bg-red-50 text-red-600 border-red-200">Failed</span>
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border bg-red-50 text-red-600 border-red-200">Failed</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${st.bg}`}>{st.label}</span>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${pay.bg}`}>{pay.label}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center justify-between text-xs text-gray-500">
@@ -155,6 +176,9 @@ const AdminOrders = () => {
                 {filteredOrders.map(order => {
                   const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.placed;
                   const pay = PAYMENT_CONFIG[order.paymentStatus] || PAYMENT_CONFIG.unpaid;
+                  // Check if payment failed
+                  const isPaymentFailed = order.paymentStatus === 'failed' || 
+                    (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
                   const userName = order.user?.name || 'Unknown';
                   const userPhone = order.user?.phone || order.shippingAddress?.phone || '—';
                   const totalQty = (order.items || []).reduce((s, i) => s + i.quantity, 0);
@@ -199,14 +223,26 @@ const AdminOrders = () => {
                         <span className="text-xs font-bold text-gray-800">₹{order.total?.toLocaleString()}</span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${st.bg}`}>
-                          {st.label}
-                        </span>
+                        {isPaymentFailed ? (
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border bg-red-50 text-red-600 border-red-200">
+                            Failed
+                          </span>
+                        ) : (
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${st.bg}`}>
+                            {st.label}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${pay.bg}`}>
-                          {pay.label}
-                        </span>
+                        {isPaymentFailed ? (
+                          <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border bg-red-50 text-red-600 border-red-200">
+                            Failed
+                          </span>
+                        ) : (
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${pay.bg}`}>
+                            {pay.label}
+                          </span>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <p className="text-[10px] text-gray-400">

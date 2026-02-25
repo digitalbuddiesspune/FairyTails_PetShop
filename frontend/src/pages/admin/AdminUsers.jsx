@@ -12,12 +12,22 @@ const AdminUsers = () => {
     }, []);
 
     const fetchUsers = async () => {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            setLoading(false);
+            return;
+        }
         setLoading(true);
         try {
-            const token = localStorage.getItem('adminToken');
             const res = await fetch(`${API_BASE}/admin/users`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            if (res.status === 401) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('admin');
+                window.location.href = '/admin/signin';
+                return;
+            }
             const data = await res.json();
             if (data.success) {
                 setUsers(data.data);

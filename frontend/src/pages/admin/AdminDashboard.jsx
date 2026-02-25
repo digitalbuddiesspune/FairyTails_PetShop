@@ -37,9 +37,10 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         const fetchDashboardData = async () => {
-            try {
-                const token = localStorage.getItem('adminToken');
+            const token = localStorage.getItem('adminToken');
+            if (!token) return;
 
+            try {
                 // Fetch product counts from ALL categories
                 const endpoints = ['food', 'clothes', 'grooming-essentials', 'health-supplements', 'houses', 'toys', 'accessories'];
                 const productResults = await Promise.allSettled(
@@ -58,6 +59,12 @@ const AdminDashboard = () => {
                     const usersRes = await fetch(`${API_BASE}/admin/users`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
+                    if (usersRes.status === 401) {
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('admin');
+                        window.location.href = '/admin/signin';
+                        return;
+                    }
                     const usersData = await usersRes.json();
                     userCount = usersData.count || 0;
                 } catch {}
@@ -68,6 +75,12 @@ const AdminDashboard = () => {
                     const ordersRes = await fetch(`${API_BASE}/admin/orders`, {
                         headers: { Authorization: `Bearer ${token}` }
                     });
+                    if (ordersRes.status === 401) {
+                        localStorage.removeItem('adminToken');
+                        localStorage.removeItem('admin');
+                        window.location.href = '/admin/signin';
+                        return;
+                    }
                     const ordersData = await ordersRes.json();
                     if (ordersData.success) {
                         orders = ordersData.data || [];
