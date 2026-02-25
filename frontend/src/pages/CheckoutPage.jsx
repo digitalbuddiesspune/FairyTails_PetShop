@@ -175,17 +175,44 @@ const CheckoutPage = () => {
     return Object.keys(e).length === 0;
   };
 
+  // Load Razorpay script once and open checkout for online payment
+  const openRazorpayCheckout = (options) => {
+    return new Promise((resolve, reject) => {
+      if (window.Razorpay) {
+        const rzp = new window.Razorpay({
+          ...options,
+          handler: (response) => resolve(response),
+          modal: {
+            ondismiss: () => reject(new Error('Payment closed')),
+          },
+        });
+        rzp.open();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => {
+        const rzp = new window.Razorpay({
+          ...options,
+          handler: (response) => resolve(response),
+          modal: {
+            ondismiss: () => reject(new Error('Payment closed')),
+          },
+        });
+        rzp.open();
+      };
+      script.onerror = () => reject(new Error('Failed to load payment'));
+      document.body.appendChild(script);
+    });
+  };
+
   // ─── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault();
     if (!validate()) return;
 
     const f = formRef.current;
-
-    if (f.paymentMethod !== 'cash_on_delivery') {
-      setServerError('Only Cash on Delivery is available right now.');
-      return;
-    }
 
     try {
       setSubmitting(true);
@@ -196,24 +223,65 @@ const CheckoutPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Place order
       const { addressType: at, firstName, lastName, phone, streetAddress, city, state, pincode } = f;
+      const shippingAddress = { addressType: at, firstName, lastName, phone, streetAddress, city, state, pincode };
+
+      // Place order (for online we get razorpayOrderId back; cart is cleared only after payment verification)
       const orderRes = await axios.post(
         `${API_BASE}/orders`,
-        {
-          shippingAddress: { addressType: at, firstName, lastName, phone, streetAddress, city, state, pincode },
-          paymentMethod: f.paymentMethod,
-        },
+        { shippingAddress, paymentMethod: f.paymentMethod },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      if (orderRes.data.success) {
-        // Update cart badge in navbar
+      if (!orderRes.data.success) {
+        setServerError(orderRes.data.message || 'Failed to create order');
+        return;
+      }
+
+      const { data: order, razorpayOrderId, keyId, amountInPaise } = orderRes.data;
+
+      if (f.paymentMethod === 'cash_on_delivery') {
         window.dispatchEvent(new Event('cart-wishlist-update'));
-        // Show success popup
         setOrderSuccess(true);
-        // Redirect to orders page after 2.5 seconds
         setTimeout(() => navigate('/orders'), 2500);
+        return;
+      }
+
+      // Online payment: open Razorpay (cards, UPI, net banking, wallets, etc.)
+      try {
+        const response = await openRazorpayCheckout({
+          key: keyId,
+          amount: amountInPaise,
+          currency: 'INR',
+          order_id: razorpayOrderId,
+          name: 'FairyTails PetShop',
+          description: `Order #${order.orderNumber}`,
+          prefill: { contact: phone || undefined },
+        });
+
+        // Verify payment on backend
+        const verifyRes = await axios.post(
+          `${API_BASE}/orders/${order._id}/verify-payment`,
+          {
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (verifyRes.data.success) {
+          window.dispatchEvent(new Event('cart-wishlist-update'));
+          setOrderSuccess(true);
+          setTimeout(() => navigate('/orders'), 2500);
+        } else {
+          setServerError(verifyRes.data.message || 'Payment verification failed');
+        }
+      } catch (payErr) {
+        if (payErr.message === 'Payment closed') {
+          setServerError('Payment was cancelled. Your order is saved; you can complete payment from My Orders or place a new order.');
+        } else {
+          setServerError(payErr.response?.data?.message || payErr.message || 'Payment failed. Please try again.');
+        }
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Something went wrong. Please try again.';

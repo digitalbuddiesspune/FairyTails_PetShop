@@ -4,6 +4,7 @@ import {
   getMyOrders,
   getOrderById,
   cancelOrder,
+  verifyPayment,
 } from '../controllers/orderController.js';
 import protect from '../middleware/auth.js';
 
@@ -16,5 +17,6 @@ router.use(protect);
 router.route('/').get(getMyOrders).post(placeOrder);
 router.route('/:id').get(getOrderById);
 router.put('/:id/cancel', cancelOrder);
+router.post('/:id/verify-payment', verifyPayment);
 
 export default router;
