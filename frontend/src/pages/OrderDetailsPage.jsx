@@ -222,12 +222,12 @@ const OrderDetailsPage = () => {
             </div>
             <button
               onClick={() => window.open(`/invoice/${order._id}`, '_blank')}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#65a30d]/25 hover:from-[#4d7c0f] hover:to-[#3f6212] hover:shadow-[#65a30d]/30 active:scale-[0.98] transition-all"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Invoice
+              View Invoice
             </button>
           </div>
 
