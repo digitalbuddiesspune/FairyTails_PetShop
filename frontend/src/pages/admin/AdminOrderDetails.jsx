@@ -33,10 +33,20 @@ const AdminOrderDetails = () => {
   const [updating, setUpdating] = useState(false);
 
   const fetchOrder = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/admin/orders/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('admin');
+        window.location.href = '/admin/signin';
+        return;
+      }
       const data = await res.json();
       if (data.success) setOrder(data.data);
     } catch (err) {

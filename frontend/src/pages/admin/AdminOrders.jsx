@@ -27,10 +27,20 @@ const AdminOrders = () => {
   const token = localStorage.getItem('adminToken');
 
   const fetchOrders = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/admin/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (res.status === 401) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('admin');
+        window.location.href = '/admin/signin';
+        return;
+      }
       const data = await res.json();
       if (data.success) setOrders(data.data || []);
     } catch (err) {
