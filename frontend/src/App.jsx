@@ -15,6 +15,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
+import InvoicePage from './pages/InvoicePage';
 import WishlistPage from './pages/WishlistPage';
 import SearchPage from './pages/SearchPage';
 import AdminSignIn from './pages/AdminSignIn';
@@ -26,6 +27,7 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminCategories from './pages/admin/AdminCategories';
 import AdminOrders from './pages/admin/AdminOrders';
 import AdminOrderDetails from './pages/admin/AdminOrderDetails';
+import AdminPayments from './pages/admin/AdminPayments';
 import AdminSettings from './pages/admin/AdminSettings';
 import './App.css';
 
@@ -71,6 +73,7 @@ function App() {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="order-details/:id" element={<AdminOrderDetails />} />
+          <Route path="payments" element={<AdminPayments />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
@@ -146,6 +149,7 @@ function App() {
             <OrderDetailsPage />
           </MainLayout>
         } />
+        <Route path="/invoice/:id" element={<InvoicePage />} />
       </Routes>
     </Router>
   );

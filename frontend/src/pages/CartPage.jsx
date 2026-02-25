@@ -347,16 +347,21 @@ const CartPage = () => {
                   <h3 className="text-lg font-bold text-gray-900 mb-5">Order Summary</h3>
 
                   <div className="space-y-3 text-sm">
-                    <div className="flex justify-between text-gray-600">
-                      <span>Subtotal ({cartItems.length} item{cartItems.length !== 1 ? 's' : ''})</span>
-                      <span>₹{mrpTotal.toLocaleString()}</span>
-                    </div>
+                    
                     {savings > 0 && (
                       <div className="flex justify-between text-green-600">
                         <span>Discount</span>
                         <span>- ₹{savings.toLocaleString()}</span>
                       </div>
                     )}
+                    <div className="flex justify-between text-gray-600">
+                      <span>Subtotal</span>
+                      <span>₹{subtotal.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600">
+                      <span>GST (18%)</span>
+                      <span>₹{Math.round(subtotal * 0.18).toLocaleString()}</span>
+                    </div>
                     <div className="flex justify-between text-gray-600">
                       <span>Delivery</span>
                       <span className="text-green-600 font-medium">{subtotal >= 500 ? 'Free' : '₹50'}</span>
@@ -366,9 +371,8 @@ const CartPage = () => {
                   <div className="border-t border-gray-100 mt-4 pt-4">
                     <div className="flex justify-between text-lg font-bold text-gray-900">
                       <span>Total</span>
-                      <span>₹{(subtotal + (subtotal >= 500 ? 0 : 50)).toLocaleString()}</span>
+                      <span>₹{(subtotal + Math.round(subtotal * 0.18) + (subtotal >= 500 ? 0 : 50)).toLocaleString()}</span>
                     </div>
-                    <p className="text-[11px] text-gray-400 mt-0.5">18% GST included</p>
                     {savings > 0 && (
                       <p className="text-xs text-green-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
                     )}

@@ -134,8 +134,12 @@ const OrdersPage = () => {
               {orders.map((order) => {
                 const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.placed;
                 const displayOrderId = order.orderNumber || parseInt(order._id.slice(-8), 16);
+                // Check if payment failed: either status is 'failed' OR online payment with no transaction ID
+                const isPaymentFailed = order.paymentStatus === 'failed' || 
+                  (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+                
                 return (
-                  <div key={order._id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                  <div key={order._id} className={`bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden ${isPaymentFailed ? 'opacity-75' : ''}`}>
                     {/* Order Header */}
                     <div className="p-5 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
                       <div>
@@ -145,9 +149,15 @@ const OrdersPage = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${st.color}`}>
-                          {st.icon} {st.label}
-                        </span>
+                        {isPaymentFailed ? (
+                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                            ❌ Payment Failed
+                          </span>
+                        ) : (
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${st.color}`}>
+                            {st.icon} {st.label}
+                          </span>
+                        )}
                         <span className="text-lg font-bold text-gray-900">₹{order.total?.toLocaleString()}</span>
                       </div>
                     </div>
@@ -175,25 +185,36 @@ const OrdersPage = () => {
 
                       {/* Action Buttons */}
                       <div className="mt-5 pt-4 border-t border-gray-100 flex flex-wrap gap-3">
-                        <Link
-                          to={`/order-details/${order._id}`}
-                          className="px-5 py-2 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white text-xs font-bold rounded-lg hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all"
-                        >
-                          View Details
-                        </Link>
-                        {order.status === 'placed' && (
-                          <button
-                            onClick={() => handleCancel(order._id)}
-                            disabled={cancellingId === order._id}
-                            className="px-5 py-2 bg-red-50 text-red-600 border border-red-200 text-xs font-bold rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
-                          >
-                            {cancellingId === order._id ? 'Cancelling...' : 'Cancel Order'}
-                          </button>
-                        )}
-                        {order.status !== 'placed' && order.status !== 'cancelled' && (
-                          <span className="px-4 py-2 text-[10px] text-gray-400 font-medium">
-                            Cannot cancel — order is {order.status}
-                          </span>
+                        {isPaymentFailed ? (
+                          <>
+                            <div className="flex-1 text-center py-2 px-5 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed">
+                              View Details
+                            </div>
+                            <Link
+                              to="/checkout"
+                              className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
+                            >
+                              Try Again
+                            </Link>
+                          </>
+                        ) : (
+                          <>
+                            <Link
+                              to={`/order-details/${order._id}`}
+                              className="px-5 py-2 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white text-xs font-bold rounded-lg hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all"
+                            >
+                              View Details
+                            </Link>
+                            {order.status === 'placed' && (
+                              <button
+                                onClick={() => handleCancel(order._id)}
+                                disabled={cancellingId === order._id}
+                                className="px-5 py-2 bg-red-50 text-red-600 border border-red-200 text-xs font-bold rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
+                              >
+                                {cancellingId === order._id ? 'Cancelling...' : 'Cancel Order'}
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

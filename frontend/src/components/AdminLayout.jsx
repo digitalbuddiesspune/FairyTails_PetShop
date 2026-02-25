@@ -55,6 +55,7 @@ const AdminLayout = () => {
         if (location.pathname.includes('/admin/categories')) return 'Categories';
         if (location.pathname.includes('/admin/orders')) return 'Orders';
         if (location.pathname.includes('/admin/order-details')) return 'Order Details';
+        if (location.pathname.includes('/admin/payments')) return 'Payments';
         if (location.pathname.includes('/admin/users')) return 'Users';
         if (location.pathname.includes('/admin/settings')) return 'Settings';
         return 'Dashboard';
@@ -171,6 +172,21 @@ const AdminLayout = () => {
                         >
                             <ShoppingBag size={20} />
                             Orders
+                        </button>
+
+                        {/* Payments */}
+                        <button
+                            onClick={() => { navigate('/admin/payments'); setSidebarOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                location.pathname === '/admin/payments'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            }`}
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            Payments
                         </button>
 
                         {/* Users */}
