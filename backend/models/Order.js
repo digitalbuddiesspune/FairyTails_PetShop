@@ -90,6 +90,8 @@ const orderSchema = new mongoose.Schema(
       enum: ['unpaid', 'paid'],
       default: 'unpaid',
     },
+    razorpayOrderId: { type: String, default: null },
+    razorpayPaymentId: { type: String, default: null },
     statusHistory: {
       type: [statusHistorySchema],
       default: [],
