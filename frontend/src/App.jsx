@@ -15,6 +15,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
 import OrderDetailsPage from './pages/OrderDetailsPage';
+import InvoicePage from './pages/InvoicePage';
 import WishlistPage from './pages/WishlistPage';
 import SearchPage from './pages/SearchPage';
 import AdminSignIn from './pages/AdminSignIn';
@@ -148,6 +149,7 @@ function App() {
             <OrderDetailsPage />
           </MainLayout>
         } />
+        <Route path="/invoice/:id" element={<InvoicePage />} />
       </Routes>
     </Router>
   );

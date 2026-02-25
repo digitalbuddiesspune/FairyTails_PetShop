@@ -197,28 +197,38 @@ const OrderDetailsPage = () => {
       <section className="relative z-10 py-8">
         <div className="container mx-auto px-4 max-w-3xl">
           {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
-            <img src={cattImg} alt="" className="w-20 h-20 object-contain" />
-            <div>
-              
-              <h1 className="text-2xl font-bold text-gray-900">
-                Order #{displayOrderId}
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${STATUS_CONFIG[order.status]?.color || 'bg-gray-100'}`}>
-                  {STATUS_CONFIG[order.status]?.label}
-                </span>
-                {order.status === 'placed' && (
-                  <button
-                    onClick={handleCancel}
-                    disabled={cancellingId}
-                    className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 text-xs font-bold rounded-full hover:bg-red-100 transition-colors disabled:opacity-50"
-                  >
-                    {cancellingId ? 'Cancelling...' : 'Cancel Order'}
-                  </button>
-                )}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <img src={cattImg} alt="" className="w-20 h-20 object-contain" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Order #{displayOrderId}
+                </h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${STATUS_CONFIG[order.status]?.color || 'bg-gray-100'}`}>
+                    {STATUS_CONFIG[order.status]?.label}
+                  </span>
+                  {order.status === 'placed' && (
+                    <button
+                      onClick={handleCancel}
+                      disabled={cancellingId}
+                      className="px-3 py-1 bg-red-50 text-red-600 border border-red-200 text-xs font-bold rounded-full hover:bg-red-100 transition-colors disabled:opacity-50"
+                    >
+                      {cancellingId ? 'Cancelling...' : 'Cancel Order'}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
+            <button
+              onClick={() => window.open(`/invoice/${order._id}`, '_blank')}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
+              Invoice
+            </button>
           </div>
 
           {/* Progress Bar */}

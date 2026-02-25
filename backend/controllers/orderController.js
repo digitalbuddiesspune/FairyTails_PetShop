@@ -92,7 +92,8 @@ export const placeOrder = async (req, res) => {
 
     const discount = mrpTotal - subtotal;
     const deliveryCharge = subtotal >= 500 ? 0 : 50;
-    const total = subtotal + deliveryCharge;  // GST already included in product prices
+    const gst = Math.round(subtotal * 0.18);  // 18% GST on subtotal
+    const total = subtotal + gst + deliveryCharge;
 
     const order = await Order.create({
       user: req.user._id,
@@ -102,7 +103,7 @@ export const placeOrder = async (req, res) => {
       subtotal,
       mrpTotal,
       discount,
-      gst: 0,  // GST is already included in product prices, not added separately
+      gst,
       deliveryCharge,
       total,
       status: 'placed',
@@ -123,6 +124,7 @@ export const placeOrder = async (req, res) => {
       return res.status(500).json({ success: false, message: 'Online payment is not configured' });
     }
 
+    const amountInPaise = Math.round(total * 100);  // Convert to paise
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
