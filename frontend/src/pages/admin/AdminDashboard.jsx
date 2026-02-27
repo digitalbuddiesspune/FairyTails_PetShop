@@ -138,7 +138,12 @@ const AdminDashboard = () => {
             // Today-specific stats
             if (dateString === todayDateString) {
                 todayOrders++;
-                if (order.status === 'placed') todayConfirmed++;
+
+                const isPaymentFailed =
+                    order.paymentStatus === 'failed' ||
+                    (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+
+                if (order.status === 'placed' && !isPaymentFailed) todayConfirmed++;
                 if (order.status === 'delivered') todayDelivered++;
                 if (order.status === 'cancelled') todayCancelled++;
             }
@@ -177,12 +182,18 @@ const AdminDashboard = () => {
                 title = "Today's Orders";
                 filtered = allOrders.filter(o => new Date(o.createdAt).toDateString() === todayDateString);
                 break;
-            case 'confirmed':
+            case 'confirmed': {
                 title = "Today's Confirmed Orders";
-                filtered = allOrders.filter(o =>
-                    new Date(o.createdAt).toDateString() === todayDateString && o.status === 'placed'
-                );
+                filtered = allOrders.filter(o => {
+                    const sameDay = new Date(o.createdAt).toDateString() === todayDateString;
+                    const isConfirmed = o.status === 'placed';
+                    const isPaymentFailed =
+                        o.paymentStatus === 'failed' ||
+                        (o.paymentMethod !== 'cash_on_delivery' && !o.razorpayPaymentId);
+                    return sameDay && isConfirmed && !isPaymentFailed;
+                });
                 break;
+            }
             case 'todayDelivered':
                 title = "Today's Delivered Orders";
                 filtered = allOrders.filter(o =>
@@ -221,7 +232,20 @@ const AdminDashboard = () => {
         return labels[status] || status;
     };
 
-    const getStatusBadge = (status) => {
+    const isPaymentFailed = (order) => {
+        return order.paymentStatus === 'failed' ||
+            (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+    };
+
+    const getStatusBadge = (order) => {
+        // If payment failed, show Failed for status too
+        if (isPaymentFailed(order)) {
+            return (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    Failed
+                </span>
+            );
+        }
         const map = {
             placed: 'bg-blue-100 text-blue-700',
             processing: 'bg-yellow-100 text-yellow-700',
@@ -230,18 +254,27 @@ const AdminDashboard = () => {
             cancelled: 'bg-red-100 text-red-700'
         };
         return (
-            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${map[status] || 'bg-gray-100 text-gray-700'}`}>
-                {getStatusLabel(status)}
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${map[order.status] || 'bg-gray-100 text-gray-700'}`}>
+                {getStatusLabel(order.status)}
             </span>
         );
     };
 
-    const getPaymentBadge = (status) => {
+    const getPaymentBadge = (order) => {
+        if (isPaymentFailed(order)) {
+            return (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    Failed
+                </span>
+            );
+        }
+
         const map = {
             paid: 'bg-green-100 text-green-700',
             unpaid: 'bg-yellow-100 text-yellow-700',
-            failed: 'bg-red-100 text-red-700'
+            refund: 'bg-purple-100 text-purple-700',
         };
+        const status = order.paymentStatus || 'unpaid';
         return (
             <span className={`px-2 py-0.5 rounded-full text-xs font-bold capitalize ${map[status] || 'bg-gray-100 text-gray-700'}`}>
                 {status}
@@ -443,10 +476,10 @@ const AdminDashboard = () => {
                                             ₹{order.total?.toLocaleString()}
                                         </td>
                                         <td className="px-4 py-3">
-                                            {getPaymentBadge(order.paymentStatus)}
+                                            {getPaymentBadge(order)}
                                         </td>
                                         <td className="px-4 py-3">
-                                            {getStatusBadge(order.status)}
+                                            {getStatusBadge(order)}
                                         </td>
                                         <td className="px-4 py-3 text-xs text-gray-500">
                                             {new Date(order.createdAt).toLocaleTimeString('en-IN', {
@@ -554,18 +587,10 @@ const AdminDashboard = () => {
                                                             <span className="text-xs font-bold text-gray-800">₹{order.total?.toLocaleString()}</span>
                                                         </td>
                                                         <td className="px-4 py-3 text-center">
-                                                            {isPaymentFailed ? (
-                                                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border bg-red-50 text-red-600 border-red-200">Failed</span>
-                                                            ) : (
-                                                                getStatusBadge(order.status)
-                                                            )}
+                                                            {getStatusBadge(order)}
                                                         </td>
                                                         <td className="px-4 py-3 text-center">
-                                                            {isPaymentFailed ? (
-                                                                <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border bg-red-50 text-red-600 border-red-200">Failed</span>
-                                                            ) : (
-                                                                getPaymentBadge(order.paymentStatus)
-                                                            )}
+                                                            {getPaymentBadge(order)}
                                                         </td>
                                                         <td className="px-4 py-3">
                                                             <p className="text-[10px] text-gray-400">

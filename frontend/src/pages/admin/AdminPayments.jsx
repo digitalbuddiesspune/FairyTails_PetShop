@@ -118,7 +118,7 @@ const AdminPayments = () => {
     } else if (status === 'unpaid') {
       return <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Unpaid</span>;
     } else if (status === 'refund') {
-      return <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">Refund</span>;
+      return <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">Refunded</span>;
     } else if (status === 'failed') {
       return <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Failed</span>;
     } else {
@@ -200,7 +200,7 @@ const AdminPayments = () => {
             <option value="All">All Payment Status</option>
             <option value="Paid">Paid</option>
             <option value="Unpaid">Unpaid</option>
-            <option value="Refund">Refund</option>
+            <option value="Refund">Refunded</option>
             <option value="Failed">Failed</option>
           </select>
           <select

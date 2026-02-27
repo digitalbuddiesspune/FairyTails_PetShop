@@ -15,7 +15,7 @@ const STATUS_CONFIG = {
 const PAYMENT_CONFIG = {
   unpaid:  { label: 'Unpaid',  bg: 'bg-orange-50 text-orange-600 border-orange-200' },
   paid:    { label: 'Paid',    bg: 'bg-green-50 text-green-600 border-green-200' },
-  refund:  { label: 'Refund',  bg: 'bg-purple-50 text-purple-600 border-purple-200' },
+  refund:  { label: 'Refunded',  bg: 'bg-purple-50 text-purple-600 border-purple-200' },
   failed:  { label: 'Failed',  bg: 'bg-red-50 text-red-600 border-red-200' },
 };
 
@@ -233,7 +233,7 @@ const AdminOrders = () => {
               <option value="all">All Payment</option>
               <option value="paid">Paid</option>
               <option value="unpaid">Unpaid</option>
-              <option value="refund">Refund</option>
+              <option value="refund">Refunded</option>
               <option value="failed">Failed</option>
             </select>
           </div>
