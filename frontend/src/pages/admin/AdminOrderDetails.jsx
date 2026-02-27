@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const STATUS_FLOW = ['placed', 'processing', 'shipped', 'delivered', 'cancelled'];
 const STATUS_CONFIG = {
-  placed:     { label: 'Placed',     color: 'bg-blue-100 text-blue-700',   selectBg: 'bg-blue-50 border-blue-300 text-blue-700' },
+  placed:     { label: 'Confirm',    color: 'bg-blue-100 text-blue-700',   selectBg: 'bg-blue-50 border-blue-300 text-blue-700' },
   processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700', selectBg: 'bg-yellow-50 border-yellow-300 text-yellow-700' },
   shipped:    { label: 'Shipped',    color: 'bg-indigo-100 text-indigo-700', selectBg: 'bg-indigo-50 border-indigo-300 text-indigo-700' },
   delivered:  { label: 'Delivered',  color: 'bg-green-100 text-green-700',  selectBg: 'bg-green-50 border-green-300 text-green-700' },
@@ -15,6 +15,7 @@ const STATUS_CONFIG = {
 const PAYMENT_CONFIG = {
   unpaid: { label: 'Unpaid', selectBg: 'bg-orange-50 border-orange-300 text-orange-700' },
   paid:   { label: 'Paid',   selectBg: 'bg-green-50 border-green-300 text-green-700' },
+  refund: { label: 'Refund', selectBg: 'bg-purple-50 border-purple-300 text-purple-700' },
   failed: { label: 'Failed', selectBg: 'bg-red-50 border-red-300 text-red-700' },
 };
 
@@ -156,11 +157,12 @@ const AdminOrderDetails = () => {
               <select
                 value={order.paymentStatus || 'unpaid'}
                 onChange={(e) => handlePaymentChange(e.target.value)}
-                disabled={updating || order.paymentStatus === 'paid' || order.paymentStatus === 'failed'}
+                disabled={updating || order.paymentStatus === 'failed'}
                 className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${PAYMENT_CONFIG[order.paymentStatus || 'unpaid']?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
               >
                 <option value="unpaid">Unpaid</option>
                 <option value="paid">Paid</option>
+                <option value="refund">Refund</option>
                 <option value="failed">Failed</option>
               </select>
             </div>
@@ -261,9 +263,16 @@ const AdminOrderDetails = () => {
             <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
               order.paymentStatus === 'paid' ? 'bg-green-100 text-green-600' : 
               order.paymentStatus === 'failed' ? 'bg-red-100 text-red-600' : 
+              order.paymentStatus === 'refund' ? 'bg-purple-100 text-purple-600' :
               'bg-orange-100 text-orange-600'
             }`}>
-              {order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus === 'failed' ? 'Failed' : 'Unpaid'}
+              {order.paymentStatus === 'paid'
+                ? 'Paid'
+                : order.paymentStatus === 'failed'
+                ? 'Failed'
+                : order.paymentStatus === 'refund'
+                ? 'Refund'
+                : 'Unpaid'}
             </span>
           </div>
         </div>

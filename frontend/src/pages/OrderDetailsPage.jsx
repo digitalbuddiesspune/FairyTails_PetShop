@@ -11,7 +11,7 @@ const STATUS_FLOW = ['placed', 'processing', 'shipped', 'delivered', 'cancelled'
 
 const STATUS_CONFIG = {
 
-  placed:     { label: 'Placed',     color: 'bg-blue-100 text-blue-700' },
+  placed:     { label: 'Confirm',    color: 'bg-blue-100 text-blue-700' },
 
   processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700' },
 

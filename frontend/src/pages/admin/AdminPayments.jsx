@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -10,7 +11,7 @@ const AdminPayments = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All Status');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState('All');
   const [methodFilter, setMethodFilter] = useState('All Methods');
 
   useEffect(() => {
@@ -38,12 +39,6 @@ const AdminPayments = () => {
   const paidRevenue = orders
     .filter(o => o.paymentStatus === 'paid')
     .reduce((sum, o) => sum + (o.total || 0), 0);
-  const unpaidCount = orders.filter(o => o.paymentStatus === 'unpaid').length;
-  // Count failed: either paymentStatus is 'failed' OR online payment with no transaction ID
-  const failedCount = orders.filter(o => 
-    o.paymentStatus === 'failed' || 
-    (o.paymentMethod !== 'cash_on_delivery' && !o.razorpayPaymentId)
-  ).length;
 
   // Filter orders
   const filteredOrders = orders.filter(order => {
@@ -53,17 +48,63 @@ const AdminPayments = () => {
       order.razorpayOrderId?.includes(searchTerm) ||
       order.razorpayPaymentId?.includes(searchTerm);
     
-    const matchesStatus = 
-      statusFilter === 'All Status' || 
-      order.paymentStatus === statusFilter.toLowerCase();
+    // Payment status filter
+    if (paymentStatusFilter !== 'All') {
+      const isPaymentFailed = order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId;
+      
+      if (paymentStatusFilter === 'Failed') {
+        if (!isPaymentFailed && order.paymentStatus !== 'failed') return false;
+      } else {
+        if (isPaymentFailed) return false;
+        if (order.paymentStatus !== paymentStatusFilter.toLowerCase()) return false;
+      }
+    }
     
     const matchesMethod = 
       methodFilter === 'All Methods' || 
       (methodFilter === 'Online' && order.paymentMethod !== 'cash_on_delivery') ||
       (methodFilter === 'COD' && order.paymentMethod === 'cash_on_delivery');
     
-    return matchesSearch && matchesStatus && matchesMethod;
+    return matchesSearch && matchesMethod;
   });
+
+  // Download XLS
+  const downloadXLS = () => {
+    if (filteredOrders.length === 0) return;
+
+    const xlsData = filteredOrders.map(order => {
+      const isPaymentFailed = order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId;
+      const displayOrderId = order.orderNumber || parseInt(order._id.slice(-8), 16);
+      const paymentStatus = isPaymentFailed ? 'Failed' : (order.paymentStatus || 'Unpaid');
+
+      return {
+        'Order ID': `#${displayOrderId}`,
+        'Customer': `${order.shippingAddress?.firstName || ''} ${order.shippingAddress?.lastName || ''}`.trim(),
+        'Email': order.user?.email || 'N/A',
+        'Phone': order.shippingAddress?.phone || order.user?.phone || '—',
+        'Amount (₹)': order.total || 0,
+        'Payment Method': order.paymentMethod === 'cash_on_delivery' ? 'COD' : 'Online',
+        'Payment Status': paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1),
+        'Transaction ID': order.razorpayPaymentId || '—',
+        'Gateway Order ID': order.razorpayOrderId || '—',
+        'Date': new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+        'Time': new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
+      };
+    });
+
+    const ws = XLSX.utils.json_to_sheet(xlsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Payments');
+
+    // Auto-adjust column widths
+    const colWidths = Object.keys(xlsData[0]).map(key => ({
+      wch: Math.max(key.length, ...xlsData.map(row => String(row[key]).length)) + 2
+    }));
+    ws['!cols'] = colWidths;
+
+    const fileName = `Payments_${paymentStatusFilter === 'All' ? 'All' : paymentStatusFilter}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
 
   const getStatusBadge = (order) => {
     // If online payment and no transaction ID, it means payment failed
@@ -76,6 +117,8 @@ const AdminPayments = () => {
       return <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Paid</span>;
     } else if (status === 'unpaid') {
       return <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Unpaid</span>;
+    } else if (status === 'refund') {
+      return <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700">Refund</span>;
     } else if (status === 'failed') {
       return <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">Failed</span>;
     } else {
@@ -116,15 +159,19 @@ const AdminPayments = () => {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-       
-        <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium">
+        <h2 className="text-2xl font-bold text-gray-900">Payments</h2>
+        <button 
+          onClick={downloadXLS}
+          disabled={filteredOrders.length === 0}
+          className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+        >
           <Download size={16} />
           Download XLS
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500 mb-1">TOTAL ORDERS</p>
           <h3 className="text-3xl font-bold text-gray-900">{totalOrders}</h3>
@@ -132,14 +179,6 @@ const AdminPayments = () => {
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500 mb-1">PAID REVENUE</p>
           <h3 className="text-3xl font-bold text-green-600">₹{paidRevenue.toLocaleString()}</h3>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <p className="text-sm text-gray-500 mb-1">UNPAID</p>
-          <h3 className="text-3xl font-bold text-yellow-600">{unpaidCount}</h3>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <p className="text-sm text-gray-500 mb-1">FAILED</p>
-          <h3 className="text-3xl font-bold text-red-600">{failedCount}</h3>
         </div>
       </div>
 
@@ -154,14 +193,15 @@ const AdminPayments = () => {
             className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
           />
           <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            value={paymentStatusFilter}
+            onChange={(e) => setPaymentStatusFilter(e.target.value)}
             className="px-4 py-2 border border-gray-200 rounded-lg text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
           >
-            <option>All Status</option>
-            <option>Paid</option>
-            <option>Unpaid</option>
-            <option>Failed</option>
+            <option value="All">All Payment Status</option>
+            <option value="Paid">Paid</option>
+            <option value="Unpaid">Unpaid</option>
+            <option value="Refund">Refund</option>
+            <option value="Failed">Failed</option>
           </select>
           <select
             value={methodFilter}
@@ -173,6 +213,11 @@ const AdminPayments = () => {
             <option>COD</option>
           </select>
         </div>
+        {paymentStatusFilter !== 'All' && (
+          <div className="mt-3 pt-3 border-t border-gray-100 text-xs text-gray-500">
+            Showing <span className="font-semibold text-purple-600">{filteredOrders.length}</span> order{filteredOrders.length !== 1 ? 's' : ''} with status: <span className="font-semibold">{paymentStatusFilter}</span>
+          </div>
+        )}
       </div>
 
       {/* Table */}

@@ -165,7 +165,7 @@ const Profile = () => {
               <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
                 {orders.map((order) => {
                   const statusMap = {
-                    placed: { label: 'Placed', color: 'bg-blue-100 text-blue-700' },
+                    placed: { label: 'Confirm', color: 'bg-blue-100 text-blue-700' },
                     processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700' },
                     shipped: { label: 'Shipped', color: 'bg-indigo-100 text-indigo-700' },
                     delivered: { label: 'Delivered', color: 'bg-green-100 text-green-700' },

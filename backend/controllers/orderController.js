@@ -334,7 +334,7 @@ export const updateOrderStatus = async (req, res) => {
 export const updatePaymentStatus = async (req, res) => {
   try {
     const { paymentStatus } = req.body;
-    if (!['unpaid', 'paid', 'failed'].includes(paymentStatus)) {
+    if (!['unpaid', 'paid', 'failed', 'refund'].includes(paymentStatus)) {
       return res.status(400).json({ success: false, message: 'Invalid payment status' });
     }
 
