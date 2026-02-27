@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const STATUS_FLOW = ['placed', 'processing', 'shipped', 'delivered', 'cancelled'];
 const STATUS_CONFIG = {
-  placed:     { label: 'Placed',     color: 'bg-blue-100 text-blue-700',   selectBg: 'bg-blue-50 border-blue-300 text-blue-700' },
+  placed:     { label: 'Confirm',    color: 'bg-blue-100 text-blue-700',   selectBg: 'bg-blue-50 border-blue-300 text-blue-700' },
   processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700', selectBg: 'bg-yellow-50 border-yellow-300 text-yellow-700' },
   shipped:    { label: 'Shipped',    color: 'bg-indigo-100 text-indigo-700', selectBg: 'bg-indigo-50 border-indigo-300 text-indigo-700' },
   delivered:  { label: 'Delivered',  color: 'bg-green-100 text-green-700',  selectBg: 'bg-green-50 border-green-300 text-green-700' },
@@ -15,6 +15,7 @@ const STATUS_CONFIG = {
 const PAYMENT_CONFIG = {
   unpaid: { label: 'Unpaid', selectBg: 'bg-orange-50 border-orange-300 text-orange-700' },
   paid:   { label: 'Paid',   selectBg: 'bg-green-50 border-green-300 text-green-700' },
+  refund: { label: 'Refunded', selectBg: 'bg-purple-50 border-purple-300 text-purple-700' },
   failed: { label: 'Failed', selectBg: 'bg-red-50 border-red-300 text-red-700' },
 };
 
@@ -138,31 +139,58 @@ const AdminOrderDetails = () => {
             {/* Order Status Dropdown */}
             <div>
               <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Order Status</p>
-              <select
-                value={order.status}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                disabled={updating || order.status === 'delivered' || order.status === 'cancelled' || order.paymentStatus === 'failed'}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${STATUS_CONFIG[order.status]?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
-              >
-                {STATUS_FLOW.map(s => (
-                  <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
-                ))}
-              </select>
+              {(() => {
+                const isPaymentFailed = order.paymentStatus === 'failed' ||
+                  (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+                if (isPaymentFailed) {
+                  return (
+                    <div className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-red-50 border-red-300 text-red-700">
+                      Failed
+                    </div>
+                  );
+                }
+                return (
+                  <select
+                    value={order.status}
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                    disabled={updating || order.status === 'delivered' || order.status === 'cancelled'}
+                    className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${STATUS_CONFIG[order.status]?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
+                  >
+                    {STATUS_FLOW.map(s => (
+                      <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
+                    ))}
+                  </select>
+                );
+              })()}
             </div>
 
             {/* Payment Status Dropdown */}
             <div>
               <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Payment Status</p>
-              <select
-                value={order.paymentStatus || 'unpaid'}
-                onChange={(e) => handlePaymentChange(e.target.value)}
-                disabled={updating || order.paymentStatus === 'paid' || order.paymentStatus === 'failed'}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${PAYMENT_CONFIG[order.paymentStatus || 'unpaid']?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
-              >
-                <option value="unpaid">Unpaid</option>
-                <option value="paid">Paid</option>
-                <option value="failed">Failed</option>
-              </select>
+              {(() => {
+                const isPaymentFailed = order.paymentStatus === 'failed' ||
+                  (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+                if (isPaymentFailed) {
+                  return (
+                    <div className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-red-50 border-red-300 text-red-700">
+                      Failed
+                    </div>
+                  );
+                }
+                return (
+                  <select
+                    value={order.paymentStatus || 'unpaid'}
+                    onChange={(e) => handlePaymentChange(e.target.value)}
+                    disabled={updating || order.paymentStatus === 'paid' || order.paymentStatus === 'failed'}
+                    className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${PAYMENT_CONFIG[order.paymentStatus || 'unpaid']?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
+                  >
+                    <option value="unpaid">Unpaid</option>
+                    <option value="paid">Paid</option>
+                    <option value="refund">Refunded</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -258,13 +286,30 @@ const AdminOrderDetails = () => {
           </div>
           <div>
             <p className="text-gray-400 font-semibold uppercase mb-0.5">Payment Status</p>
-            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-              order.paymentStatus === 'paid' ? 'bg-green-100 text-green-600' : 
-              order.paymentStatus === 'failed' ? 'bg-red-100 text-red-600' : 
-              'bg-orange-100 text-orange-600'
-            }`}>
-              {order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus === 'failed' ? 'Failed' : 'Unpaid'}
-            </span>
+            {(() => {
+              const isPaymentFailed = order.paymentStatus === 'failed' ||
+                (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+              if (isPaymentFailed) {
+                return (
+                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600">
+                    Failed
+                  </span>
+                );
+              }
+              return (
+                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                  order.paymentStatus === 'paid' ? 'bg-green-100 text-green-600' : 
+                  order.paymentStatus === 'refund' ? 'bg-purple-100 text-purple-600' :
+                  'bg-orange-100 text-orange-600'
+                }`}>
+                  {order.paymentStatus === 'paid'
+                    ? 'Paid'
+                    : order.paymentStatus === 'refund'
+                    ? 'Refunded'
+                    : 'Unpaid'}
+                </span>
+              );
+            })()}
           </div>
         </div>
 
@@ -275,9 +320,22 @@ const AdminOrderDetails = () => {
           </div>
           <div>
             <p className="text-gray-400 font-semibold uppercase mb-0.5">Order Status</p>
-            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${STATUS_CONFIG[order.status]?.color || 'bg-gray-100'}`}>
-              {STATUS_CONFIG[order.status]?.label}
-            </span>
+            {(() => {
+              const isPaymentFailed = order.paymentStatus === 'failed' ||
+                (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+              if (isPaymentFailed) {
+                return (
+                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600">
+                    Failed
+                  </span>
+                );
+              }
+              return (
+                <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${STATUS_CONFIG[order.status]?.color || 'bg-gray-100'}`}>
+                  {STATUS_CONFIG[order.status]?.label}
+                </span>
+              );
+            })()}
           </div>
           <div>
             <p className="text-gray-400 font-semibold uppercase mb-0.5">Order Date & Time</p>

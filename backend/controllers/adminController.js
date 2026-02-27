@@ -113,6 +113,41 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+// @desc    Change admin password
+// @route   PUT /api/v1/admin/change-password
+// @access  Private (admin only)
+export const changeAdminPassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide current and new password' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+    }
+
+    const admin = await Admin.findById(req.admin.id).select('+password');
+    if (!admin) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
+
+    const isMatch = await admin.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    admin.password = newPassword;
+    await admin.save();
+
+    res.status(200).json({ success: true, message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('❌ Change password error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};
+
 // @desc    Delete user
 // @route   DELETE /api/v1/admin/users/:id
 // @access  Private (admin only)
