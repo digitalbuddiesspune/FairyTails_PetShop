@@ -169,7 +169,7 @@ export const getMyOrders = async (req, res) => {
 // @access  Private
 export const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
+    const order = await Order.findOne({ _id: req.params.id, user: req.user._id }).populate('user', 'name email phone');
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }

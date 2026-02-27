@@ -7,8 +7,92 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 const formatDateTime = (d) => {
   if (!d) return '—';
   const date = new Date(d);
-  return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' +
-    date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  return (
+    date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) +
+    ', ' +
+    date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  );
+};
+
+// Convert number to words (e.g. 3103 -> "three thousand one hundred and three")
+const numberToWords = (num) => {
+  if (num === 0) return 'zero';
+
+  const belowTwenty = [
+    '',
+    'one',
+    'two',
+    'three',
+    'four',
+    'five',
+    'six',
+    'seven',
+    'eight',
+    'nine',
+    'ten',
+    'eleven',
+    'twelve',
+    'thirteen',
+    'fourteen',
+    'fifteen',
+    'sixteen',
+    'seventeen',
+    'eighteen',
+    'nineteen',
+  ];
+
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+  const toWordsUnderThousand = (n) => {
+    let result = '';
+    const hundred = Math.floor(n / 100);
+    const rem = n % 100;
+
+    if (hundred > 0) {
+      result += belowTwenty[hundred] + ' hundred';
+      if (rem > 0) result += ' and ';
+    }
+
+    if (rem > 0) {
+      if (rem < 20) {
+        result += belowTwenty[rem];
+      } else {
+        const t = Math.floor(rem / 10);
+        const u = rem % 10;
+        result += tens[t];
+        if (u > 0) result += ' ' + belowTwenty[u];
+      }
+    }
+    return result;
+  };
+
+  let n = Math.abs(Math.trunc(num));
+  const parts = [];
+
+  const billions = Math.floor(n / 1_000_000_000);
+  if (billions > 0) {
+    parts.push(toWordsUnderThousand(billions) + ' billion');
+    n %= 1_000_000_000;
+  }
+
+  const millions = Math.floor(n / 1_000_000);
+  if (millions > 0) {
+    parts.push(toWordsUnderThousand(millions) + ' million');
+    n %= 1_000_000;
+  }
+
+  const thousands = Math.floor(n / 1_000);
+  if (thousands > 0) {
+    parts.push(toWordsUnderThousand(thousands) + ' thousand');
+    n %= 1_000;
+  }
+
+  if (n > 0) {
+    parts.push(toWordsUnderThousand(n));
+  }
+
+  const words = parts.join(' ');
+  return num < 0 ? 'minus ' + words : words;
 };
 
 const InvoicePage = () => {
@@ -63,19 +147,12 @@ const InvoicePage = () => {
         `}</style>
 
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 print:rounded-none print:shadow-none print:border-0">
-          {/* Header - grey */}
-          <div className="bg-gray-800 text-white px-6 py-6 flex items-center justify-between flex-wrap gap-4 print:py-5">
-            <div className="flex items-center gap-3">
+          {/* Header - centred, no Tax Invoice / INV on top */}
+          <div className="bg-gray-800 text-white px-6 py-6 text-center print:py-5">
+            <div className="flex flex-col items-center gap-1">
               <span className="text-3xl">🐾</span>
-              <div>
-                <h1 className="text-xl font-bold leading-tight">FairyTails Pet Shop</h1>
-                <p className="text-sm text-gray-300 mt-0.5">Your Trusted Pet Care Partner</p>
-                <p className="text-xs text-gray-400 mt-1">support@fairytails.com · GST: 09AHCPC5752E1ZM</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-sm font-bold uppercase tracking-wide">Tax Invoice</div>
-              <div className="text-gray-200 font-semibold mt-0.5">{invoiceNo}</div>
+              <h1 className="text-xl font-bold leading-tight">FairyTails Pet Shop</h1>
+              <p className="text-sm text-gray-300">Your Trusted Pet Care Partner | support@fairytails.com | GST: 09AHCPC5752E1ZM</p>
             </div>
           </div>
 
@@ -87,15 +164,18 @@ const InvoicePage = () => {
                 <dl className="space-y-2.5 text-sm">
                   <div className="flex justify-between"><dt className="text-gray-600">Invoice Date</dt><dd className="font-medium text-gray-900">{formatDateTime(new Date())}</dd></div>
                   <div className="flex justify-between"><dt className="text-gray-600">Order No</dt><dd className="font-medium text-gray-900">#{displayOrderId}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Invoice No.</dt><dd className="font-medium text-gray-900">{invoiceNo}</dd></div>
                   <div className="flex justify-between"><dt className="text-gray-600">Order Date</dt><dd className="font-medium text-gray-900">{formatDateTime(order.createdAt)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-600">Status</dt><dd className="font-medium capitalize text-gray-900">{order.status} · {order.paymentStatus}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-600">Payment</dt><dd className="font-medium text-gray-900">{order.paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' : 'Online'}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Order Status</dt><dd className="font-medium capitalize text-gray-900">{order.status}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Payment status</dt><dd className="font-medium capitalize text-gray-900">{order.paymentStatus}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Payment Mode</dt><dd className="font-medium text-gray-900">{order.paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' : 'Online'}</dd></div>
                 </dl>
               </div>
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
                 <h3 className="font-bold text-gray-700 text-xs uppercase tracking-wide mb-3">Bill To</h3>
                 <dl className="space-y-2.5 text-sm">
                   <div><dt className="text-gray-500 text-xs">Name</dt><dd className="font-medium text-gray-900">{order.shippingAddress?.firstName} {order.shippingAddress?.lastName}</dd></div>
+                  <div><dt className="text-gray-500 text-xs">Email</dt><dd className="text-gray-900">{order.user?.email || '—'}</dd></div>
                   <div><dt className="text-gray-500 text-xs">Phone</dt><dd className="text-gray-900">{order.shippingAddress?.phone}</dd></div>
                   <div><dt className="text-gray-500 text-xs">Address</dt><dd className="text-gray-900 leading-snug">{order.shippingAddress?.streetAddress}, {order.shippingAddress?.city}, {order.shippingAddress?.state} — {order.shippingAddress?.pincode}</dd></div>
                 </dl>
@@ -109,7 +189,7 @@ const InvoicePage = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-700 text-white">
-                      <th className="py-3 px-3 text-left font-bold">#</th>
+                      <th className="py-3 px-3 text-left font-bold">Sr. No.</th>
                       <th className="py-3 px-3 text-left font-bold">Item Name</th>
                       <th className="py-3 px-3 text-center font-bold">Category</th>
                       <th className="py-3 px-3 text-center font-bold">Qty</th>
@@ -153,11 +233,14 @@ const InvoicePage = () => {
               const sgstAmt = Math.round(gstTotal / 2 * 100) / 100;
               const cgstAmt = gstTotal - sgstAmt;
               const delivery = Number(order.deliveryCharge) || 0;
-              const total = Number(order.total) || (subtotal + gstTotal + delivery);
+              const total = Number(order.total) || subtotal + gstTotal + delivery;
               return (
                 <div className="flex flex-wrap items-start justify-between gap-6 mb-5 break-inside-avoid">
                   <div className="text-sm text-gray-500">
-                    <p><span className="font-semibold text-gray-600">Amount in words:</span> Rupees {typeof total === 'number' ? Math.round(total).toLocaleString('en-IN') : total} only.</p>
+                    <p>
+                      <span className="font-semibold text-gray-600">Amount in words:</span>{' '}
+                      Rupees {numberToWords(Math.round(total))} only.
+                    </p>
                     <p className="text-xs italic mt-1">Valid without signature and stamp.</p>
                   </div>
                   <div className="rounded-xl border border-gray-200 overflow-hidden shrink-0">
