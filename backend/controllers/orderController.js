@@ -169,7 +169,7 @@ export const getMyOrders = async (req, res) => {
 // @access  Private
 export const getOrderById = async (req, res) => {
   try {
-    const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
+    const order = await Order.findOne({ _id: req.params.id, user: req.user._id }).populate('user', 'name email phone');
     if (!order) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
@@ -334,7 +334,7 @@ export const updateOrderStatus = async (req, res) => {
 export const updatePaymentStatus = async (req, res) => {
   try {
     const { paymentStatus } = req.body;
-    if (!['unpaid', 'paid', 'failed'].includes(paymentStatus)) {
+    if (!['unpaid', 'paid', 'failed', 'refund'].includes(paymentStatus)) {
       return res.status(400).json({ success: false, message: 'Invalid payment status' });
     }
 

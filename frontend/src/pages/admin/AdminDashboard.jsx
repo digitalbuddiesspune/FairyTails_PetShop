@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     BarChart,
     Bar,
@@ -17,7 +17,9 @@ import {
     Users,
     Package,
     TrendingUp,
-    CreditCard
+    CreditCard,
+    X,
+    Eye
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -25,7 +27,7 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
         todayOrders: 0,
-        todayPending: 0,
+        todayConfirmed: 0,
         todayDelivered: 0,
         todayCancelled: 0,
         totalUsers: 0,
@@ -34,77 +36,89 @@ const AdminDashboard = () => {
     const [chartData, setChartData] = useState([]);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(true);
+    const [allOrders, setAllOrders] = useState([]);
 
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            const token = localStorage.getItem('adminToken');
-            if (!token) return;
+    // Modal states
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalOrders, setModalOrders] = useState([]);
 
+    const fetchDashboardData = useCallback(async (showLoader = false) => {
+        const token = localStorage.getItem('adminToken');
+        if (!token) return;
+
+        if (showLoader) setLoading(true);
+
+        try {
+            // Fetch product counts from ALL categories
+            const endpoints = ['food', 'clothes', 'grooming-essentials', 'health-supplements', 'houses', 'toys', 'accessories'];
+            const productResults = await Promise.allSettled(
+                endpoints.map(ep => fetch(`${API_BASE}/${ep}?limit=1`).then(r => r.json()))
+            );
+            const totalProducts = productResults.reduce((sum, r) => {
+                if (r.status === 'fulfilled') {
+                    const d = r.value;
+                    return sum + (d.total || d.count || (Array.isArray(d.data) ? d.data.length : 0));
+                }
+                return sum;
+            }, 0);
+
+            let userCount = 0;
             try {
-                // Fetch product counts from ALL categories
-                const endpoints = ['food', 'clothes', 'grooming-essentials', 'health-supplements', 'houses', 'toys', 'accessories'];
-                const productResults = await Promise.allSettled(
-                    endpoints.map(ep => fetch(`${API_BASE}/${ep}?limit=1`).then(r => r.json()))
-                );
-                const totalProducts = productResults.reduce((sum, r) => {
-                    if (r.status === 'fulfilled') {
-                        const d = r.value;
-                        return sum + (d.total || d.count || (Array.isArray(d.data) ? d.data.length : 0));
-                    }
-                    return sum;
-                }, 0);
+                const usersRes = await fetch(`${API_BASE}/admin/users`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (usersRes.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('admin');
+                    window.location.href = '/admin/signin';
+                    return;
+                }
+                const usersData = await usersRes.json();
+                userCount = usersData.count || 0;
+            } catch {}
 
-                let userCount = 0;
-                try {
-                    const usersRes = await fetch(`${API_BASE}/admin/users`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (usersRes.status === 401) {
-                        localStorage.removeItem('adminToken');
-                        localStorage.removeItem('admin');
-                        window.location.href = '/admin/signin';
-                        return;
-                    }
-                    const usersData = await usersRes.json();
-                    userCount = usersData.count || 0;
-                } catch {}
+            // Fetch all orders
+            let orders = [];
+            try {
+                const ordersRes = await fetch(`${API_BASE}/admin/orders`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (ordersRes.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('admin');
+                    window.location.href = '/admin/signin';
+                    return;
+                }
+                const ordersData = await ordersRes.json();
+                if (ordersData.success) {
+                    orders = ordersData.data || [];
+                }
+            } catch {}
 
-                // Fetch all orders
-                let orders = [];
-                try {
-                    const ordersRes = await fetch(`${API_BASE}/admin/orders`, {
-                        headers: { Authorization: `Bearer ${token}` }
-                    });
-                    if (ordersRes.status === 401) {
-                        localStorage.removeItem('adminToken');
-                        localStorage.removeItem('admin');
-                        window.location.href = '/admin/signin';
-                        return;
-                    }
-                    const ordersData = await ordersRes.json();
-                    if (ordersData.success) {
-                        orders = ordersData.data || [];
-                    }
-                } catch {}
-
-                processOrderData(orders, totalProducts, userCount);
-            } catch (error) {
-                console.error('Error fetching dashboard data:', error);
-                processOrderData([], 0, 0);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDashboardData();
+            setAllOrders(orders);
+            processOrderData(orders, totalProducts, userCount);
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            processOrderData([], 0, 0);
+        } finally {
+            setLoading(false);
+        }
     }, [selectedYear]);
+
+    // Initial fetch + auto-refresh every 10 seconds
+    useEffect(() => {
+        fetchDashboardData(true);
+        const interval = setInterval(() => fetchDashboardData(false), 10000);
+        return () => clearInterval(interval);
+    }, [fetchDashboardData]);
 
     const processOrderData = (orders, productCount, userCount) => {
         const today = new Date();
         const todayDateString = today.toDateString();
 
         let todayOrders = 0;
-        let todayPending = 0;
+        let todayConfirmed = 0;
         let todayDelivered = 0;
         let todayCancelled = 0;
 
@@ -115,43 +129,38 @@ const AdminDashboard = () => {
             return acc;
         }, {});
 
-  orders.forEach(order => {
-    const orderDate = new Date(order.createdAt);
-    const dateString = orderDate.toDateString();
-    const orderYear = orderDate.getFullYear();
-    const monthKey = orderDate.toLocaleString('default', { month: 'short' });
+        orders.forEach(order => {
+            const orderDate = new Date(order.createdAt);
+            const dateString = orderDate.toDateString();
+            const orderYear = orderDate.getFullYear();
+            const monthKey = orderDate.toLocaleString('default', { month: 'short' });
 
-    const isPending =
-        order.status === 'placed' ||
-        order.status === 'processing' ||
-        order.status === 'shipped';
+            // Today-specific stats
+            if (dateString === todayDateString) {
+                todayOrders++;
 
-    // ⭐ Pending = ANY date
-    if (isPending) {
-        todayPending++;
-    }
+                const isPaymentFailed =
+                    order.paymentStatus === 'failed' ||
+                    (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
 
-    // ⭐ Today-specific stats
-    if (dateString === todayDateString) {
-        todayOrders++;
+                if (order.status === 'placed' && !isPaymentFailed) todayConfirmed++;
+                if (order.status === 'delivered') todayDelivered++;
+                if (order.status === 'cancelled') todayCancelled++;
+            }
 
-        if (order.status === 'delivered') todayDelivered++;
-        if (order.status === 'cancelled') todayCancelled++;
-    }
-
-    // Monthly Aggregation
-    if (orderYear === selectedYear && monthlyData[monthKey]) {
-        monthlyData[monthKey].revenue += order.total || 0;
-        monthlyData[monthKey].orders += 1;
-    }
-});
+            // Monthly Aggregation
+            if (orderYear === selectedYear && monthlyData[monthKey]) {
+                monthlyData[monthKey].revenue += order.total || 0;
+                monthlyData[monthKey].orders += 1;
+            }
+        });
 
         // Convert to array in correct order
         const chartArray = monthsOrder.map(month => monthlyData[month]);
 
         setStats({
             todayOrders,
-            todayPending,
+            todayConfirmed,
             todayDelivered,
             todayCancelled,
             totalUsers: userCount,
@@ -160,6 +169,122 @@ const AdminDashboard = () => {
 
         setChartData(chartArray);
     };
+
+    // Filter orders for each stat card click
+    const handleStatCardClick = (type) => {
+        const today = new Date();
+        const todayDateString = today.toDateString();
+        let filtered = [];
+        let title = '';
+
+        switch (type) {
+            case 'todayOrders':
+                title = "Today's Orders";
+                filtered = allOrders.filter(o => new Date(o.createdAt).toDateString() === todayDateString);
+                break;
+            case 'confirmed': {
+                title = "Today's Confirmed Orders";
+                filtered = allOrders.filter(o => {
+                    const sameDay = new Date(o.createdAt).toDateString() === todayDateString;
+                    const isConfirmed = o.status === 'placed';
+                    const isPaymentFailed =
+                        o.paymentStatus === 'failed' ||
+                        (o.paymentMethod !== 'cash_on_delivery' && !o.razorpayPaymentId);
+                    return sameDay && isConfirmed && !isPaymentFailed;
+                });
+                break;
+            }
+            case 'todayDelivered':
+                title = "Today's Delivered Orders";
+                filtered = allOrders.filter(o =>
+                    new Date(o.createdAt).toDateString() === todayDateString && o.status === 'delivered'
+                );
+                break;
+            case 'todayCancelled':
+                title = "Today's Cancelled Orders";
+                filtered = allOrders.filter(o =>
+                    new Date(o.createdAt).toDateString() === todayDateString && o.status === 'cancelled'
+                );
+                break;
+            default:
+                return;
+        }
+
+        setModalTitle(title);
+        setModalOrders(filtered);
+        setModalOpen(true);
+    };
+
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
+
+    const getStatusLabel = (status) => {
+        const labels = { placed: 'Confirm', processing: 'Processing', shipped: 'Shipped', delivered: 'Delivered', cancelled: 'Cancelled' };
+        return labels[status] || status;
+    };
+
+    const isPaymentFailed = (order) => {
+        return order.paymentStatus === 'failed' ||
+            (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+    };
+
+    const getStatusBadge = (order) => {
+        // If payment failed, show Failed for status too
+        if (isPaymentFailed(order)) {
+            return (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    Failed
+                </span>
+            );
+        }
+        const map = {
+            placed: 'bg-blue-100 text-blue-700',
+            processing: 'bg-yellow-100 text-yellow-700',
+            shipped: 'bg-indigo-100 text-indigo-700',
+            delivered: 'bg-green-100 text-green-700',
+            cancelled: 'bg-red-100 text-red-700'
+        };
+        return (
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${map[order.status] || 'bg-gray-100 text-gray-700'}`}>
+                {getStatusLabel(order.status)}
+            </span>
+        );
+    };
+
+    const getPaymentBadge = (order) => {
+        if (isPaymentFailed(order)) {
+            return (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                    Failed
+                </span>
+            );
+        }
+
+        const map = {
+            paid: 'bg-green-100 text-green-700',
+            unpaid: 'bg-yellow-100 text-yellow-700',
+            refund: 'bg-purple-100 text-purple-700',
+        };
+        const status = order.paymentStatus || 'unpaid';
+        return (
+            <span className={`px-2 py-0.5 rounded-full text-xs font-bold capitalize ${map[status] || 'bg-gray-100 text-gray-700'}`}>
+                {status}
+            </span>
+        );
+    };
+
+    // Get today's orders for Recent Orders section
+    const todayDateString = new Date().toDateString();
+    const recentOrders = allOrders.filter(o => new Date(o.createdAt).toDateString() === todayDateString);
 
     if (loading) {
         return (
@@ -184,24 +309,28 @@ const AdminDashboard = () => {
                     value={stats.todayOrders}
                     icon={<ShoppingBag className="w-6 h-6 text-white" />}
                     color="bg-gradient-to-r from-blue-500 to-blue-600"
+                    onClick={() => handleStatCardClick('todayOrders')}
                 />
                 <StatCard
-                    title="Pending"
-                    value={stats.todayPending}
+                    title="Confirmed"
+                    value={stats.todayConfirmed}
                     icon={<Clock className="w-6 h-6 text-white" />}
                     color="bg-gradient-to-r from-orange-400 to-orange-500"
+                    onClick={() => handleStatCardClick('confirmed')}
                 />
                 <StatCard
                     title="Today's Delivered"
                     value={stats.todayDelivered}
                     icon={<CheckCircle className="w-6 h-6 text-white" />}
                     color="bg-gradient-to-r from-emerald-500 to-emerald-600"
+                    onClick={() => handleStatCardClick('todayDelivered')}
                 />
                 <StatCard
                     title="Today's Cancelled"
                     value={stats.todayCancelled}
                     icon={<XCircle className="w-6 h-6 text-white" />}
                     color="bg-gradient-to-r from-red-500 to-red-600"
+                    onClick={() => handleStatCardClick('todayCancelled')}
                 />
             </div>
 
@@ -297,6 +426,192 @@ const AdminDashboard = () => {
                 </div>
             </div>
 
+            {/* Recent Orders (Today) */}
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-800">Recent Orders</h3>
+                        <p className="text-sm text-gray-500">Orders placed today</p>
+                    </div>
+                    <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                        {recentOrders.length} order{recentOrders.length !== 1 ? 's' : ''}
+                    </span>
+                </div>
+
+                {recentOrders.length === 0 ? (
+                    <div className="text-center py-10">
+                        <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-400 text-sm">No orders placed today yet</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Order ID</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Items</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {recentOrders.map((order) => (
+                                    <tr key={order._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-4 py-3 text-sm font-semibold text-purple-600">
+                                            #{order.orderNumber || parseInt(order._id.slice(-8), 16)}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <p className="text-sm font-medium text-gray-800">
+                                                {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
+                                            </p>
+                                            <p className="text-xs text-gray-400">{order.user?.email || 'N/A'}</p>
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                            {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm font-semibold text-gray-800">
+                                            ₹{order.total?.toLocaleString()}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {getPaymentBadge(order)}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {getStatusBadge(order)}
+                                        </td>
+                                        <td className="px-4 py-3 text-xs text-gray-500">
+                                            {new Date(order.createdAt).toLocaleTimeString('en-IN', {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: true
+                                            })}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+            {/* Order Details Modal - Table Format */}
+            {modalOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]" onClick={() => setModalOpen(false)}>
+                    <div
+                        className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl mx-4 max-h-[85vh] flex flex-col"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-5 border-b border-gray-200 shrink-0">
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-800">{modalTitle}</h3>
+                                <p className="text-sm text-gray-500">{modalOrders.length} order{modalOrders.length !== 1 ? 's' : ''} found</p>
+                            </div>
+                            <button
+                                onClick={() => setModalOpen(false)}
+                                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                            >
+                                <X size={20} className="text-gray-500" />
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="flex-1 overflow-y-auto">
+                            {modalOrders.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-3" />
+                                    <p className="text-gray-400">No orders found</p>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left min-w-[900px]">
+                                        <thead>
+                                            <tr className="bg-gray-50 border-b border-gray-200">
+                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Order ID</th>
+                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Customer</th>
+                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Products</th>
+                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Qty</th>
+                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-right">Price</th>
+                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Status</th>
+                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Payment</th>
+                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {modalOrders.map(order => {
+                                                const isPaymentFailed = order.paymentStatus === 'failed' ||
+                                                    (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+                                                const userName = order.shippingAddress
+                                                    ? `${order.shippingAddress.firstName} ${order.shippingAddress.lastName}`
+                                                    : (order.user?.name || 'Unknown');
+                                                const userEmail = order.user?.email || 'N/A';
+                                                const userPhone = order.shippingAddress?.phone || order.user?.phone || '—';
+                                                const totalQty = (order.items || []).reduce((s, i) => s + i.quantity, 0);
+                                                const displayOrderId = order.orderNumber || parseInt(order._id.slice(-8), 16);
+
+                                                return (
+                                                    <tr key={order._id} className="hover:bg-gray-50 transition-colors">
+                                                        <td className="px-4 py-3">
+                                                            <p className="text-xs font-bold text-gray-800">#{displayOrderId}</p>
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <p className="text-xs font-semibold text-gray-800">{userName}</p>
+                                                            <p className="text-[10px] text-gray-400">{userEmail}</p>
+                                                            <p className="text-[10px] text-gray-400">{userPhone}</p>
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex flex-col gap-1.5 max-w-[200px]">
+                                                                {(order.items || []).slice(0, 2).map((item, idx) => (
+                                                                    <div key={idx} className="flex items-center gap-2">
+                                                                        <div className="w-7 h-7 rounded bg-gray-50 border border-gray-200 shrink-0 overflow-hidden">
+                                                                            {item.productImage ? (
+                                                                                <img src={item.productImage} alt="" className="w-full h-full object-contain" />
+                                                                            ) : (
+                                                                                <span className="flex items-center justify-center h-full text-[10px]">🐾</span>
+                                                                            )}
+                                                                        </div>
+                                                                        <p className="text-[11px] text-gray-700 truncate">{item.productName}</p>
+                                                                    </div>
+                                                                ))}
+                                                                {(order.items || []).length > 2 && (
+                                                                    <p className="text-[10px] text-gray-400 pl-9">+{order.items.length - 2} more</p>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-center">
+                                                            <span className="text-xs text-gray-600">{totalQty}</span>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right">
+                                                            <span className="text-xs font-bold text-gray-800">₹{order.total?.toLocaleString()}</span>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-center">
+                                                            {getStatusBadge(order)}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-center">
+                                                            {getPaymentBadge(order)}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <p className="text-[10px] text-gray-400">
+                                                                {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                            </p>
+                                                            <p className="text-[10px] text-gray-300">
+                                                                {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <style>{`
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(10px); }
@@ -308,17 +623,21 @@ const AdminDashboard = () => {
     );
 };
 
-const StatCard = ({ title, value, icon, color }) => (
-    <div className="relative overflow-hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+const StatCard = ({ title, value, icon, color, onClick }) => (
+    <div
+        onClick={onClick}
+        className="relative overflow-hidden bg-white p-6 rounded-2xl shadow-sm border border-gray-100 transition-all hover:shadow-md cursor-pointer group"
+    >
         <div className="flex items-center justify-between z-10 relative">
             <div>
                 <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
                 <h3 className="text-3xl font-bold text-gray-800">{value}</h3>
             </div>
-            <div className={`p-3 rounded-xl shadow-lg ${color}`}>
+            <div className={`p-3 rounded-xl shadow-lg ${color} group-hover:scale-110 transition-transform`}>
                 {icon}
             </div>
         </div>
+        <p className="text-xs text-purple-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Click to view details →</p>
         {/* Decorative background element */}
         <div className={`absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-10 ${color}`} />
     </div>

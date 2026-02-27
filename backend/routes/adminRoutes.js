@@ -1,5 +1,5 @@
 import express from 'express';
-import { adminSignup, adminSignin, getAdminMe, getAllUsers, deleteUser } from '../controllers/adminController.js';
+import { adminSignup, adminSignin, getAdminMe, getAllUsers, deleteUser, changeAdminPassword } from '../controllers/adminController.js';
 import { getAllOrders, getOrderByIdAdmin, updateOrderStatus, updatePaymentStatus } from '../controllers/orderController.js';
 import { protectAdmin } from '../middleware/adminMiddleware.js';
 
@@ -11,6 +11,7 @@ router.post('/signin', adminSignin);
 
 // Protected routes (admin only)
 router.get('/me', protectAdmin, getAdminMe);
+router.put('/change-password', protectAdmin, changeAdminPassword);
 router.get('/users', protectAdmin, getAllUsers);
 router.delete('/users/:id', protectAdmin, deleteUser);
 

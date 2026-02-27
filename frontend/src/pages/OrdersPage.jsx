@@ -6,7 +6,7 @@ import cattImage from '../assets/catt.png';
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const STATUS_CONFIG = {
-  placed: { label: 'Placed', color: 'bg-blue-100 text-blue-700', icon: '📦' },
+  placed: { label: 'Confirm', color: 'bg-blue-100 text-blue-700', icon: '📦' },
   processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700', icon: '⚙️' },
   shipped: { label: 'Shipped', color: 'bg-indigo-100 text-indigo-700', icon: '🚚' },
   delivered: { label: 'Delivered', color: 'bg-green-100 text-green-700', icon: '🎉' },

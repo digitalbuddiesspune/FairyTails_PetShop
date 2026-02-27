@@ -1,5 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import {
     LayoutDashboard,
     Package,
@@ -13,8 +14,14 @@ import {
     ChevronDown,
     PackageSearch,
     PlusCircle,
-    ExternalLink
+    ExternalLink,
+    Eye,
+    EyeOff,
+    Lock,
+    Mail
 } from 'lucide-react';
+
+const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const AdminLayout = () => {
     const navigate = useNavigate();
@@ -22,6 +29,18 @@ const AdminLayout = () => {
     const [admin, setAdmin] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [productsOpen, setProductsOpen] = useState(false);
+    const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showCurrentPw, setShowCurrentPw] = useState(false);
+    const [showNewPw, setShowNewPw] = useState(false);
+    const [showConfirmPw, setShowConfirmPw] = useState(false);
+    const [pwError, setPwError] = useState('');
+    const [pwSuccess, setPwSuccess] = useState('');
+    const [pwLoading, setPwLoading] = useState(false);
+    const profileRef = useRef(null);
 
     useEffect(() => {
         const adminData = localStorage.getItem('admin');
@@ -40,10 +59,64 @@ const AdminLayout = () => {
         }
     }, [location.pathname]);
 
+    // Close profile dropdown on outside click
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setProfileDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const handleLogout = () => {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('admin');
         navigate('/admin/signin');
+    };
+
+    const handleChangePassword = async () => {
+        setPwError('');
+        setPwSuccess('');
+
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            setPwError('All fields are required');
+            return;
+        }
+        if (newPassword.length < 6) {
+            setPwError('New password must be at least 6 characters');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setPwError('New passwords do not match');
+            return;
+        }
+
+        setPwLoading(true);
+        try {
+            const token = localStorage.getItem('adminToken');
+            const res = await axios.put(`${API_BASE}/admin/change-password`, {
+                currentPassword,
+                newPassword
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setPwSuccess('Password updated successfully!');
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+                setTimeout(() => {
+                    setShowPasswordModal(false);
+                    setPwSuccess('');
+                }, 1500);
+            }
+        } catch (err) {
+            setPwError(err.response?.data?.message || 'Failed to update password');
+        } finally {
+            setPwLoading(false);
+        }
     };
 
     const isProductPage = location.pathname.includes('/admin/my-products') || location.pathname.includes('/admin/products');
@@ -86,16 +159,7 @@ const AdminLayout = () => {
                 </div>
 
                 {/* Admin Info */}
-                <div className="p-4 border-b border-slate-700/50">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-purple-500/20 border border-purple-500/30 rounded-full flex items-center justify-center text-purple-300 font-bold text-sm">
-                            {admin.email?.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{admin.email}</p>
-                        </div>
-                    </div>
-                </div>
+              
 
                 {/* Menu */}
 <nav className="p-3 flex-1 overflow-y-auto no-scrollbar">                    <div className="space-y-1">
@@ -240,13 +304,129 @@ const AdminLayout = () => {
                             {getPageTitle()}
                         </h1>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-500 hidden sm:inline">Welcome, <span className="font-semibold text-gray-700">Admin</span></span>
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">
+                    <div className="relative" ref={profileRef}>
+                        <button
+                            onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                            className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer"
+                        >
                             {admin.email?.charAt(0).toUpperCase()}
-                        </div>
+                        </button>
+
+                        {/* Profile Dropdown */}
+                        {profileDropdownOpen && (
+                            <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-fadeIn">
+                                <div className="px-4 py-3 border-b border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-lg">
+                                            {admin.email?.charAt(0).toUpperCase()}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-semibold text-gray-800">Admin</p>
+                                            <p className="text-xs text-gray-500 truncate">{admin.email}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => { setProfileDropdownOpen(false); setShowPasswordModal(true); setPwError(''); setPwSuccess(''); }}
+                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                    <Lock size={16} className="text-gray-400" />
+                                    Change Password
+                                </button>
+                                <div className="border-t border-gray-100 mt-1 pt-1">
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                    >
+                                        <LogOut size={16} />
+                                        Log Out
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </header>
+
+                {/* Change Password Modal */}
+                {showPasswordModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]" onClick={() => setShowPasswordModal(false)}>
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="p-2 bg-purple-100 rounded-xl">
+                                    <Lock size={20} className="text-purple-600" />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-800">Change Password</h3>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Current Password</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showCurrentPw ? 'text' : 'password'}
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10"
+                                            placeholder="Enter current password"
+                                        />
+                                        <button type="button" onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            {showCurrentPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">New Password</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showNewPw ? 'text' : 'password'}
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10"
+                                            placeholder="Enter new password"
+                                        />
+                                        <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Confirm New Password</label>
+                                    <div className="relative">
+                                        <input
+                                            type={showConfirmPw ? 'text' : 'password'}
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10"
+                                            placeholder="Confirm new password"
+                                        />
+                                        <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            {showConfirmPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {pwError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{pwError}</p>}
+                                {pwSuccess && <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">{pwSuccess}</p>}
+                            </div>
+
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    onClick={() => { setShowPasswordModal(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); setPwError(''); setPwSuccess(''); }}
+                                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleChangePassword}
+                                    disabled={pwLoading}
+                                    className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                                >
+                                    {pwLoading ? 'Updating...' : 'Update Password'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Page Content — my-products uses internal scroll; other pages scroll normally */}
                 <main className={`flex-1 min-h-0 p-4 sm:p-6 ${
