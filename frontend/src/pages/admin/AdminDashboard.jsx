@@ -27,7 +27,7 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
         todayOrders: 0,
-        todayPending: 0,
+        todayConfirmed: 0,
         todayDelivered: 0,
         todayCancelled: 0,
         totalUsers: 0,
@@ -118,7 +118,7 @@ const AdminDashboard = () => {
         const todayDateString = today.toDateString();
 
         let todayOrders = 0;
-        let todayPending = 0;
+        let todayConfirmed = 0;
         let todayDelivered = 0;
         let todayCancelled = 0;
 
@@ -135,19 +135,10 @@ const AdminDashboard = () => {
             const orderYear = orderDate.getFullYear();
             const monthKey = orderDate.toLocaleString('default', { month: 'short' });
 
-            const isPending =
-                order.status === 'placed' ||
-                order.status === 'processing' ||
-                order.status === 'shipped';
-
-            // Pending = ANY date
-            if (isPending) {
-                todayPending++;
-            }
-
             // Today-specific stats
             if (dateString === todayDateString) {
                 todayOrders++;
+                if (order.status === 'placed') todayConfirmed++;
                 if (order.status === 'delivered') todayDelivered++;
                 if (order.status === 'cancelled') todayCancelled++;
             }
@@ -164,7 +155,7 @@ const AdminDashboard = () => {
 
         setStats({
             todayOrders,
-            todayPending,
+            todayConfirmed,
             todayDelivered,
             todayCancelled,
             totalUsers: userCount,
@@ -186,10 +177,10 @@ const AdminDashboard = () => {
                 title = "Today's Orders";
                 filtered = allOrders.filter(o => new Date(o.createdAt).toDateString() === todayDateString);
                 break;
-            case 'pending':
-                title = 'Pending Orders';
+            case 'confirmed':
+                title = "Today's Confirmed Orders";
                 filtered = allOrders.filter(o =>
-                    o.status === 'placed' || o.status === 'processing' || o.status === 'shipped'
+                    new Date(o.createdAt).toDateString() === todayDateString && o.status === 'placed'
                 );
                 break;
             case 'todayDelivered':
@@ -288,11 +279,11 @@ const AdminDashboard = () => {
                     onClick={() => handleStatCardClick('todayOrders')}
                 />
                 <StatCard
-                    title="Pending"
-                    value={stats.todayPending}
+                    title="Confirmed"
+                    value={stats.todayConfirmed}
                     icon={<Clock className="w-6 h-6 text-white" />}
                     color="bg-gradient-to-r from-orange-400 to-orange-500"
-                    onClick={() => handleStatCardClick('pending')}
+                    onClick={() => handleStatCardClick('confirmed')}
                 />
                 <StatCard
                     title="Today's Delivered"

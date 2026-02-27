@@ -159,16 +159,7 @@ const AdminLayout = () => {
                 </div>
 
                 {/* Admin Info */}
-                <div className="p-4 border-b border-slate-700/50">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-purple-500/20 border border-purple-500/30 rounded-full flex items-center justify-center text-purple-300 font-bold text-sm">
-                            {admin.email?.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{admin.email}</p>
-                        </div>
-                    </div>
-                </div>
+              
 
                 {/* Menu */}
 <nav className="p-3 flex-1 overflow-y-auto no-scrollbar">                    <div className="space-y-1">
