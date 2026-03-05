@@ -81,7 +81,7 @@ const AdminUsers = () => {
         <div className="animate-fadeIn">
             {deleteConfirm && renderDeleteConfirm()}
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Users</h2>
+          
 
             {loading ? (
                 <div className="flex items-center justify-center py-20">
@@ -101,6 +101,7 @@ const AdminUsers = () => {
                                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
                                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Contact</th>
                                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Joined</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Total Ordered</th>
                                     <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -125,6 +126,11 @@ const AdminUsers = () => {
                                         <td className="px-6 py-4">
                                             <span className="text-sm text-gray-500">
                                                 {new Date(user.createdAt).toLocaleDateString()}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                {user.totalOrderedQuantity || 0}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">

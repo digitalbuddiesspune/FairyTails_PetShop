@@ -181,7 +181,7 @@ const AdminOrderDetails = () => {
                   <select
                     value={order.paymentStatus || 'unpaid'}
                     onChange={(e) => handlePaymentChange(e.target.value)}
-                    disabled={updating || order.paymentStatus === 'paid' || order.paymentStatus === 'failed'}
+                    disabled={updating || order.paymentStatus === 'failed'}
                     className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${PAYMENT_CONFIG[order.paymentStatus || 'unpaid']?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
                   >
                     <option value="unpaid">Unpaid</option>

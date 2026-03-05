@@ -202,7 +202,7 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Top Bar */}
-      <div className="bg-[#a3e635] w-full">
+      <div className="bg-[#203D5B] w-full">
         <div className="w-full px-4 lg:px-8 py-2">
           {/* Desktop layout */}
           <div className="hidden md:flex items-center justify-between gap-4">
@@ -233,14 +233,14 @@ const Navbar = () => {
 
             {/* Right Icons - Desktop */}
             <div className="flex items-center gap-3 md:gap-4 shrink-0">
-              <Link to="/contact" className="hidden lg:flex items-center gap-1 text-gray-800 hover:text-black font-medium text-sm transition-colors">
+              <Link to="/contact" className="hidden lg:flex items-center gap-1 text-white hover:text-white/80 font-medium text-sm transition-colors">
                 <PhoneIcon />
                 <span>Contact</span>
               </Link>
-              <Link to="/about" className="hidden lg:flex items-center text-gray-800 hover:text-black font-medium text-sm transition-colors">
+              <Link to="/about" className="hidden lg:flex items-center text-white hover:text-white/80 font-medium text-sm transition-colors">
                 About
               </Link>
-              <Link to="/wishlist" className="text-gray-800 hover:text-black transition-colors relative" title="Wishlist">
+              <Link to="/wishlist" className="text-white hover:text-white/80 transition-colors relative" title="Wishlist">
                 <HeartIcon />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
@@ -248,7 +248,7 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
-              <Link to="/cart" className="text-gray-800 hover:text-black transition-colors relative" title="Cart">
+              <Link to="/cart" className="text-white hover:text-white/80 transition-colors relative" title="Cart">
                 <CartIcon />
                 {cartCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
@@ -257,7 +257,7 @@ const Navbar = () => {
                 )}
               </Link>
               <div className="relative" ref={userDropdownRef}>
-                <button onClick={handleProfileClick} className="text-gray-800 hover:text-black transition-colors" title="Profile">
+                <button onClick={handleProfileClick} className="text-white hover:text-white/80 transition-colors" title="Profile">
                   <UserIcon />
                 </button>
                 {userDropdownOpen && localStorage.getItem('token') && (
@@ -297,7 +297,7 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="p-2 text-gray-800 hover:text-black hover:bg-black/5 rounded-lg transition-colors shrink-0"
+                className="p-2 text-white hover:text-white/80 hover:bg-white/10 rounded-lg transition-colors shrink-0"
                 aria-label="Open menu"
               >
                 <HamburgerIcon />
@@ -311,7 +311,7 @@ const Navbar = () => {
               </Link>
               <button
                 onClick={() => setMobileSearchExpanded(true)}
-                className="p-2 text-gray-800 hover:text-black hover:bg-black/5 rounded-lg transition-colors shrink-0"
+                className="p-2 text-white hover:text-white/80 hover:bg-white/10 rounded-lg transition-colors shrink-0"
                 aria-label="Search"
               >
                 <SearchIconGray />
@@ -334,7 +334,7 @@ const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => { setMobileSearchExpanded(false); setSearchQuery(''); }}
-                  className="p-2.5 text-gray-800 hover:bg-black/5 rounded-lg shrink-0"
+                  className="p-2.5 text-white hover:bg-white/10 rounded-lg shrink-0"
                   aria-label="Close search"
                 >
                   <CloseIcon />
@@ -352,7 +352,7 @@ const Navbar = () => {
               <li key={category._id || index} className="relative" data-idx={index}>
                 <button
                   onClick={() => handleCategoryClick(index, category.slug)}
-                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-white hover:text-[#a3e635] hover:bg-gray-900 transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] hover:bg-gray-900 transition-colors whitespace-nowrap"
                 >
                   {category.name}
                   {category.subcategories?.length > 0 && (
@@ -364,12 +364,12 @@ const Navbar = () => {
             
             {/* Mobile Contact & About */}
             <li className="lg:hidden">
-              <Link to="/contact" className="px-4 py-3 text-sm font-medium text-white hover:text-[#a3e635] whitespace-nowrap block">
+              <Link to="/contact" className="px-4 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] whitespace-nowrap block">
                 Contact
               </Link>
             </li>
             <li className="lg:hidden">
-              <Link to="/about" className="px-4 py-3 text-sm font-medium text-white hover:text-[#a3e635] whitespace-nowrap block">
+              <Link to="/about" className="px-4 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] whitespace-nowrap block">
                 About
               </Link>
             </li>
@@ -523,7 +523,7 @@ const SearchIcon = () => (
 );
 
 const SearchIconGray = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
   </svg>
 );

@@ -781,7 +781,7 @@ const ProductDetail = () => {
                     className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 ${
                       availableStock === 0
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white hover:from-[#4d7c0f] hover:to-[#3f6212]'
+                        : 'bg-[#203D5B] text-white hover:bg-[#1a3149]'
                     }`}
                   >
                     {availableStock === 0
@@ -797,7 +797,7 @@ const ProductDetail = () => {
                     className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 ${
                       availableStock === 0
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white hover:from-[#d97706] hover:to-[#b45309]'
+                        : 'bg-[#2F5A87] text-white hover:bg-[#264a6d]'
                     }`}
                   >
                     {buyingNow ? 'Processing...' : '⚡ Buy Now'}

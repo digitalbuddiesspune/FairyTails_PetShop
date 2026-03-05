@@ -16,7 +16,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#65a30d] to-[#a3e635] py-12 md:py-20">
+      <div className="bg-gradient-to-r from-[#203D5B] to-[#2a4f75] py-12 md:py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">About FairyTails</h1>
           <p className="text-white/90 text-lg max-w-2xl mx-auto">
@@ -30,7 +30,7 @@ const About = () => {
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
-              <div className="text-2xl md:text-4xl font-bold text-[#65a30d]">{stat.number}</div>
+              <div className="text-2xl md:text-4xl font-bold text-[#203D5B]">{stat.number}</div>
               <div className="text-gray-600 text-sm md:text-base">{stat.label}</div>
             </div>
           ))}
@@ -63,7 +63,7 @@ const About = () => {
           <div className="bg-[#D6EFD8] rounded-3xl p-8 flex items-center justify-center">
             <div className="text-center">
               <span className="text-8xl md:text-9xl">🐾</span>
-              <p className="text-[#65a30d] font-bold text-xl mt-4">Where Pets Come First</p>
+              <p className="text-[#203D5B] font-bold text-xl mt-4">Where Pets Come First</p>
             </div>
           </div>
         </div>
@@ -97,7 +97,7 @@ const About = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {team.map((member, index) => (
             <div key={index} className="bg-white rounded-2xl p-4 md:p-6 text-center shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-              <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-[#D6EFD8] to-[#a3e635] rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-[#203D5B]/20 to-[#203D5B]/40 rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-3xl md:text-4xl">{member.emoji}</span>
               </div>
               <h3 className="font-bold text-gray-900 text-sm md:text-base">{member.name}</h3>
@@ -116,7 +116,7 @@ const About = () => {
           </p>
           <a 
             href="/" 
-            className="inline-block bg-[#a3e635] hover:bg-[#84cc16] text-black font-bold px-8 py-3 rounded-xl transition-colors"
+            className="inline-block bg-[#203D5B] hover:bg-[#1a3149] text-white font-bold px-8 py-3 rounded-xl transition-colors"
           >
             Start Shopping 🛒
           </a>

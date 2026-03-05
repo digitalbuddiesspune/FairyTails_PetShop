@@ -21,6 +21,8 @@ import groomingEssentialRoutes from './routes/groomingEssentialRoutes.js';
 import addressRoutes from './routes/addressRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
+import bannerRoutes from './routes/bannerRoutes.js';
+import testimonialRoutes from './routes/testimonialRoutes.js';
 
 const app = express();
 
@@ -80,6 +82,12 @@ app.use('/api/v1/orders', orderRoutes);
 
 // Search routes
 app.use('/api/v1/search', searchRoutes);
+
+// Banner routes
+app.use('/api/v1/banners', bannerRoutes);
+
+// Testimonial routes
+app.use('/api/v1/testimonials', testimonialRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

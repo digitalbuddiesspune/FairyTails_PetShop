@@ -9,7 +9,7 @@ const STATUS_CONFIG = {
   placed: { label: 'Confirm', color: 'bg-blue-100 text-blue-700', icon: '📦' },
   processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700', icon: '⚙️' },
   shipped: { label: 'Shipped', color: 'bg-indigo-100 text-indigo-700', icon: '🚚' },
-  delivered: { label: 'Delivered', color: 'bg-green-100 text-green-700', icon: '🎉' },
+  delivered: { label: 'Delivered', color: 'bg-[#203D5B]/10 text-[#203D5B]', icon: '🎉' },
   cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-700', icon: '❌' },
 };
 
@@ -75,7 +75,7 @@ const OrdersPage = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-[#203D5B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-500 text-lg">Loading your orders...</p>
         </div>
       </div>
@@ -125,7 +125,7 @@ const OrdersPage = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">No orders yet</h3>
               <p className="text-gray-500 mb-6">Once you place an order, it will appear here.</p>
-              <Link to="/" className="inline-block bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all">
+              <Link to="/" className="inline-block bg-gradient-to-r from-[#7ec1ec] to-[#5ba8d4] text-white font-bold py-3 px-8 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] transition-all">
                 Start Shopping
               </Link>
             </div>
@@ -201,7 +201,7 @@ const OrdersPage = () => {
                           <>
                             <Link
                               to={`/order-details/${order._id}`}
-                              className="px-5 py-2 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white text-xs font-bold rounded-lg hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all"
+                              className="px-5 py-2 bg-gradient-to-r from-[#203D5B] to-[#1a3149] text-white text-xs font-bold rounded-lg hover:from-[#1a3149] hover:to-[#152639] transition-all"
                             >
                               View Details
                             </Link>

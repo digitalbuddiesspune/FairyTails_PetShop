@@ -452,7 +452,7 @@ const HomePage = () => {
               </p>
 
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-                Expert <span className="text-[#65a30d]">Vet Consultation</span><br />
+                Expert <span className="text-[#203D5B]">Vet Consultation</span><br />
                 at Your Fingertips
               </h2>
 
@@ -472,7 +472,7 @@ const HomePage = () => {
 
               <Link
                 to="/contact"
-                className="inline-block mt-4 bg-[#65a30d] hover:bg-[#4d7c0f] text-white font-bold px-8 py-3 rounded-full transition-colors shadow-lg shadow-[#65a30d]/20"
+                className="inline-block mt-4 bg-[#203D5B] hover:bg-[#1a3149] text-white font-bold px-8 py-3 rounded-full transition-colors shadow-lg shadow-[#203D5B]/20"
               >
                 Book a Consultation
               </Link>
@@ -551,7 +551,205 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
     </main>
+  );
+};
+
+// Testimonials Component
+const TestimonialsSection = () => {
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const API_BASE = import.meta.env.VITE_BACKEND_API;
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/testimonials`);
+        const data = await res.json();
+        if (data.success) {
+          setTestimonials(data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching testimonials:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
+  const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span key={i} className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}>
+        ★
+      </span>
+    ));
+  };
+
+  // Carousel logic
+  const itemsPerPage = 3;
+  const totalPages = Math.ceil(testimonials.length / itemsPerPage);
+  const showCarousel = testimonials.length > itemsPerPage;
+  
+  const getVisibleTestimonials = () => {
+    if (!showCarousel) return testimonials;
+    const start = currentIndex * itemsPerPage;
+    return testimonials.slice(start, start + itemsPerPage);
+  };
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % totalPages);
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => (prev - 1 + totalPages) % totalPages);
+  };
+
+  if (loading) {
+    return (
+      <section className="py-12 md:py-16 bg-gradient-to-br from-purple-50 to-purple-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="py-12 md:py-16 bg-gradient-to-br from-purple-50 to-purple-100">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">What Our Customers Say</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">Hear from our happy pet parents</p>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto">
+          {/* Carousel Navigation Arrows */}
+          {showCarousel && (
+            <>
+              <button
+                onClick={prevSlide}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-purple-50 transition-all duration-300 border-2 border-purple-200"
+                aria-label="Previous testimonials"
+              >
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-purple-50 transition-all duration-300 border-2 border-purple-200"
+                aria-label="Next testimonials"
+              >
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Testimonials Grid */}
+      {/* Testimonials Grid */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto px-4">
+  {getVisibleTestimonials().map((testimonial, i) => (
+    <div key={testimonial._id} className="relative group w-full">
+      <div className="relative bg-gradient-to-br from-[#F3E8FF] via-[#E6D1FF] to-[#D9BAFF] rounded-3xl px-10 py-8 shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_25px_50px_rgba(147,51,234,0.3)] border-2 border-purple-200 flex flex-col justify-center min-h-[200px] w-full">
+        
+        {/* === SVG BUBBLE ANIMATIONS === */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+          {/* Large slow bubble - top right */}
+          <circle cx="85%" cy="20%" r="45" fill="rgba(255,255,255,0.18)" style={{animation: `floatBubble${i}A 6s ease-in-out infinite`}}/>
+          {/* Medium bubble - bottom left */}
+          <circle cx="10%" cy="75%" r="30" fill="rgba(255,255,255,0.22)" style={{animation: `floatBubble${i}B 8s ease-in-out infinite 1s`}}/>
+          {/* Small bubble - top left */}
+          <circle cx="5%" cy="15%" r="16" fill="rgba(192,132,252,0.25)" style={{animation: `floatBubble${i}C 5s ease-in-out infinite 0.5s`}}/>
+          {/* Tiny bubble - mid right */}
+          <circle cx="92%" cy="65%" r="10" fill="rgba(255,255,255,0.3)" style={{animation: `floatBubble${i}A 4s ease-in-out infinite 2s`}}/>
+          {/* Decorative ring - top right */}
+          <circle cx="80%" cy="80%" r="38" fill="none" stroke="rgba(192,132,252,0.3)" strokeWidth="2" style={{animation: `floatBubble${i}B 7s ease-in-out infinite 0.3s`}}/>
+          {/* Sparkle dots */}
+         
+        </svg>
+
+        {/* Keyframes injected per card to vary timing */}
+        
+
+        {/* Shine sweep on hover */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+        {/* Quote mark SVG */}
+        <svg className="absolute top-4 left-6 w-8 h-8 opacity-20" viewBox="0 0 24 24" fill="rgb(147,51,234)">
+          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+        </svg>
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-center items-center h-full pt-2">
+          <p className="text-gray-700 text-base md:text-lg leading-relaxed mb-5 font-medium text-center px-4">
+            {testimonial.comment}
+          </p>
+          
+          {/* Stars */}
+          <div className="flex items-center justify-center gap-1 mb-4 text-xl">
+            {renderStars(testimonial.rating)}
+          </div>
+
+          {/* Divider */}
+          <div className="w-12 h-0.5 bg-purple-300 rounded-full mb-3 opacity-60" />
+
+          {/* Customer Name */}
+          <p className="font-bold text-gray-800 text-base md:text-lg text-center tracking-wide">
+            — {testimonial.name}
+          </p>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
+{/* Carousel Indicators */}
+{showCarousel && (
+  <div className="flex justify-center gap-2 mt-6">
+    {Array.from({ length: totalPages }).map((_, index) => (
+      <button
+        key={index}
+        onClick={() => setCurrentIndex(index)}
+        className={`h-2 rounded-full transition-all duration-300 ${
+          index === currentIndex ? 'w-8 bg-purple-600' : 'w-2 bg-purple-300'
+        }`}
+        aria-label={`Go to page ${index + 1}`}
+      />
+    ))}
+  </div>
+)}
+
+          {/* Carousel Indicators */}
+          {showCarousel && (
+            <div className="flex justify-center gap-2 mt-6">
+              {Array.from({ length: totalPages }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex ? 'w-8 bg-purple-600' : 'w-2 bg-purple-300'
+                  }`}
+                  aria-label={`Go to page ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 };
 

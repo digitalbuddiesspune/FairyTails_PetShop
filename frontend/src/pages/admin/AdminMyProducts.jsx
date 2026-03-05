@@ -176,16 +176,15 @@ const AdminMyProducts = () => {
       {/* ═══ STICKY TOP: Tabs + Search + Count ═══ */}
       <div className="shrink-0 bg-gray-50">
         {/* ─── Category Tabs ─── */}
-        <div className="flex gap-2 sm:gap-3 mb-3 sm:mb-4 overflow-x-auto pb-2 scrollbar-thin -mx-1 px-1">
+        <div className="flex gap-2 mb-2 overflow-x-auto pb-1 scrollbar-thin -mx-1 px-1">
           {CATEGORIES.map(cat => (
             <button key={cat.key} onClick={() => { setSelectedKey(cat.key); setSearchQuery(''); }}
-              className={`flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl border-2 font-semibold text-xs sm:text-sm transition-all duration-200 ${
+              className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-semibold text-xs transition-all duration-200 ${
                 selectedKey === cat.key ? cat.activeColor : `${cat.color} hover:shadow-md`
               }`}>
-              <span className="text-base sm:text-lg">{cat.icon}</span>
-              <span className="whitespace-nowrap hidden xs:inline sm:inline">{cat.label}</span>
+              <span className="whitespace-nowrap">{cat.label}</span>
               {categoryCounts[cat.key] !== undefined && (
-                <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold min-w-[20px] text-center ${
+                <span className={`ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold min-w-[18px] text-center ${
                   selectedKey === cat.key ? 'bg-white/25 text-white' : 'bg-black/10 text-current'
                 }`}>{categoryCounts[cat.key]}</span>
               )}
@@ -194,16 +193,16 @@ const AdminMyProducts = () => {
         </div>
 
         {/* ─── Search Bar ─── */}
-        <div className="relative mb-3 sm:mb-4">
-          <Search size={18} className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="relative mb-2">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input type="text" placeholder="Search products..." value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 sm:pl-11 pr-10 py-2.5 sm:py-3 border border-gray-200 rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm" />
-          {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">✕</button>}
+            className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm" />
+          {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">✕</button>}
         </div>
 
         {/* Count */}
-        <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-3">
+        <p className="text-xs text-gray-500 mb-2">
           Showing <span className="font-semibold text-gray-800">{filtered.length}</span> products
           {searchQuery && <span className="text-purple-600"> matching &ldquo;{searchQuery}&rdquo;</span>}
         </p>
@@ -277,17 +276,17 @@ const AdminMyProducts = () => {
           </div>
 
           {/* ─── DESKTOP: Table Layout (visible at lg+) ─── */}
-          <div className="hidden lg:block bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="hidden lg:block bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Product</th>
-                    {selectedKey === 'all' && <th className="px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Type</th>}
-                    <th className="px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Price</th>
-                    <th className="px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Expiry</th>
-                    <th className="px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Stock</th>
-                    <th className="px-5 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wide text-center">Actions</th>
+                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Product</th>
+                    {selectedKey === 'all' && <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Type</th>}
+                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Price</th>
+                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Expiry</th>
+                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Stock</th>
+                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -296,47 +295,46 @@ const AdminMyProducts = () => {
                     const stock = getStock(product);
                     return (
                       <tr key={`d-${product._catKey}-${product._id}`} className="hover:bg-gray-50/70 transition-colors group">
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl bg-gray-100 p-1 border border-gray-200 shrink-0 overflow-hidden">
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-lg bg-gray-100 p-0.5 border border-gray-200 shrink-0 overflow-hidden">
                               <img src={getImage(product)} alt="" className="w-full h-full object-contain" />
                             </div>
                             <div className="min-w-0">
-                              <p className="font-semibold text-gray-900 text-sm truncate max-w-[220px]">{getName(product)}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                {getBrand(product) && <span className="text-xs text-gray-500">{getBrand(product)}</span>}
-                                {getSubCat(product) && <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600">{getSubCat(product)}</span>}
+                              <p className="font-semibold text-gray-900 text-xs truncate max-w-[200px]">{getName(product)}</p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                {getBrand(product) && <span className="text-[10px] text-gray-500">{getBrand(product)}</span>}
+                                {getSubCat(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-blue-50 text-blue-600">{getSubCat(product)}</span>}
                               </div>
                             </div>
                           </div>
                         </td>
                         {selectedKey === 'all' && (
-                          <td className="px-5 py-4">
-                            <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">{product._catLabel}</span>
+                          <td className="px-3 py-2">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">{product._catLabel}</span>
                           </td>
                         )}
-                        <td className="px-5 py-4">
-                          <p className="font-bold text-gray-900 text-sm">₹{price.sale}</p>
-                         
+                        <td className="px-3 py-2">
+                          <p className="font-bold text-gray-900 text-xs">₹{price.sale}</p>
                         </td>
-                        <td className="px-5 py-4"><p className="text-sm text-gray-600">{getExpiry(product)}</p></td>
-                        <td className="px-5 py-4">
-                          {stock === '—' ? <span className="text-sm text-gray-400">—</span> : (
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${stock > 10 ? 'bg-green-50 text-green-700' : stock > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                        <td className="px-3 py-2"><p className="text-xs text-gray-600">{getExpiry(product)}</p></td>
+                        <td className="px-3 py-2">
+                          {stock === '—' ? <span className="text-xs text-gray-400">—</span> : (
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${stock > 10 ? 'bg-green-50 text-green-700' : stock > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
                               {stock} {stock === 0 ? '(Out)' : 'in stock'}
                             </span>
                           )}
                         </td>
-                        <td className="px-5 py-4">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button onClick={() => setDetailProduct(product)} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Show Details">
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center justify-center gap-1">
+                            <button onClick={() => setDetailProduct(product)} className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Show Details">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                             </button>
-                            <button onClick={() => openEdit(product)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            <button onClick={() => openEdit(product)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                             </button>
-                            <button onClick={() => setDeleteConfirm(product)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            <button onClick={() => setDeleteConfirm(product)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
                           </div>
                         </td>

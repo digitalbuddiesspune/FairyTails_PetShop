@@ -41,7 +41,7 @@ const getDisplayImage = (product) => product?.images?.[0] || product?.image || n
 
 // ─── Helper: product type label for badge ───────────────────────────────────
 const TYPE_BADGES = {
-  Food: { label: 'Food', color: 'bg-green-50 text-green-700 border-green-200' },
+  Food: { label: 'Food', color: 'bg-[#203D5B]/10 text-[#203D5B] border-[#203D5B]/20' },
   Clothes: { label: 'Clothes', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   Toy: { label: 'Toy', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   House: { label: 'House', color: 'bg-pink-50 text-pink-700 border-pink-200' },
@@ -160,7 +160,7 @@ const CartPage = () => {
           <p className="text-gray-500 mb-6">Please sign in to view your cart and start shopping for your furry friends.</p>
           <Link
             to="/signin"
-            className="inline-block bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all"
+            className="inline-block bg-gradient-to-r from-[#203D5B] to-[#1a3149] text-white font-bold py-3 px-8 rounded-xl hover:from-[#1a3149] hover:to-[#152639] transition-all"
           >
             Sign In
           </Link>
@@ -173,7 +173,7 @@ const CartPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-[#203D5B] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-500 text-lg">Loading your cart...</p>
         </div>
       </div>
@@ -187,7 +187,7 @@ const CartPage = () => {
           <p className="text-5xl mb-4">⚠️</p>
           <h3 className="text-xl font-bold text-gray-800 mb-2">Something went wrong</h3>
           <p className="text-gray-500 mb-6">{error}</p>
-          <button onClick={fetchCart} className="bg-[#65a30d] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#4d7c0f]">
+          <button onClick={fetchCart} className="bg-[#203D5B] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1a3149]">
             Try Again
           </button>
         </div>
@@ -223,7 +223,7 @@ const CartPage = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Your cart is empty</h3>
               <p className="text-gray-500 mb-6">Start adding products for your beloved pets!</p>
-              <Link to="/" className="inline-block bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all">
+              <Link to="/" className="inline-block bg-gradient-to-r from-[#203D5B] to-[#1a3149] text-white font-bold py-3 px-8 rounded-xl hover:from-[#1a3149] hover:to-[#152639] transition-all">
                 Browse Products
               </Link>
             </div>
@@ -273,14 +273,14 @@ const CartPage = () => {
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                                 {product.brand && (
-                                  <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide">{product.brand}</p>
+                                  <p className="text-xs font-semibold text-[#203D5B] uppercase tracking-wide">{product.brand}</p>
                                 )}
                                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.color}`}>
                                   {badge.label}
                                 </span>
                               </div>
                               <Link to={`/product/${product._id}`}>
-                                <h3 className="font-bold text-gray-900 text-sm md:text-base leading-tight hover:text-[#65a30d] transition-colors line-clamp-2">
+                                <h3 className="font-bold text-gray-900 text-sm md:text-base leading-tight hover:text-[#203D5B] transition-colors line-clamp-2">
                                   {displayName}
                                 </h3>
                               </Link>
@@ -349,7 +349,7 @@ const CartPage = () => {
                   <div className="space-y-3 text-sm">
                     
                     {savings > 0 && (
-                      <div className="flex justify-between text-green-600">
+                      <div className="flex justify-between text-[#203D5B]">
                         <span>Discount</span>
                         <span>- ₹{savings.toLocaleString()}</span>
                       </div>
@@ -364,7 +364,7 @@ const CartPage = () => {
                     </div>
                     <div className="flex justify-between text-gray-600">
                       <span>Delivery</span>
-                      <span className="text-green-600 font-medium">{subtotal >= 500 ? 'Free' : '₹50'}</span>
+                      <span className="text-[#203D5B] font-medium">{subtotal >= 500 ? 'Free' : '₹50'}</span>
                     </div>
                   </div>
 
@@ -374,13 +374,13 @@ const CartPage = () => {
                       <span>₹{(subtotal + Math.round(subtotal * 0.18) + (subtotal >= 500 ? 0 : 50)).toLocaleString()}</span>
                     </div>
                     {savings > 0 && (
-                      <p className="text-xs text-green-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
+                      <p className="text-xs text-[#203D5B] mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
                     )}
                   </div>
 
                   <button
                     onClick={() => navigate('/checkout')}
-                    className="w-full mt-6 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm"
+                    className="w-full mt-6 bg-gradient-to-r from-[#7ec1ec] to-[#5ba8d4] text-white font-bold py-3.5 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] active:scale-[0.98] transition-all text-sm"
                   >
                     Proceed to Checkout
                   </button>

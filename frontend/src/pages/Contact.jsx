@@ -86,7 +86,7 @@ const Contact = () => {
                   <a 
                     key={social}
                     href="#" 
-                    className="w-10 h-10 bg-gray-100 hover:bg-[#a3e635] rounded-full flex items-center justify-center transition-colors"
+                    className="w-10 h-10 bg-gray-100 hover:bg-[#203D5B] rounded-full flex items-center justify-center transition-colors"
                   >
                     <span className="text-lg">
                       {social === 'Facebook' && '📘'}
@@ -105,7 +105,7 @@ const Contact = () => {
             <h2 className="text-xl font-bold text-gray-900 mb-6">Send us a Message</h2>
             
             {submitted && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
+              <div className="bg-[#203D5B]/10 border border-[#203D5B]/30 text-[#203D5B] px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
                 <span>✓</span> Thank you! Your message has been sent successfully.
               </div>
             )}
@@ -118,7 +118,7 @@ const Contact = () => {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#203D5B] focus:border-transparent outline-none transition-all"
                   placeholder="Enter your name"
                 />
               </div>
@@ -130,7 +130,7 @@ const Contact = () => {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#203D5B] focus:border-transparent outline-none transition-all"
                   placeholder="Enter your email"
                 />
               </div>
@@ -142,7 +142,7 @@ const Contact = () => {
                   required
                   value={formData.subject}
                   onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#203D5B] focus:border-transparent outline-none transition-all"
                   placeholder="What's this about?"
                 />
               </div>
@@ -154,14 +154,14 @@ const Contact = () => {
                   rows={4}
                   value={formData.message}
                   onChange={(e) => setFormData({...formData, message: e.target.value})}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all resize-none"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#7ec1ec] focus:border-transparent outline-none transition-all resize-none"
                   placeholder="Write your message here..."
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-[#65a30d] hover:bg-[#4d7c0f] text-white font-semibold rounded-xl transition-colors"
+                className="w-full py-3 bg-[#203D5B] hover:bg-[#1a3149] text-white font-semibold rounded-xl transition-colors"
               >
                 Send Message
               </button>
@@ -199,7 +199,7 @@ const Contact = () => {
                   href="https://maps.app.goo.gl/H7kAH4feAhcVoZM58"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-[#65a30d] hover:text-[#4d7c0f] transition-colors"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-[#203D5B] hover:text-[#1a3149] transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
