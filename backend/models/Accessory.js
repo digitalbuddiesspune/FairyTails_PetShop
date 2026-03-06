@@ -17,6 +17,18 @@ const accessoriesSchema = new mongoose.Schema(
       lowercase: true,
     },
 
+    productType: {
+      type: String,
+      enum: ["collar-leash"],
+      lowercase: true,
+    },
+
+    subSubCategory: {
+      type: String,
+      enum: ["collar-leash"],
+      lowercase: true,
+    },
+
     productName: {
       type: String,
       required: true,

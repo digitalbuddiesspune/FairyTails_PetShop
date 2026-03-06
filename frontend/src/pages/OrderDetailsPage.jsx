@@ -222,7 +222,7 @@ const OrderDetailsPage = () => {
             </div>
             <button
               onClick={() => window.open(`/invoice/${order._id}`, '_blank')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#65a30d]/25 hover:from-[#4d7c0f] hover:to-[#3f6212] hover:shadow-[#65a30d]/30 active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#205ea9] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#65a30d]/25 hover:from-[#4d7c0f] hover:to-[#3f6212] hover:shadow-[#65a30d]/30 active:scale-[0.98] transition-all"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -283,9 +283,9 @@ const OrderDetailsPage = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-gray-900 text-sm truncate">{item.productName}</p>
-                    <p className="text-xs text-gray-400">Qty: {item.quantity} × ₹{item.price?.toLocaleString()}</p>
+                    <p className="text-xs text-gray-400">Qty: {item.quantity} × ₹{(item.price || 0).toLocaleString()}</p>
                   </div>
-                  <p className="text-sm font-bold text-gray-900 shrink-0">₹{(item.price * item.quantity).toLocaleString()}</p>
+                  <p className="text-sm font-bold text-gray-900 shrink-0">₹{((item.price || 0) * item.quantity).toLocaleString()}</p>
                 </div>
               ))}
             </div>
@@ -316,13 +316,38 @@ const OrderDetailsPage = () => {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
             <h3 className="font-bold text-gray-900 mb-3">Price Breakdown</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="text-gray-800">₹{order.subtotal?.toLocaleString()}</span></div>
-              {order.discount > 0 && <div className="flex justify-between"><span className="text-green-500">Discount</span><span className="text-green-500">-₹{order.discount?.toLocaleString()}</span></div>}
-              <div className="flex justify-between"><span className="text-gray-400">GST (18%)</span><span className="text-gray-800">₹{order.gst?.toLocaleString()}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">Delivery</span><span className="text-gray-800">{order.deliveryCharge === 0 ? 'Free' : `₹${order.deliveryCharge}`}</span></div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Subtotal</span>
+                <span className="text-gray-800">₹{(order.subtotal || 0).toLocaleString()}</span>
+              </div>
+              {(order.discount || 0) > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-green-500">Discount</span>
+                  <span className="text-green-500">-₹{(order.discount || 0).toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-gray-400">18% GST</span>
+                <span className="text-gray-500 text-xs">Included</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Delivery Charges</span>
+                <div className="flex items-center gap-2">
+                  {(order.subtotal || 0) >= 500 ? (
+                    <>
+                      <span className="text-gray-400 line-through text-xs">₹50</span>
+                      <span className="text-green-600 font-medium">Free</span>
+                    </>
+                  ) : (
+                    <span className="text-gray-800">
+                      {(order.deliveryCharge || 0) === 0 ? 'Free' : `₹${(order.deliveryCharge || 0).toLocaleString()}`}
+                    </span>
+                  )}
+                </div>
+              </div>
               <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100">
                 <span>Total</span>
-                <span>₹{order.total?.toLocaleString()}</span>
+                <span>₹{(order.total || 0).toLocaleString()}</span>
               </div>
             </div>
 
@@ -343,7 +368,7 @@ const OrderDetailsPage = () => {
             </div>
           </div>
 
-          <Link to="/orders" className="inline-flex items-center gap-1 text-sm text-[#65a30d] font-semibold hover:underline">
+          <Link to="/orders" className="inline-flex items-center gap-1 text-sm text-[#205ea9] font-semibold hover:underline">
 
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
 

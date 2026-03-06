@@ -18,7 +18,21 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
   const handleAddToCart = async (e) => {
     e.stopPropagation();
     if (!token) {
-      navigate('/signin');
+      // Use guest cart
+      try {
+        setAddingToCart(true);
+        const { addToGuestCart } = await import('../utils/guestCart');
+        addToGuestCart({
+          productId: product._id,
+          quantity: 1,
+          selectedSize: 0,
+          productType: 'Food',
+        });
+      } catch (err) {
+        console.error('Add to guest cart error:', err);
+      } finally {
+        setAddingToCart(false);
+      }
       return;
     }
     try {
@@ -36,10 +50,17 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
     }
   };
 
-  const handleWishlistToggle = (e) => {
+  const handleWishlistToggle = async (e) => {
     e.stopPropagation();
     if (!token) {
-      navigate('/signin');
+      // Use guest wishlist with full product data
+      const { addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } = await import('../utils/guestCart');
+      if (isInGuestWishlist(product._id)) {
+        removeFromGuestWishlist(product._id);
+      } else {
+        addToGuestWishlist(product);
+      }
+      if (onWishlistToggle) onWishlistToggle(product._id);
       return;
     }
     if (onWishlistToggle) onWishlistToggle(product._id);
@@ -166,7 +187,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
         <div className="flex gap-2 mt-1">
           <button
             onClick={() => navigate(`/product/${product._id}?type=/food`)}
-            className="flex-1 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all duration-200 text-sm"
+            className="flex-1 bg-[#205ea9] hover:bg-[#1a4a7a] text-white font-semibold py-2.5 rounded-xl active:scale-[0.98] transition-all duration-200 text-sm"
           >
             View Details
           </button>

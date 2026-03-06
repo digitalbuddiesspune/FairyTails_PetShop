@@ -5,10 +5,12 @@ import Accessory from '../models/Accessory.js';
 // @access  Public
 export const getAllAccessories = async (req, res) => {
   try {
-    const { subCategory, brand, material, sort, page = 1, limit = 12 } = req.query;
+    const { subCategory, productType, subSubCategory, brand, material, sort, page = 1, limit = 12 } = req.query;
 
     const filter = {};
     if (subCategory) filter.subCategory = subCategory.toLowerCase();
+    if (productType) filter.productType = productType.toLowerCase();
+    if (subSubCategory) filter.subSubCategory = subSubCategory.toLowerCase();
     if (brand) filter.brand = { $regex: brand, $options: 'i' };
     if (material) filter.material = { $regex: material, $options: 'i' };
 
@@ -75,7 +77,7 @@ export const getAccessoryById = async (req, res) => {
 export const createAccessory = async (req, res) => {
   try {
     const {
-      category, subCategory, productName, mrp, discountPrice,
+      category, subCategory, productType, subSubCategory, productName, mrp, discountPrice,
       discountType, availableStock, baseUnit, taxes, images,
       // Optional fields
       brand, material, color, productDetails, keyFeatures,
@@ -96,7 +98,7 @@ export const createAccessory = async (req, res) => {
     }
 
     const accessory = await Accessory.create({
-      category, subCategory, productName, mrp, discountPrice,
+      category, subCategory, productType, subSubCategory, productName, mrp, discountPrice,
       discountType, availableStock, baseUnit, taxes, images,
       // Optional fields
       brand, material, color, productDetails, keyFeatures,

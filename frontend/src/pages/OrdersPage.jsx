@@ -125,7 +125,7 @@ const OrdersPage = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">No orders yet</h3>
               <p className="text-gray-500 mb-6">Once you place an order, it will appear here.</p>
-              <Link to="/" className="inline-block bg-gradient-to-r from-[#7ec1ec] to-[#5ba8d4] text-white font-bold py-3 px-8 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] transition-all">
+              <Link to="/" className="inline-block bg-[#205ea9] text-white font-bold py-3 px-8 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] transition-all">
                 Start Shopping
               </Link>
             </div>
@@ -201,7 +201,7 @@ const OrdersPage = () => {
                           <>
                             <Link
                               to={`/order-details/${order._id}`}
-                              className="px-5 py-2 bg-gradient-to-r from-[#203D5B] to-[#1a3149] text-white text-xs font-bold rounded-lg hover:from-[#1a3149] hover:to-[#152639] transition-all"
+                              className="px-5 py-2 bg-[#205ea9] hover:bg-[#1a4a7a] text-white text-xs font-bold rounded-lg transition-all"
                             >
                               View Details
                             </Link>

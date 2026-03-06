@@ -13,7 +13,8 @@ const defaultCategories = [
       {
         name: 'Treats',
         subSubCategories: ['Dental Treats', 'Biscuits', 'Healthy Treats']
-      }
+      },
+      { name: 'Collar & Leash', subSubCategories: [] }
     ]
   },
   {
@@ -24,7 +25,8 @@ const defaultCategories = [
       { name: 'Dry Food', subSubCategories: [] },
       { name: 'Wet Food', subSubCategories: [] },
       { name: 'Treats', subSubCategories: [] },
-      { name: 'Cat Clothes', subSubCategories: [] }
+      { name: 'Cat Clothes', subSubCategories: [] },
+      { name: 'Collar & Leash', subSubCategories: [] }
     ]
   },
   {
@@ -235,6 +237,45 @@ export const deleteCategory = async (req, res) => {
     res.status(500).json({
       success: false,
       message: error.message || 'Server error deleting category'
+    });
+  }
+};
+
+// @desc    Update Dogs category with Collar and Leash subcategories
+// @route   PUT /api/categories/dogs/update-subcategories
+// @access  Public (should be Admin in production)
+export const updateDogsSubcategories = async (req, res) => {
+  try {
+    const dogsCategory = await Category.findOne({ slug: 'dogs' });
+    
+    if (!dogsCategory) {
+      return res.status(404).json({
+        success: false,
+        message: 'Dogs category not found'
+      });
+    }
+
+    // Check if Collar & Leash already exists
+    const hasCollarLeash = dogsCategory.subcategories.some(sub => sub.name === 'Collar & Leash');
+
+    if (!hasCollarLeash) {
+      dogsCategory.subcategories.push({ name: 'Collar & Leash', subSubCategories: [] });
+    }
+
+    await dogsCategory.save();
+
+    console.log('✅ Dogs category updated with Collar and Leash');
+
+    res.status(200).json({
+      success: true,
+      message: 'Dogs category updated successfully',
+      data: dogsCategory
+    });
+  } catch (error) {
+    console.error('❌ Update Dogs subcategories error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error updating Dogs category'
     });
   }
 };

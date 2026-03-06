@@ -25,18 +25,27 @@ const MODEL_MAP = {
 const getPricing = (product, productType, selectedSize) => {
   if (product.prices?.length > 0) {
     const p = product.prices[selectedSize] || product.prices[0];
-    return { mrp: p.mrp, price: p.discountedPrice };
+    return { 
+      mrp: p.mrp || p.price || 0, 
+      price: p.discountedPrice || p.discountPrice || p.price || p.mrp || 0 
+    };
   }
   if (product.sizes?.length > 0) {
     const s = product.sizes[selectedSize] || product.sizes[0];
-    return { mrp: s.mrp, price: s.discountedPrice };
+    return { 
+      mrp: s.mrp || s.price || 0, 
+      price: s.discountedPrice || s.discountPrice || s.price || s.mrp || 0 
+    };
   }
   if (product.variants?.length > 0) {
     const v = product.variants[selectedSize] || product.variants[0];
-    return { mrp: v.mrp, price: v.discountedPrice };
+    return { 
+      mrp: v.mrp || v.price || 0, 
+      price: v.discountedPrice || v.discountPrice || v.price || v.mrp || 0 
+    };
   }
-  const mrp = product.price || 0;
-  const price = product.discountedPrice || product.discountPrice || mrp;
+  const mrp = product.price || product.mrp || 0;
+  const price = product.discountedPrice || product.discountPrice || product.price || product.mrp || 0;
   return { mrp, price };
 };
 
@@ -72,6 +81,17 @@ export const placeOrder = async (req, res) => {
     for (const item of cart.items) {
       if (!item.product) continue;
       const { mrp, price } = getPricing(item.product, item.productType, item.selectedSize);
+      
+      // Validate price - if price is 0 or invalid, use MRP as fallback
+      const finalPrice = (price && price > 0) ? price : ((mrp && mrp > 0) ? mrp : 0);
+      const finalMrp = (mrp && mrp > 0) ? mrp : finalPrice;
+      
+      if (finalPrice <= 0) {
+        console.error(`Warning: Product ${item.product._id} (${getDisplayName(item.product)}) has invalid price. Price: ${price}, MRP: ${mrp}`);
+        // Skip items with no valid price
+        continue;
+      }
+      
       orderItems.push({
         product: item.product._id,
         productType: item.productType,
@@ -79,11 +99,11 @@ export const placeOrder = async (req, res) => {
         productImage: getDisplayImage(item.product),
         quantity: item.quantity,
         selectedSize: item.selectedSize,
-        price,
-        mrp,
+        price: finalPrice,
+        mrp: finalMrp,
       });
-      subtotal += price * item.quantity;
-      mrpTotal += mrp * item.quantity;
+      subtotal += finalPrice * item.quantity;
+      mrpTotal += finalMrp * item.quantity;
     }
 
     if (orderItems.length === 0) {
@@ -92,8 +112,8 @@ export const placeOrder = async (req, res) => {
 
     const discount = mrpTotal - subtotal;
     const deliveryCharge = subtotal >= 500 ? 0 : 50;
-    const gst = Math.round(subtotal * 0.18);  // 18% GST on subtotal
-    const total = subtotal + gst + deliveryCharge;
+    const gst = Math.round(subtotal * 0.18);  // 18% GST on subtotal (for record keeping)
+    const total = subtotal + deliveryCharge; // GST is already included in subtotal prices
 
     const order = await Order.create({
       user: req.user._id,

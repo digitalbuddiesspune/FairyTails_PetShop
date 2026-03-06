@@ -1,0 +1,6 @@
+@echo off
+echo Waiting for backend to start...
+timeout /t 5 /nobreak >nul
+echo Updating database...
+node update-categories.js
+pause

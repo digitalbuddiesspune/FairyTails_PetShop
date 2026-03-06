@@ -663,7 +663,7 @@ const TestimonialsSection = () => {
 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto px-4">
   {getVisibleTestimonials().map((testimonial, i) => (
     <div key={testimonial._id} className="relative group w-full">
-      <div className="relative bg-gradient-to-br from-[#F3E8FF] via-[#E6D1FF] to-[#D9BAFF] rounded-3xl px-10 py-8 shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_25px_50px_rgba(147,51,234,0.3)] border-2 border-purple-200 flex flex-col justify-center min-h-[200px] w-full">
+      <div className="relative bg-gradient-to-br from-[#F3E8FF] via-[#E6D1FF] to-[#D9BAFF] rounded-3xl px-8 py-6 shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_25px_50px_rgba(147,51,234,0.3)] border-2 border-purple-200 flex flex-col h-[240px] w-full">
         
         {/* === SVG BUBBLE ANIMATIONS === */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
@@ -693,21 +693,28 @@ const TestimonialsSection = () => {
         </svg>
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center items-center h-full pt-2">
-          <p className="text-gray-700 text-base md:text-lg leading-relaxed mb-5 font-medium text-center px-4">
+        <div className="relative z-10 flex flex-col justify-between items-center h-full">
+          <p className="text-gray-700 text-sm md:text-base mb-3 font-medium text-center px-2 flex-1 overflow-hidden" style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 4,
+            WebkitBoxOrient: 'vertical',
+            textOverflow: 'ellipsis',
+            lineHeight: '1.6',
+            maxHeight: 'calc(1.6em * 4)'
+          }}>
             {testimonial.comment}
           </p>
           
           {/* Stars */}
-          <div className="flex items-center justify-center gap-1 mb-4 text-xl">
+          <div className="flex items-center justify-center gap-1 mb-2 text-lg shrink-0">
             {renderStars(testimonial.rating)}
           </div>
 
           {/* Divider */}
-          <div className="w-12 h-0.5 bg-purple-300 rounded-full mb-3 opacity-60" />
+          <div className="w-12 h-0.5 bg-purple-300 rounded-full mb-2 opacity-60 shrink-0" />
 
           {/* Customer Name */}
-          <p className="font-bold text-gray-800 text-base md:text-lg text-center tracking-wide">
+          <p className="font-bold text-gray-800 text-sm md:text-base text-center tracking-wide truncate max-w-full shrink-0">
             — {testimonial.name}
           </p>
         </div>

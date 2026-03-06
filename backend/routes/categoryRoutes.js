@@ -5,7 +5,8 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
-  seedCategories
+  seedCategories,
+  updateDogsSubcategories
 } from '../controllers/categoryController.js';
 
 const router = express.Router();
@@ -18,6 +19,9 @@ router.get('/:slug', getCategoryBySlug);    // GET    /api/categories/:slug
 router.post('/', createCategory);           // POST   /api/categories
 router.put('/:slug', updateCategory);       // PUT    /api/categories/:slug
 router.delete('/:slug', deleteCategory);    // DELETE /api/categories/:slug
+
+// Update Dogs category with Collar and Leash (must be before /:slug route)
+router.put('/dogs/update-subcategories', updateDogsSubcategories);
 
 // Seed route - populates DB with default categories
 router.post('/seed', seedCategories);       // POST   /api/categories/seed
