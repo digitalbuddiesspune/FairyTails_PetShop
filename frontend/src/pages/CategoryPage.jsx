@@ -557,23 +557,15 @@ const CategoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb + Title Bar */}
+      {/* Category Header */}
       <section className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 py-4">
-          <nav className="text-gray-400 text-sm flex items-center gap-2 mb-2">
-            <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
-            <span>/</span>
-            <span className="text-gray-800 font-medium">{category.name}</span>
-          </nav>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex items-center gap-3">
               {category.image && (
                 <img src={category.image} alt={category.name} className="w-16 h-16 object-contain" />
               )}
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{category.name}</h1>
-                <p className="text-sm text-gray-500">{total} product{total !== 1 ? 's' : ''} found</p>
-              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{category.name}</h1>
             </div>
             {/* Sort */}
             <div className="flex items-center gap-3">
@@ -581,7 +573,7 @@ const CategoryPage = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#65a30d] cursor-pointer min-w-[170px]"
+                className="bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[170px]"
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -672,9 +664,6 @@ const CategoryPage = () => {
                     apiEndpoint={currentApiEndpoint}
                   />
                 ))}
-              </div>
-              <div className="mt-8 text-center text-gray-500 text-sm">
-                Showing {products.length} of {total} products
               </div>
             </>
           )}

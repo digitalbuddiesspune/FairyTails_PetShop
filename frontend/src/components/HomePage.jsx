@@ -563,6 +563,7 @@ const TestimonialsSection = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [itemsPerView, setItemsPerView] = useState(3);
   const API_BASE = import.meta.env.VITE_BACKEND_API;
 
   useEffect(() => {
@@ -582,6 +583,28 @@ const TestimonialsSection = () => {
     fetchTestimonials();
   }, []);
 
+  // Responsive items per view
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        // Mobile: 1 item
+        setItemsPerView(1);
+      } else if (window.innerWidth < 1024) {
+        // Tablet: 2 items
+        setItemsPerView(2);
+      } else {
+        // Desktop: 3 items
+        setItemsPerView(3);
+      }
+      // Reset index when screen size changes
+      setCurrentIndex(0);
+    };
+
+    handleResize(); // Set initial value
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => (
       <span key={i} className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}>
@@ -590,31 +613,26 @@ const TestimonialsSection = () => {
     ));
   };
 
-  // Carousel logic
-  const itemsPerPage = 3;
-  const totalPages = Math.ceil(testimonials.length / itemsPerPage);
-  const showCarousel = testimonials.length > itemsPerPage;
+  // Carousel logic - shift one at a time
+  const showCarousel = testimonials.length > itemsPerView;
   
-  const getVisibleTestimonials = () => {
-    if (!showCarousel) return testimonials;
-    const start = currentIndex * itemsPerPage;
-    return testimonials.slice(start, start + itemsPerPage);
-  };
-
+  // Calculate max index to prevent empty pages
+  const maxIndex = Math.max(0, testimonials.length - itemsPerView);
+  
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % totalPages);
+    setCurrentIndex((prev) => Math.min(prev + 1, maxIndex));
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + totalPages) % totalPages);
+    setCurrentIndex((prev) => Math.max(prev - 1, 0));
   };
 
   if (loading) {
     return (
-      <section className="py-12 md:py-16 bg-gradient-to-br from-purple-50 to-purple-100">
+      <section className="py-12 md:py-16 bg-gradient-to-br from-blue-50 to-blue-100">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto"></div>
+            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
           </div>
         </div>
       </section>
@@ -626,7 +644,7 @@ const TestimonialsSection = () => {
   }
 
   return (
-    <section className="py-12 md:py-16 bg-gradient-to-br from-purple-50 to-purple-100">
+    <section className="py-12 md:py-16 bg-gradient-to-br from-blue-50 to-blue-100">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">What Our Customers Say</h2>
@@ -639,31 +657,61 @@ const TestimonialsSection = () => {
             <>
               <button
                 onClick={prevSlide}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-purple-50 transition-all duration-300 border-2 border-purple-200"
+                disabled={currentIndex === 0}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-white rounded-full p-3 shadow-lg transition-all duration-300 border-2 ${
+                  currentIndex === 0 
+                    ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                    : 'hover:bg-blue-50 border-blue-200'
+                }`}
                 aria-label="Previous testimonials"
               >
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-6 h-6 ${currentIndex === 0 ? 'text-gray-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
               <button
                 onClick={nextSlide}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-white rounded-full p-3 shadow-lg hover:bg-purple-50 transition-all duration-300 border-2 border-purple-200"
+                disabled={currentIndex >= maxIndex}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-white rounded-full p-3 shadow-lg transition-all duration-300 border-2 ${
+                  currentIndex >= maxIndex 
+                    ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                    : 'hover:bg-blue-50 border-blue-200'
+                }`}
                 aria-label="Next testimonials"
               >
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`w-6 h-6 ${currentIndex >= maxIndex ? 'text-gray-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             </>
           )}
 
-          {/* Testimonials Grid */}
-      {/* Testimonials Grid */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto px-4">
-  {getVisibleTestimonials().map((testimonial, i) => (
-    <div key={testimonial._id} className="relative group w-full">
-      <div className="relative bg-gradient-to-br from-[#F3E8FF] via-[#E6D1FF] to-[#D9BAFF] rounded-3xl px-8 py-6 shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_25px_50px_rgba(147,51,234,0.3)] border-2 border-purple-200 flex flex-col h-[240px] w-full">
+          {/* Testimonials Container with Sliding Animation */}
+          <div className="overflow-hidden max-w-7xl mx-auto px-4 py-2">
+            <div 
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{
+                transform: showCarousel ? `translateX(calc(-${currentIndex} * (100% / ${itemsPerView})))` : 'translateX(0)',
+                gap: '1.5rem'
+              }}
+            >
+              {testimonials.map((testimonial, i) => {
+                const gapCount = itemsPerView > 1 ? itemsPerView - 1 : 0;
+                const totalGap = gapCount * 1.5;
+                const itemWidth = showCarousel 
+                  ? `calc((100% - ${totalGap}rem) / ${itemsPerView})` 
+                  : testimonials.length <= itemsPerView 
+                    ? `calc((100% - ${(testimonials.length - 1) * 1.5}rem) / ${testimonials.length})` 
+                    : `calc((100% - ${totalGap}rem) / ${itemsPerView})`;
+                return (
+                <div 
+                  key={testimonial._id} 
+                  className="relative group flex-shrink-0"
+                  style={{
+                    width: itemWidth
+                  }}
+                >
+      <div className="relative bg-gradient-to-br from-[#F0F8FF] via-[#E6F3FF] to-[#D6EBFF] rounded-3xl px-8 py-6 shadow-lg overflow-visible transform transition-all duration-300 hover:scale-[1.02] flex flex-col h-[240px] w-full">
         
         {/* === SVG BUBBLE ANIMATIONS === */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
@@ -672,11 +720,9 @@ const TestimonialsSection = () => {
           {/* Medium bubble - bottom left */}
           <circle cx="10%" cy="75%" r="30" fill="rgba(255,255,255,0.22)" style={{animation: `floatBubble${i}B 8s ease-in-out infinite 1s`}}/>
           {/* Small bubble - top left */}
-          <circle cx="5%" cy="15%" r="16" fill="rgba(192,132,252,0.25)" style={{animation: `floatBubble${i}C 5s ease-in-out infinite 0.5s`}}/>
+          <circle cx="5%" cy="15%" r="16" fill="rgba(47,90,135,0.25)" style={{animation: `floatBubble${i}C 5s ease-in-out infinite 0.5s`}}/>
           {/* Tiny bubble - mid right */}
           <circle cx="92%" cy="65%" r="10" fill="rgba(255,255,255,0.3)" style={{animation: `floatBubble${i}A 4s ease-in-out infinite 2s`}}/>
-          {/* Decorative ring - top right */}
-          <circle cx="80%" cy="80%" r="38" fill="none" stroke="rgba(192,132,252,0.3)" strokeWidth="2" style={{animation: `floatBubble${i}B 7s ease-in-out infinite 0.3s`}}/>
           {/* Sparkle dots */}
          
         </svg>
@@ -688,10 +734,7 @@ const TestimonialsSection = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
         {/* Quote mark SVG */}
-        <svg className="absolute top-4 left-6 w-8 h-8 opacity-20" viewBox="0 0 24 24" fill="rgb(147,51,234)">
-          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
-        </svg>
-
+        
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-between items-center h-full">
           <p className="text-gray-700 text-sm md:text-base mb-3 font-medium text-center px-2 flex-1 overflow-hidden" style={{
@@ -711,7 +754,7 @@ const TestimonialsSection = () => {
           </div>
 
           {/* Divider */}
-          <div className="w-12 h-0.5 bg-purple-300 rounded-full mb-2 opacity-60 shrink-0" />
+          <div className="w-12 h-0.5 bg-blue-300 rounded-full mb-2 opacity-60 shrink-0" />
 
           {/* Customer Name */}
           <p className="font-bold text-gray-800 text-sm md:text-base text-center tracking-wide truncate max-w-full shrink-0">
@@ -720,36 +763,22 @@ const TestimonialsSection = () => {
         </div>
       </div>
     </div>
-  ))}
-</div>
-
-{/* Carousel Indicators */}
-{showCarousel && (
-  <div className="flex justify-center gap-2 mt-6">
-    {Array.from({ length: totalPages }).map((_, index) => (
-      <button
-        key={index}
-        onClick={() => setCurrentIndex(index)}
-        className={`h-2 rounded-full transition-all duration-300 ${
-          index === currentIndex ? 'w-8 bg-purple-600' : 'w-2 bg-purple-300'
-        }`}
-        aria-label={`Go to page ${index + 1}`}
-      />
-    ))}
-  </div>
-)}
+                );
+              })}
+            </div>
+          </div>
 
           {/* Carousel Indicators */}
           {showCarousel && (
             <div className="flex justify-center gap-2 mt-6">
-              {Array.from({ length: totalPages }).map((_, index) => (
+              {Array.from({ length: maxIndex + 1 }).map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentIndex(index)}
                   className={`h-2 rounded-full transition-all duration-300 ${
-                    index === currentIndex ? 'w-8 bg-purple-600' : 'w-2 bg-purple-300'
+                    index === currentIndex ? 'w-8 bg-[#2f5a87]' : 'w-2 bg-blue-300'
                   }`}
-                  aria-label={`Go to page ${index + 1}`}
+                  aria-label={`Go to position ${index + 1}`}
                 />
               ))}
             </div>
