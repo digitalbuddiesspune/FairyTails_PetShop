@@ -687,7 +687,7 @@ const TestimonialsSection = () => {
           )}
 
           {/* Testimonials Container with Sliding Animation */}
-          <div className="overflow-hidden max-w-7xl mx-auto px-4 py-2">
+          <div className="overflow-hidden max-w-7xl mx-auto px-4 pt-8 pb-2">
             <div 
               className="flex transition-transform duration-500 ease-in-out"
               style={{
@@ -713,6 +713,11 @@ const TestimonialsSection = () => {
                 >
       <div className="relative bg-gradient-to-br from-[#F0F8FF] via-[#E6F3FF] to-[#D6EBFF] rounded-3xl px-8 py-6 shadow-lg overflow-visible transform transition-all duration-300 hover:scale-[1.02] flex flex-col h-[240px] w-full">
         
+        {/* Avatar initial circle - centered at top */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#2f5a87] text-white flex items-center justify-center font-semibold text-lg shadow-md z-20">
+          {(testimonial.name && testimonial.name.charAt(0).toUpperCase()) || 'A'}
+        </div>
+
         {/* === SVG BUBBLE ANIMATIONS === */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
           {/* Large slow bubble - top right */}
