@@ -6,6 +6,7 @@ const AdminUsers = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+    const [sortOrder, setSortOrder] = useState('default'); // 'default', 'asc', 'desc'
 
     useEffect(() => {
         fetchUsers();
@@ -56,6 +57,23 @@ const AdminUsers = () => {
         }
     };
 
+    // ─── Sort Users by Total Ordered ───
+    const getSortedUsers = () => {
+        if (sortOrder === 'default') {
+            return users;
+        }
+        const sorted = [...users].sort((a, b) => {
+            const aTotal = a.totalOrderedQuantity || 0;
+            const bTotal = b.totalOrderedQuantity || 0;
+            if (sortOrder === 'asc') {
+                return aTotal - bTotal;
+            } else {
+                return bTotal - aTotal;
+            }
+        });
+        return sorted;
+    };
+
     // ─── Delete Confirmation Modal ───
     const renderDeleteConfirm = () => (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center px-4">
@@ -81,7 +99,22 @@ const AdminUsers = () => {
         <div className="animate-fadeIn">
             {deleteConfirm && renderDeleteConfirm()}
 
-          
+            {/* Filter/Sort Section */}
+            <div className="mb-6 flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+                <div className="flex items-center gap-3">
+                    <label className="text-sm font-medium text-gray-700">Sort by Total Orders:</label>
+                    <select
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors cursor-pointer"
+                    >
+                        <option value="default">Default</option>
+                        <option value="asc">Ascending (Low to High)</option>
+                        <option value="desc">Descending (High to Low)</option>
+                    </select>
+                </div>
+            </div>
 
             {loading ? (
                 <div className="flex items-center justify-center py-20">
@@ -106,7 +139,7 @@ const AdminUsers = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {users.map((user) => (
+                                {getSortedUsers().map((user) => (
                                     <tr key={user._id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
