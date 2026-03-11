@@ -18,7 +18,21 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
   const handleAddToCart = async (e) => {
     e.stopPropagation();
     if (!token) {
-      navigate('/signin');
+      // Use guest cart
+      try {
+        setAddingToCart(true);
+        const { addToGuestCart } = await import('../utils/guestCart');
+        addToGuestCart({
+          productId: product._id,
+          quantity: 1,
+          selectedSize: 0,
+          productType: 'Food',
+        });
+      } catch (err) {
+        console.error('Add to guest cart error:', err);
+      } finally {
+        setAddingToCart(false);
+      }
       return;
     }
     try {
@@ -36,10 +50,17 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
     }
   };
 
-  const handleWishlistToggle = (e) => {
+  const handleWishlistToggle = async (e) => {
     e.stopPropagation();
     if (!token) {
-      navigate('/signin');
+      // Use guest wishlist with full product data
+      const { addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } = await import('../utils/guestCart');
+      if (isInGuestWishlist(product._id)) {
+        removeFromGuestWishlist(product._id);
+      } else {
+        addToGuestWishlist(product);
+      }
+      if (onWishlistToggle) onWishlistToggle(product._id);
       return;
     }
     if (onWishlistToggle) onWishlistToggle(product._id);
@@ -166,7 +187,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
         <div className="flex gap-2 mt-1">
           <button
             onClick={() => navigate(`/product/${product._id}?type=/food`)}
-            className="flex-1 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all duration-200 text-sm"
+            className="flex-1 bg-[#205ea9] hover:bg-[#1a4a7a] text-white font-semibold py-2.5 rounded-xl active:scale-[0.98] transition-all duration-200 text-sm"
           >
             View Details
           </button>
@@ -331,36 +352,16 @@ const CategoryProducts = () => {
 
   // Title based on category
   const pageTitle = category
-    ? `${category} Food Products`
-    : 'All Food Products';
+    ? `${category}s`
+    : 'All Products';
 
   const categoryIcon = category === 'Dog' ? DOG_ICON : category === 'Cat' ? CAT_ICON : null;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero / Header */}
+      {/* Category Header */}
       <section className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-6">
-          {/* Breadcrumb */}
-          <nav className="mb-2 text-gray-400 text-sm flex items-center gap-2">
-            <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
-            <span>/</span>
-            {category && (
-              <>
-                <Link
-                  to={`/category/${category.toLowerCase()}s`}
-                  className="hover:text-gray-700 transition-colors"
-                >
-                  {category}s
-                </Link>
-                <span>/</span>
-              </>
-            )}
-            <span className="text-gray-900 font-medium">
-              {activeSubCategory !== 'All' ? activeSubCategory : 'All Products'}
-            </span>
-          </nav>
-
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 flex items-center gap-3">
@@ -371,18 +372,14 @@ const CategoryProducts = () => {
                 )}
                 {pageTitle}
               </h1>
-              <p className="mt-1 text-gray-500 text-sm">
-                {total} product{total !== 1 ? 's' : ''} found
-              </p>
             </div>
-
             {/* Sort Dropdown */}
             <div className="flex items-center gap-3">
               <label className="text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
               <select
                 value={sortBy}
                 onChange={handleSortChange}
-                className="bg-gray-50 text-gray-900 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#65a30d] cursor-pointer min-w-[180px]"
+                className="bg-gray-50 text-gray-900 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[180px]"
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -489,10 +486,6 @@ const CategoryProducts = () => {
                 ))}
               </div>
 
-              {/* Results Count */}
-              <div className="mt-8 text-center text-gray-500 text-sm">
-                Showing {products.length} of {total} products
-              </div>
             </>
           )}
         </div>

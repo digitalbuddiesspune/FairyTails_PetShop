@@ -237,7 +237,7 @@ const AccountSettingsPage = () => {
                   <div className="pt-3">
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all shadow-md hover:shadow-lg"
+                      className="bg-[#2f5a87] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all shadow-md hover:shadow-lg"
                     >
                       ✏️ Edit Profile
                     </button>
@@ -282,7 +282,7 @@ const AccountSettingsPage = () => {
                 <p className="text-xs text-gray-400 mt-0.5">{addresses.length} saved address{addresses.length !== 1 ? 'es' : ''}</p>
               </div>
               <button onClick={openAddAddr}
-                className="bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white px-4 py-2 rounded-lg font-bold text-xs hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all">
+                className="bg-[#2f5a87] text-white px-4 py-2 rounded-lg font-bold text-xs hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all">
                 + Add Address
               </button>
             </div>

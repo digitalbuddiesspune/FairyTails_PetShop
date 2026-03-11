@@ -16,6 +16,9 @@ const slugToFoodCategory = {
 // Subcategory names that map to the Clothes collection
 const clothesSubCategories = ['Dog Clothes', 'Cat Clothes'];
 
+// Subcategory names that map to Accessories with productType
+const accessoryProductTypes = ['Collar & Leash'];
+
 // Category slugs that are served entirely by the Toys collection
 const toysCategorySlug = 'toys';
 
@@ -165,7 +168,21 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
-    if (!token) { navigate('/signin'); return; }
+    if (!token) {
+      // Use guest cart
+      try {
+        setAddingToCart(true);
+        const { addToGuestCart } = await import('../utils/guestCart');
+        addToGuestCart({
+          productId: product._id,
+          quantity: 1,
+          selectedSize: 0,
+          productType: productModelType,
+        });
+      } catch (err) { console.error(err); }
+      finally { setAddingToCart(false); }
+      return;
+    }
     try {
       setAddingToCart(true);
       await axios.post(`${API_BASE}/cart`, { productId: product._id, quantity: 1, selectedSize: 0, productType: productModelType }, { headers: { Authorization: `Bearer ${token}` } });
@@ -174,9 +191,19 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
     finally { setAddingToCart(false); }
   };
 
-  const handleWishlistToggle = (e) => {
+  const handleWishlistToggle = async (e) => {
     e.stopPropagation();
-    if (!token) { navigate('/signin'); return; }
+    if (!token) {
+      // Use guest wishlist with full product data
+      const { addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } = await import('../utils/guestCart');
+      if (isInGuestWishlist(product._id)) {
+        removeFromGuestWishlist(product._id);
+      } else {
+        addToGuestWishlist(product);
+      }
+      if (onWishlistToggle) onWishlistToggle(product._id);
+      return;
+    }
     if (onWishlistToggle) onWishlistToggle(product._id);
   };
 
@@ -252,7 +279,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
           </div>
         )}
         <div className="flex gap-2 mt-1">
-          <Link to={productUrl} className="flex-1 text-center bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all duration-200 text-sm">
+          <Link to={productUrl} className="flex-1 text-center bg-[#205ea9] hover:bg-[#1a4a7a] text-white font-semibold py-2.5 rounded-xl active:scale-[0.98] transition-all duration-200 text-sm">
             View Details
           </Link>
           <button onClick={handleAddToCart} disabled={addingToCart} className="px-4 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all duration-200 text-sm border border-gray-200 disabled:opacity-50" title="Add to Cart">
@@ -390,9 +417,27 @@ const CategoryPage = () => {
         } else if (foodCategory) {
           // ── Dogs / Cats categories ──
           const isClothes = clothesSubCategories.includes(activeSubCategory);
+          const isAccessoryType = accessoryProductTypes.includes(activeSubCategory);
           const isAll = activeSubCategory === 'All';
 
-          if (isClothes) {
+          if (isAccessoryType) {
+            // Fetch accessories for "Collar & Leash" - single product type
+            const params = { 
+              subCategory: foodCategory.toLowerCase(), // "dog" or "cat"
+            };
+            if (sortBy) params.sort = sortBy;
+            // Fetch all accessories for this pet category, then filter by productType or subSubCategory
+            const res = await axios.get(`${API_BASE}/accessories`, { params });
+            if (res.data.success) {
+              // Filter to show only Collar & Leash products (single type)
+              const filteredProducts = res.data.data.filter(product => 
+                product.productType === 'collar-leash' || product.subSubCategory === 'collar-leash'
+              );
+              setProducts(filteredProducts);
+              setTotal(filteredProducts.length);
+              setCurrentApiEndpoint('/accessories');
+            }
+          } else if (isClothes) {
             const params = { category: foodCategory };
             if (sortBy) params.sort = sortBy;
             const res = await axios.get(`${API_BASE}/clothes`, { params });
@@ -512,23 +557,15 @@ const CategoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb + Title Bar */}
+      {/* Category Header */}
       <section className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 sm:px-6 py-4">
-          <nav className="text-gray-400 text-sm flex items-center gap-2 mb-2">
-            <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
-            <span>/</span>
-            <span className="text-gray-800 font-medium">{category.name}</span>
-          </nav>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex items-center gap-3">
               {category.image && (
                 <img src={category.image} alt={category.name} className="w-16 h-16 object-contain" />
               )}
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{category.name}</h1>
-                <p className="text-sm text-gray-500">{total} product{total !== 1 ? 's' : ''} found</p>
-              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{category.name}</h1>
             </div>
             {/* Sort */}
             <div className="flex items-center gap-3">
@@ -536,7 +573,7 @@ const CategoryPage = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#65a30d] cursor-pointer min-w-[170px]"
+                className="bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[170px]"
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -552,19 +589,33 @@ const CategoryPage = () => {
         <section className="bg-white border-b border-gray-200 sticky top-[108px] z-30">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-3">
-              {subCategoryTabs.map((sub) => (
-                <button
-                  key={sub}
-                  onClick={() => handleSubCategoryChange(sub)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
-                    activeSubCategory === sub
-                      ? `${accent.tab} text-white shadow-md`
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {sub}
-                </button>
-              ))}
+              {subCategoryTabs.map((sub) => {
+                // Icon mapping for subcategories
+                const getSubIcon = (name) => {
+                  if (name === 'All') return '📋';
+                  if (name === 'Dry Food') return '🥫';
+                  if (name === 'Wet Food') return '🍖';
+                  if (name === 'Treats') return '🦴';
+                  if (name === 'Dog Clothes') return '👕';
+                  if (name === 'Cat Clothes') return '👗';
+                  if (name === 'Collar & Leash') return '🔗';
+                  return '';
+                };
+                return (
+                  <button
+                    key={sub}
+                    onClick={() => handleSubCategoryChange(sub)}
+                    className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+                      activeSubCategory === sub
+                        ? `${accent.tab} text-white shadow-md`
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {getSubIcon(sub) && <span className="mr-1.5">{getSubIcon(sub)}</span>}
+                    {sub}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -613,9 +664,6 @@ const CategoryPage = () => {
                     apiEndpoint={currentApiEndpoint}
                   />
                 ))}
-              </div>
-              <div className="mt-8 text-center text-gray-500 text-sm">
-                Showing {products.length} of {total} products
               </div>
             </>
           )}

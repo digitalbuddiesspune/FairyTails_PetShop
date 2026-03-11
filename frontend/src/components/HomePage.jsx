@@ -452,7 +452,7 @@ const HomePage = () => {
               </p>
 
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-                Expert <span className="text-[#65a30d]">Vet Consultation</span><br />
+                Expert <span className="text-[#203D5B]">Vet Consultation</span><br />
                 at Your Fingertips
               </h2>
 
@@ -472,7 +472,7 @@ const HomePage = () => {
 
               <Link
                 to="/contact"
-                className="inline-block mt-4 bg-[#65a30d] hover:bg-[#4d7c0f] text-white font-bold px-8 py-3 rounded-full transition-colors shadow-lg shadow-[#65a30d]/20"
+                className="inline-block mt-4 bg-[#203D5B] hover:bg-[#1a3149] text-white font-bold px-8 py-3 rounded-full transition-colors shadow-lg shadow-[#203D5B]/20"
               >
                 Book a Consultation
               </Link>
@@ -551,7 +551,246 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Testimonials Section */}
+      <TestimonialsSection />
     </main>
+  );
+};
+
+// Testimonials Component
+const TestimonialsSection = () => {
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [itemsPerView, setItemsPerView] = useState(3);
+  const API_BASE = import.meta.env.VITE_BACKEND_API;
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/testimonials`);
+        const data = await res.json();
+        if (data.success) {
+          setTestimonials(data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching testimonials:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
+  // Responsive items per view
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        // Mobile: 1 item
+        setItemsPerView(1);
+      } else if (window.innerWidth < 1024) {
+        // Tablet: 2 items
+        setItemsPerView(2);
+      } else {
+        // Desktop: 3 items
+        setItemsPerView(3);
+      }
+      // Reset index when screen size changes
+      setCurrentIndex(0);
+    };
+
+    handleResize(); // Set initial value
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span key={i} className={i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}>
+        ★
+      </span>
+    ));
+  };
+
+  // Carousel logic - shift one at a time
+  const showCarousel = testimonials.length > itemsPerView;
+  
+  // Calculate max index to prevent empty pages
+  const maxIndex = Math.max(0, testimonials.length - itemsPerView);
+  
+  const nextSlide = () => {
+    setCurrentIndex((prev) => Math.min(prev + 1, maxIndex));
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  if (loading) {
+    return (
+      <section className="py-12 md:py-16 bg-gradient-to-br from-blue-50 to-blue-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="py-12 md:py-16 bg-gradient-to-br from-blue-50 to-blue-100">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">What Our Customers Say</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">Hear from our happy pet parents</p>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto">
+          {/* Carousel Navigation Arrows */}
+          {showCarousel && (
+            <>
+              <button
+                onClick={prevSlide}
+                disabled={currentIndex === 0}
+                className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-white rounded-full p-3 shadow-lg transition-all duration-300 border-2 ${
+                  currentIndex === 0 
+                    ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                    : 'hover:bg-blue-50 border-blue-200'
+                }`}
+                aria-label="Previous testimonials"
+              >
+                <svg className={`w-6 h-6 ${currentIndex === 0 ? 'text-gray-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={nextSlide}
+                disabled={currentIndex >= maxIndex}
+                className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-white rounded-full p-3 shadow-lg transition-all duration-300 border-2 ${
+                  currentIndex >= maxIndex 
+                    ? 'opacity-50 cursor-not-allowed border-gray-200' 
+                    : 'hover:bg-blue-50 border-blue-200'
+                }`}
+                aria-label="Next testimonials"
+              >
+                <svg className={`w-6 h-6 ${currentIndex >= maxIndex ? 'text-gray-400' : 'text-blue-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Testimonials Container with Sliding Animation */}
+          <div className="overflow-hidden max-w-7xl mx-auto px-4 pt-8 pb-2">
+            <div 
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{
+                transform: showCarousel ? `translateX(calc(-${currentIndex} * (100% / ${itemsPerView})))` : 'translateX(0)',
+                gap: '1.5rem'
+              }}
+            >
+              {testimonials.map((testimonial, i) => {
+                const gapCount = itemsPerView > 1 ? itemsPerView - 1 : 0;
+                const totalGap = gapCount * 1.5;
+                const itemWidth = showCarousel 
+                  ? `calc((100% - ${totalGap}rem) / ${itemsPerView})` 
+                  : testimonials.length <= itemsPerView 
+                    ? `calc((100% - ${(testimonials.length - 1) * 1.5}rem) / ${testimonials.length})` 
+                    : `calc((100% - ${totalGap}rem) / ${itemsPerView})`;
+                return (
+                <div 
+                  key={testimonial._id} 
+                  className="relative group flex-shrink-0"
+                  style={{
+                    width: itemWidth
+                  }}
+                >
+      <div className="relative bg-gradient-to-br from-[#F0F8FF] via-[#E6F3FF] to-[#D6EBFF] rounded-3xl px-8 py-6 shadow-lg overflow-visible transform transition-all duration-300 hover:scale-[1.02] flex flex-col h-[240px] w-full">
+        
+        {/* Avatar initial circle - centered at top */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#2f5a87] text-white flex items-center justify-center font-semibold text-lg shadow-md z-20">
+          {(testimonial.name && testimonial.name.charAt(0).toUpperCase()) || 'A'}
+        </div>
+
+        {/* === SVG BUBBLE ANIMATIONS === */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+          {/* Large slow bubble - top right */}
+          <circle cx="85%" cy="20%" r="45" fill="rgba(255,255,255,0.18)" style={{animation: `floatBubble${i}A 6s ease-in-out infinite`}}/>
+          {/* Medium bubble - bottom left */}
+          <circle cx="10%" cy="75%" r="30" fill="rgba(255,255,255,0.22)" style={{animation: `floatBubble${i}B 8s ease-in-out infinite 1s`}}/>
+          {/* Small bubble - top left */}
+          <circle cx="5%" cy="15%" r="16" fill="rgba(47,90,135,0.25)" style={{animation: `floatBubble${i}C 5s ease-in-out infinite 0.5s`}}/>
+          {/* Tiny bubble - mid right */}
+          <circle cx="92%" cy="65%" r="10" fill="rgba(255,255,255,0.3)" style={{animation: `floatBubble${i}A 4s ease-in-out infinite 2s`}}/>
+          {/* Sparkle dots */}
+         
+        </svg>
+
+        {/* Keyframes injected per card to vary timing */}
+        
+
+        {/* Shine sweep on hover */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+
+        {/* Quote mark SVG */}
+        
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-between items-center h-full">
+          <p className="text-gray-700 text-sm md:text-base mb-3 font-medium text-center px-2 flex-1 overflow-hidden" style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 4,
+            WebkitBoxOrient: 'vertical',
+            textOverflow: 'ellipsis',
+            lineHeight: '1.6',
+            maxHeight: 'calc(1.6em * 4)'
+          }}>
+            {testimonial.comment}
+          </p>
+          
+          {/* Stars */}
+          <div className="flex items-center justify-center gap-1 mb-2 text-lg shrink-0">
+            {renderStars(testimonial.rating)}
+          </div>
+
+          {/* Divider */}
+          <div className="w-12 h-0.5 bg-blue-300 rounded-full mb-2 opacity-60 shrink-0" />
+
+          {/* Customer Name */}
+          <p className="font-bold text-gray-800 text-sm md:text-base text-center tracking-wide truncate max-w-full shrink-0">
+            — {testimonial.name}
+          </p>
+        </div>
+      </div>
+    </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Carousel Indicators */}
+          {showCarousel && (
+            <div className="flex justify-center gap-2 mt-6">
+              {Array.from({ length: maxIndex + 1 }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex ? 'w-8 bg-[#2f5a87]' : 'w-2 bg-blue-300'
+                  }`}
+                  aria-label={`Go to position ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 };
 

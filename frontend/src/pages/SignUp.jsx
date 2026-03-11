@@ -129,6 +129,15 @@ const SignUp = () => {
       if (data.success) {
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('user', JSON.stringify(data.data));
+        
+        // Sync guest cart and wishlist to backend
+        const { syncGuestCartToBackend, syncGuestWishlistToBackend } = await import('../utils/guestCart');
+        await syncGuestCartToBackend(data.data.token, API_BASE);
+        await syncGuestWishlistToBackend(data.data.token, API_BASE);
+        
+        // Trigger cart/wishlist update
+        window.dispatchEvent(new Event('cart-wishlist-update'));
+        
         navigate('/');
       } else {
         setError(data.message || 'Registration failed');

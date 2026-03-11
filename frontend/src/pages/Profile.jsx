@@ -322,9 +322,9 @@ const Profile = () => {
                     <div className="text-center pt-2">
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        className="bg-[#205ea9] hover:bg-[#4d7c0f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                       >
-                        ✏️ Edit Profile
+                        Edit Profile
                       </button>
                     </div>
                   </div>

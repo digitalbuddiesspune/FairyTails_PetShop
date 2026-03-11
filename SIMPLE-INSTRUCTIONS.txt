@@ -1,0 +1,38 @@
+═══════════════════════════════════════════════════════════════
+  HOW TO ADD COLLAR AND LEASH OPTIONS - SIMPLE STEPS
+═══════════════════════════════════════════════════════════════
+
+STEP 1: Start Backend Server
+─────────────────────────────
+1. Open a NEW terminal/command prompt
+2. Go to your project folder:
+   cd C:\Users\HP\Desktop\FairyTails_PetShop\backend
+3. Start the server:
+   npm start
+4. Wait until you see: "Server running on port 5000"
+5. KEEP THIS TERMINAL OPEN (don't close it)
+
+STEP 2: Update Database
+────────────────────────
+1. Open ANOTHER NEW terminal/command prompt
+2. Go to your project root folder:
+   cd C:\Users\HP\Desktop\FairyTails_PetShop
+3. Run the update script:
+   node update-categories.js
+4. You should see: "✅ Success! Dogs category updated."
+
+STEP 3: Refresh Your Website
+─────────────────────────────
+1. Go to your website in the browser
+2. Press F5 to refresh
+3. Click on "Dogs" in the menu
+4. You should now see "Collar" and "Leash" options!
+
+═══════════════════════════════════════════════════════════════
+
+ALTERNATIVE: If the script doesn't work, you can also:
+1. Open Postman or any API tool
+2. Make a POST request to: http://localhost:5000/api/categories/seed
+3. Click Send
+
+═══════════════════════════════════════════════════════════════

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getGuestCart, updateGuestCartItem, removeFromGuestCart, clearGuestCart, getGuestCartCount } from '../utils/guestCart';
+import LoginRequiredModal from '../components/LoginRequiredModal';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -41,7 +43,7 @@ const getDisplayImage = (product) => product?.images?.[0] || product?.image || n
 
 // ─── Helper: product type label for badge ───────────────────────────────────
 const TYPE_BADGES = {
-  Food: { label: 'Food', color: 'bg-green-50 text-green-700 border-green-200' },
+  Food: { label: 'Food', color: 'bg-[#203D5B]/10 text-[#203D5B] border-[#203D5B]/20' },
   Clothes: { label: 'Clothes', color: 'bg-purple-50 text-purple-700 border-purple-200' },
   Toy: { label: 'Toy', color: 'bg-blue-50 text-blue-700 border-blue-200' },
   House: { label: 'House', color: 'bg-pink-50 text-pink-700 border-pink-200' },
@@ -56,17 +58,92 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(null); // itemId being updated
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [guestCart, setGuestCart] = useState([]);
+  const [guestCartProducts, setGuestCartProducts] = useState([]);
 
   const token = localStorage.getItem('token');
+
+  // Map productType to API endpoint
+  const PRODUCT_TYPE_TO_ENDPOINT = {
+    'Food': '/food',
+    'Clothes': '/clothes',
+    'Toy': '/toys',
+    'Accessory': '/accessories',
+    'GroomingEssential': '/grooming-essentials',
+    'HealthSupplement': '/health-supplements',
+    'House': '/houses',
+  };
+
+  // Fetch product details for guest cart items
+  const fetchGuestCartProducts = async () => {
+    try {
+      setLoading(true);
+      const guest = getGuestCart();
+      setGuestCart(guest);
+      
+      if (guest.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch product details for each item
+      const productPromises = guest.map(async (item) => {
+        try {
+          // Ensure productId is a string
+          const productId = String(item.productId || item._id || '');
+          if (!productId || productId === 'undefined' || productId === 'null') {
+            return null;
+          }
+          
+          const endpoint = PRODUCT_TYPE_TO_ENDPOINT[item.productType] || '/food';
+          const res = await axios.get(`${API_BASE}${endpoint}/${productId}`, { validateStatus: () => true });
+          if (res.status === 200 && res.data?.success) {
+            return {
+              _id: productId,
+              quantity: item.quantity,
+              selectedSize: item.selectedSize || 0,
+              productType: item.productType,
+              product: res.data.data,
+            };
+          }
+          return null;
+        } catch (err) {
+          console.error('Error fetching product:', err);
+          return null;
+        }
+      });
+
+      const products = (await Promise.all(productPromises)).filter(Boolean);
+      setGuestCartProducts(products);
+    } catch (err) {
+      console.error('Error fetching guest cart products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!token) {
-      setLoading(false);
+      fetchGuestCartProducts();
       return;
     }
     fetchCart();
-  }, []);
+  }, [token]);
+
+  // Listen for cart updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      if (!token) {
+        fetchGuestCartProducts();
+      } else {
+        fetchCart();
+      }
+    };
+    window.addEventListener('cart-wishlist-update', handleUpdate);
+    return () => window.removeEventListener('cart-wishlist-update', handleUpdate);
+  }, [token]);
 
   const fetchCart = async () => {
     try {
@@ -87,14 +164,19 @@ const CartPage = () => {
   const updateQuantity = async (itemId, newQuantity) => {
     try {
       setUpdating(itemId);
-      const res = await axios.put(
-        `${API_BASE}/cart/${itemId}`,
-        { quantity: newQuantity },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.data.success) {
-        setCart(res.data.data);
-        window.dispatchEvent(new Event('cart-wishlist-update'));
+      if (!token) {
+        updateGuestCartItem(itemId, newQuantity);
+        await fetchGuestCartProducts();
+      } else {
+        const res = await axios.put(
+          `${API_BASE}/cart/${itemId}`,
+          { quantity: newQuantity },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.data.success) {
+          setCart(res.data.data);
+          window.dispatchEvent(new Event('cart-wishlist-update'));
+        }
       }
     } catch (err) {
       console.error('Update cart error:', err);
@@ -106,12 +188,17 @@ const CartPage = () => {
   const removeItem = async (itemId) => {
     try {
       setUpdating(itemId);
-      const res = await axios.delete(`${API_BASE}/cart/${itemId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data.success) {
-        setCart(res.data.data);
-        window.dispatchEvent(new Event('cart-wishlist-update'));
+      if (!token) {
+        removeFromGuestCart(itemId);
+        await fetchGuestCartProducts();
+      } else {
+        const res = await axios.delete(`${API_BASE}/cart/${itemId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.success) {
+          setCart(res.data.data);
+          window.dispatchEvent(new Event('cart-wishlist-update'));
+        }
       }
     } catch (err) {
       console.error('Remove item error:', err);
@@ -122,20 +209,28 @@ const CartPage = () => {
 
   const clearCart = async () => {
     try {
-      const res = await axios.delete(`${API_BASE}/cart`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data.success) {
-        setCart(res.data.data);
-        window.dispatchEvent(new Event('cart-wishlist-update'));
+      if (!token) {
+        clearGuestCart();
+        setGuestCart([]);
+        setGuestCartProducts([]);
+      } else {
+        const res = await axios.delete(`${API_BASE}/cart`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.success) {
+          setCart(res.data.data);
+          window.dispatchEvent(new Event('cart-wishlist-update'));
+        }
       }
     } catch (err) {
       console.error('Clear cart error:', err);
     }
   };
 
+  // Build a unified cartItems array from backend cart or guest cart
+  const cartItems = token ? (cart?.items || []) : guestCartProducts;
+
   // Calculate totals using the universal pricing helper
-  const cartItems = cart?.items || [];
   const subtotal = cartItems.reduce((sum, item) => {
     const pricing = getItemPricing(item);
     return sum + pricing.discountedPrice * item.quantity;
@@ -145,35 +240,15 @@ const CartPage = () => {
     return sum + pricing.mrp * item.quantity;
   }, 0);
   const savings = mrpTotal - subtotal;
+  const deliveryCharge = subtotal >= 500 ? 0 : 50;
+  const total = subtotal + deliveryCharge; // GST is already included in subtotal
 
-  // Not logged in
-  if (!token) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-12 h-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Cart is Waiting</h2>
-          <p className="text-gray-500 mb-6">Please sign in to view your cart and start shopping for your furry friends.</p>
-          <Link
-            to="/signin"
-            className="inline-block bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all"
-          >
-            Sign In
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-[#203D5B] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-500 text-lg">Loading your cart...</p>
         </div>
       </div>
@@ -187,7 +262,7 @@ const CartPage = () => {
           <p className="text-5xl mb-4">⚠️</p>
           <h3 className="text-xl font-bold text-gray-800 mb-2">Something went wrong</h3>
           <p className="text-gray-500 mb-6">{error}</p>
-          <button onClick={fetchCart} className="bg-[#65a30d] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#4d7c0f]">
+          <button onClick={fetchCart} className="bg-[#203D5B] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1a3149]">
             Try Again
           </button>
         </div>
@@ -223,7 +298,7 @@ const CartPage = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Your cart is empty</h3>
               <p className="text-gray-500 mb-6">Start adding products for your beloved pets!</p>
-              <Link to="/" className="inline-block bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all">
+              <Link to="/" className="inline-block bg-gradient-to-r from-[#203D5B] to-[#1a3149] text-white font-bold py-3 px-8 rounded-xl hover:from-[#1a3149] hover:to-[#152639] transition-all">
                 Browse Products
               </Link>
             </div>
@@ -273,14 +348,14 @@ const CartPage = () => {
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                                 {product.brand && (
-                                  <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide">{product.brand}</p>
+                                  <p className="text-xs font-semibold text-[#203D5B] uppercase tracking-wide">{product.brand}</p>
                                 )}
                                 <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.color}`}>
                                   {badge.label}
                                 </span>
                               </div>
                               <Link to={`/product/${product._id}`}>
-                                <h3 className="font-bold text-gray-900 text-sm md:text-base leading-tight hover:text-[#65a30d] transition-colors line-clamp-2">
+                                <h3 className="font-bold text-gray-900 text-sm md:text-base leading-tight hover:text-[#203D5B] transition-colors line-clamp-2">
                                   {displayName}
                                 </h3>
                               </Link>
@@ -349,7 +424,7 @@ const CartPage = () => {
                   <div className="space-y-3 text-sm">
                     
                     {savings > 0 && (
-                      <div className="flex justify-between text-green-600">
+                      <div className="flex justify-between text-[#203D5B]">
                         <span>Discount</span>
                         <span>- ₹{savings.toLocaleString()}</span>
                       </div>
@@ -359,28 +434,43 @@ const CartPage = () => {
                       <span>₹{subtotal.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-gray-600">
-                      <span>GST (18%)</span>
-                      <span>₹{Math.round(subtotal * 0.18).toLocaleString()}</span>
+                      <span>18% GST</span>
+                      <span className="text-gray-500 text-xs">Included</span>
                     </div>
                     <div className="flex justify-between text-gray-600">
-                      <span>Delivery</span>
-                      <span className="text-green-600 font-medium">{subtotal >= 500 ? 'Free' : '₹50'}</span>
+                      <span>Delivery Charges</span>
+                      <div className="flex items-center gap-2">
+                        {subtotal >= 500 ? (
+                          <>
+                            <span className="text-gray-400 line-through text-xs">₹50</span>
+                            <span className="text-green-600 font-medium">Free</span>
+                          </>
+                        ) : (
+                          <span>₹{deliveryCharge}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
                   <div className="border-t border-gray-100 mt-4 pt-4">
                     <div className="flex justify-between text-lg font-bold text-gray-900">
                       <span>Total</span>
-                      <span>₹{(subtotal + Math.round(subtotal * 0.18) + (subtotal >= 500 ? 0 : 50)).toLocaleString()}</span>
+                      <span>₹{total.toLocaleString()}</span>
                     </div>
                     {savings > 0 && (
-                      <p className="text-xs text-green-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
+                      <p className="text-xs text-[#203D5B] mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
                     )}
                   </div>
 
                   <button
-                    onClick={() => navigate('/checkout')}
-                    className="w-full mt-6 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm"
+                    onClick={() => {
+                      if (!token) {
+                        setShowLoginModal(true);
+                      } else {
+                        navigate('/checkout');
+                      }
+                    }}
+                    className="w-full mt-6 bg-[#2f5a87] text-white font-bold py-3.5 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] active:scale-[0.98] transition-all text-sm"
                   >
                     Proceed to Checkout
                   </button>
@@ -397,6 +487,13 @@ const CartPage = () => {
           )}
         </div>
       </section>
+
+      {/* Login Required Modal */}
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        message="You are not logged in. Please log in first to proceed to checkout."
+      />
     </div>
   );
 };

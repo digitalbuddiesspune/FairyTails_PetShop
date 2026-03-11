@@ -181,7 +181,7 @@ const AdminOrderDetails = () => {
                   <select
                     value={order.paymentStatus || 'unpaid'}
                     onChange={(e) => handlePaymentChange(e.target.value)}
-                    disabled={updating || order.paymentStatus === 'paid' || order.paymentStatus === 'failed'}
+                    disabled={updating || order.paymentStatus === 'failed'}
                     className={`px-3 py-1.5 rounded-lg border text-xs font-bold outline-none ${PAYMENT_CONFIG[order.paymentStatus || 'unpaid']?.selectBg || 'bg-gray-50'} disabled:opacity-60`}
                   >
                     <option value="unpaid">Unpaid</option>
@@ -368,7 +368,7 @@ const AdminOrderDetails = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-800 truncate" title={item.productName}>{item.productName}</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">Qty: {item.quantity} × ₹{item.price.toLocaleString()} = ₹{(item.price * item.quantity).toLocaleString()}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">Qty: {item.quantity} × ₹{(item.price || 0).toLocaleString()} = ₹{((item.price || 0) * item.quantity).toLocaleString()}</p>
               </div>
             </div>
           ))}
@@ -397,8 +397,8 @@ const AdminOrderDetails = () => {
                     </div>
                   </td>
                   <td className="px-3 py-3 text-xs text-gray-600 text-center">{item.quantity}</td>
-                  <td className="px-3 py-3 text-xs text-gray-600 text-right">₹{item.price.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-xs font-bold text-gray-800 text-right">₹{(item.price * item.quantity).toLocaleString()}</td>
+                  <td className="px-3 py-3 text-xs text-gray-600 text-right">₹{(item.price || 0).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs font-bold text-gray-800 text-right">₹{((item.price || 0) * item.quantity).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -410,13 +410,38 @@ const AdminOrderDetails = () => {
       <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
         <h3 className="text-sm font-bold text-gray-800 mb-3">Billing Summary</h3>
         <div className="space-y-2 text-xs max-w-sm">
-          <div className="flex justify-between"><span className="text-gray-400">Subtotal</span><span className="text-gray-700">₹{order.subtotal?.toLocaleString()}</span></div>
-          {order.discount > 0 && <div className="flex justify-between"><span className="text-green-500">Discount</span><span className="text-green-500">-₹{order.discount?.toLocaleString()}</span></div>}
-          <div className="flex justify-between"><span className="text-gray-400">GST (18%)</span><span className="text-gray-700">₹{order.gst?.toLocaleString()}</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Shipping Charges</span><span className="text-gray-700">{order.deliveryCharge === 0 ? 'Free' : `₹${order.deliveryCharge}`}</span></div>
+          <div className="flex justify-between">
+            <span className="text-gray-400">Subtotal</span>
+            <span className="text-gray-700">₹{(order.subtotal || 0).toLocaleString()}</span>
+          </div>
+          {(order.discount || 0) > 0 && (
+            <div className="flex justify-between">
+              <span className="text-green-500">Discount</span>
+              <span className="text-green-500">-₹{(order.discount || 0).toLocaleString()}</span>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-gray-400">18% GST</span>
+            <span className="text-gray-500 text-xs">Included</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-400">Delivery Charges</span>
+            <div className="flex items-center gap-2">
+              {(order.subtotal || 0) >= 500 ? (
+                <>
+                  <span className="text-gray-400 line-through text-xs">₹50</span>
+                  <span className="text-green-600 font-medium text-xs">Free</span>
+                </>
+              ) : (
+                <span className="text-gray-700">
+                  {(order.deliveryCharge || 0) === 0 ? 'Free' : `₹${(order.deliveryCharge || 0).toLocaleString()}`}
+                </span>
+              )}
+            </div>
+          </div>
           <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100 text-sm">
             <span>Total Amount</span>
-            <span>₹{order.total?.toLocaleString()}</span>
+            <span>₹{(order.total || 0).toLocaleString()}</span>
           </div>
         </div>
       </div>

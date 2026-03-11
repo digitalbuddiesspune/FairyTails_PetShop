@@ -18,7 +18,9 @@ import {
     Eye,
     EyeOff,
     Lock,
-    Mail
+    Mail,
+    Image,
+    MessageSquare
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -130,6 +132,8 @@ const AdminLayout = () => {
         if (location.pathname.includes('/admin/order-details')) return 'Order Details';
         if (location.pathname.includes('/admin/payments')) return 'Payments';
         if (location.pathname.includes('/admin/users')) return 'Users';
+        if (location.pathname.includes('/admin/banner')) return 'Banner';
+        if (location.pathname.includes('/admin/testimonials')) return 'Testimonials';
         if (location.pathname.includes('/admin/settings')) return 'Settings';
         return 'Dashboard';
     };
@@ -264,6 +268,32 @@ const AdminLayout = () => {
                         >
                             <Users size={20} />
                             Users
+                        </button>
+
+                        {/* Banner */}
+                        <button
+                            onClick={() => { navigate('/admin/banner'); setSidebarOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                location.pathname === '/admin/banner'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            }`}
+                        >
+                            <Image size={20} />
+                            Banner
+                        </button>
+
+                        {/* Testimonials */}
+                        <button
+                            onClick={() => { navigate('/admin/testimonials'); setSidebarOpen(false); }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                location.pathname === '/admin/testimonials'
+                                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
+                                    : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                            }`}
+                        >
+                            <MessageSquare size={20} />
+                            Testimonials
                         </button>
 
                         {/* Settings */}

@@ -1,5 +1,6 @@
 import Admin from '../models/Admin.js';
 import User from '../models/User.js';
+import Order from '../models/Order.js';
 import jwt from 'jsonwebtoken';
 
 // Generate JWT Token for admin
@@ -107,7 +108,24 @@ export const getAdminMe = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}).select('-password');
-    res.status(200).json({ success: true, count: users.length, data: users });
+    
+    // Calculate total ordered quantity for each user
+    const usersWithOrderQuantity = await Promise.all(
+      users.map(async (user) => {
+        const orders = await Order.find({ user: user._id });
+        const totalQuantity = orders.reduce((sum, order) => {
+          const orderQuantity = (order.items || []).reduce((itemSum, item) => itemSum + (item.quantity || 0), 0);
+          return sum + orderQuantity;
+        }, 0);
+        
+        return {
+          ...user.toObject(),
+          totalOrderedQuantity: totalQuantity
+        };
+      })
+    );
+    
+    res.status(200).json({ success: true, count: usersWithOrderQuantity.length, data: usersWithOrderQuantity });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

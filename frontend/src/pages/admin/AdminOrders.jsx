@@ -10,6 +10,7 @@ const STATUS_CONFIG = {
   shipped:    { label: 'Shipped',    bg: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
   delivered:  { label: 'Delivered',  bg: 'bg-green-50 text-green-600 border-green-200' },
   cancelled:  { label: 'Cancelled',  bg: 'bg-red-50 text-red-600 border-red-200' },
+  failed:     { label: 'Failed',     bg: 'bg-red-50 text-red-600 border-red-200' },
 };
 
 const PAYMENT_CONFIG = {
@@ -64,6 +65,10 @@ const AdminOrders = () => {
 
   // Apply all filters
   const filteredOrders = orders.filter(order => {
+    // Check if payment failed
+    const isPaymentFailed = order.paymentStatus === 'failed' ||
+      (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
+
     // Date range filter
     if (startDate) {
       const orderDate = new Date(order.createdAt);
@@ -79,13 +84,21 @@ const AdminOrders = () => {
     }
 
     // Order status filter
-    if (statusFilter !== 'all' && order.status !== statusFilter) return false;
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'failed') {
+        // Show only orders with failed payment
+        if (!isPaymentFailed) return false;
+      } else if (statusFilter === 'placed') {
+        // For "Confirm" status, exclude failed payments
+        if (order.status !== 'placed' || isPaymentFailed) return false;
+      } else {
+        // For other statuses, check exact match and exclude failed payments
+        if (order.status !== statusFilter || isPaymentFailed) return false;
+      }
+    }
 
     // Payment status filter
     if (paymentFilter !== 'all') {
-      const isPaymentFailed = order.paymentStatus === 'failed' ||
-        (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
-
       if (paymentFilter === 'failed') {
         if (!isPaymentFailed && order.paymentStatus !== 'failed') return false;
       } else {
@@ -219,6 +232,7 @@ const AdminOrders = () => {
               <option value="shipped">Shipped</option>
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
+              <option value="failed">Failed</option>
             </select>
           </div>
 

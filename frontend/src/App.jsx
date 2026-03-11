@@ -29,6 +29,8 @@ import AdminOrders from './pages/admin/AdminOrders';
 import AdminOrderDetails from './pages/admin/AdminOrderDetails';
 import AdminPayments from './pages/admin/AdminPayments';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminBanner from './pages/admin/AdminBanner';
+import AdminTestimonials from './pages/admin/AdminTestimonials';
 import './App.css';
 
 // Scroll to top on every route change
@@ -75,6 +77,8 @@ function App() {
           <Route path="order-details/:id" element={<AdminOrderDetails />} />
           <Route path="payments" element={<AdminPayments />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="banner" element={<AdminBanner />} />
+          <Route path="testimonials" element={<AdminTestimonials />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 

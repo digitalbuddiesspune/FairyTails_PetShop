@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import MobileBottomNav from './MobileBottomNav';
 import CatalogMenuContent from './CatalogMenuContent';
 
@@ -8,6 +8,7 @@ import CatalogMenuContent from './CatalogMenuContent';
 const subIconMap = {
   'Dry Food': '🥫', 'Wet Food': '🍖', 'Dog Clothes': '👕', 'Cat Clothes': '👗',
   'Treats': '🦴',
+  'Collar & Leash': '🔗',
   'Dogs': { src: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457891/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_vzgzug.svg', alt: 'Dogs' },
   'Cats': { src: 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457890/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_1_q3xxat.svg', alt: 'Cats' },
 };
@@ -72,6 +73,7 @@ const DropdownMenu = ({ category, index, onClose }) => {
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -83,6 +85,11 @@ const Navbar = () => {
   const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
   const mobileSearchInputRef = useRef(null);
   const userDropdownRef = useRef(null);
+
+  // Close dropdown when route changes
+  useEffect(() => {
+    setActiveDropdown(null);
+  }, [location.pathname]);
 
   // Fetch categories from backend API on mount
   useEffect(() => {
@@ -100,13 +107,21 @@ const Navbar = () => {
     fetchCategories();
   }, []);
 
-  // Fetch cart & wishlist counts for logged-in users
+  // Fetch cart & wishlist counts (for logged-in users) or guest cart (for non-logged-in)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      setCartCount(0);
-      setWishlistCount(0);
-      return;
+      // Use guest cart/wishlist
+      const updateGuestCounts = () => {
+        import('../utils/guestCart').then(({ getGuestCartCount, getGuestWishlist }) => {
+          setCartCount(getGuestCartCount());
+          setWishlistCount(getGuestWishlist().length);
+        });
+      };
+      updateGuestCounts();
+      const onCountUpdate = () => updateGuestCounts();
+      window.addEventListener('cart-wishlist-update', onCountUpdate);
+      return () => window.removeEventListener('cart-wishlist-update', onCountUpdate);
     }
     const headers = { Authorization: `Bearer ${token}` };
 
@@ -138,18 +153,19 @@ const Navbar = () => {
     };
   }, []);
 
-  const handleCategoryClick = (index, slug) => {
-    // Toggle dropdown
-    if (activeDropdown === index) {
-      setActiveDropdown(null);
+  const handleCategoryClick = (index, slug, hasSubcategories) => {
+    // If category has subcategories, toggle dropdown (don't navigate)
+    if (hasSubcategories) {
+      if (activeDropdown === index) {
+        setActiveDropdown(null);
+      } else {
+        setActiveDropdown(index);
+      }
     } else {
-      setActiveDropdown(index);
-    }
-    // Navigate to category page without closing dropdown
-    // Use setTimeout so dropdown state is applied before navigation re-render
-    setTimeout(() => {
+      // If no subcategories, navigate directly and close any open dropdown
+      setActiveDropdown(null);
       navigate(`/category/${slug}`);
-    }, 0);
+    }
   };
 
   const handleProfileClick = () => {
@@ -202,7 +218,7 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Top Bar */}
-      <div className="bg-[#a3e635] w-full">
+      <div className="bg-white w-full">
         <div className="w-full px-4 lg:px-8 py-2">
           {/* Desktop layout */}
           <div className="hidden md:flex items-center justify-between gap-4">
@@ -225,7 +241,7 @@ const Navbar = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full px-4 py-2.5 bg-white text-gray-800 focus:outline-none placeholder-gray-500"
                 />
-                <button type="submit" className="bg-black px-4 py-2.5 hover:bg-gray-800 transition-colors">
+                <button type="submit" className="bg-[#205ea9] px-4 py-2.5 hover:bg-gray-800 transition-colors">
                   <SearchIcon />
                 </button>
               </div>
@@ -233,14 +249,14 @@ const Navbar = () => {
 
             {/* Right Icons - Desktop */}
             <div className="flex items-center gap-3 md:gap-4 shrink-0">
-              <Link to="/contact" className="hidden lg:flex items-center gap-1 text-gray-800 hover:text-black font-medium text-sm transition-colors">
+              <Link to="/contact" className="hidden lg:flex items-center gap-1 text-black hover:text-gray-700 font-medium text-sm transition-colors">
                 <PhoneIcon />
                 <span>Contact</span>
               </Link>
-              <Link to="/about" className="hidden lg:flex items-center text-gray-800 hover:text-black font-medium text-sm transition-colors">
+              <Link to="/about" className="hidden lg:flex items-center text-black hover:text-gray-700 font-medium text-sm transition-colors">
                 About
               </Link>
-              <Link to="/wishlist" className="text-gray-800 hover:text-black transition-colors relative" title="Wishlist">
+              <Link to="/wishlist" className="text-black hover:text-gray-700 transition-colors relative" title="Wishlist">
                 <HeartIcon />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
@@ -248,7 +264,7 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
-              <Link to="/cart" className="text-gray-800 hover:text-black transition-colors relative" title="Cart">
+              <Link to="/cart" className="text-black hover:text-gray-700 transition-colors relative" title="Cart">
                 <CartIcon />
                 {cartCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
@@ -257,7 +273,7 @@ const Navbar = () => {
                 )}
               </Link>
               <div className="relative" ref={userDropdownRef}>
-                <button onClick={handleProfileClick} className="text-gray-800 hover:text-black transition-colors" title="Profile">
+                <button onClick={handleProfileClick} className="text-black hover:text-gray-700 transition-colors" title="Profile">
                   <UserIcon />
                 </button>
                 {userDropdownOpen && localStorage.getItem('token') && (
@@ -297,7 +313,7 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="p-2 text-gray-800 hover:text-black hover:bg-black/5 rounded-lg transition-colors shrink-0"
+                className="p-2 text-black hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
                 aria-label="Open menu"
               >
                 <HamburgerIcon />
@@ -311,7 +327,7 @@ const Navbar = () => {
               </Link>
               <button
                 onClick={() => setMobileSearchExpanded(true)}
-                className="p-2 text-gray-800 hover:text-black hover:bg-black/5 rounded-lg transition-colors shrink-0"
+                className="p-2 text-black hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
                 aria-label="Search"
               >
                 <SearchIconGray />
@@ -334,7 +350,7 @@ const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => { setMobileSearchExpanded(false); setSearchQuery(''); }}
-                  className="p-2.5 text-gray-800 hover:bg-black/5 rounded-lg shrink-0"
+                  className="p-2.5 text-black hover:bg-gray-100 rounded-lg shrink-0"
                   aria-label="Close search"
                 >
                   <CloseIcon />
@@ -345,14 +361,14 @@ const Navbar = () => {
         </div>
       </div>
 
-      <nav className="bg-black text-white w-full border-b border-gray-800 relative hidden md:block">
+      <nav className="bg-[#205ea9] text-white w-full border-b border-gray-800 relative hidden md:block">
         <div className="w-full px-4 lg:px-8">
           <ul className="flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide">
             {categories.map((category, index) => (
               <li key={category._id || index} className="relative" data-idx={index}>
                 <button
-                  onClick={() => handleCategoryClick(index, category.slug)}
-                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-white hover:text-[#a3e635] hover:bg-gray-900 transition-colors whitespace-nowrap"
+                  onClick={() => handleCategoryClick(index, category.slug, category.subcategories?.length > 0)}
+                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] hover:bg-gray-900 transition-colors whitespace-nowrap"
                 >
                   {category.name}
                   {category.subcategories?.length > 0 && (
@@ -364,12 +380,12 @@ const Navbar = () => {
             
             {/* Mobile Contact & About */}
             <li className="lg:hidden">
-              <Link to="/contact" className="px-4 py-3 text-sm font-medium text-white hover:text-[#a3e635] whitespace-nowrap block">
+              <Link to="/contact" className="px-4 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] whitespace-nowrap block">
                 Contact
               </Link>
             </li>
             <li className="lg:hidden">
-              <Link to="/about" className="px-4 py-3 text-sm font-medium text-white hover:text-[#a3e635] whitespace-nowrap block">
+              <Link to="/about" className="px-4 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] whitespace-nowrap block">
                 About
               </Link>
             </li>
@@ -523,7 +539,7 @@ const SearchIcon = () => (
 );
 
 const SearchIconGray = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
   </svg>
 );

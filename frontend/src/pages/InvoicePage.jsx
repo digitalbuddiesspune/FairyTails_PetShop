@@ -150,7 +150,13 @@ const InvoicePage = () => {
           {/* Header - centred, no Tax Invoice / INV on top */}
           <div className="bg-gray-800 text-white px-6 py-6 text-center print:py-5">
             <div className="flex flex-col items-center gap-1">
-              <span className="text-3xl">🐾</span>
+              <div className="bg-white rounded-full p-3 mb-2">
+                <img 
+                  src="https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770288839/LOGO-2_l5wmxs.png" 
+                  alt="FairyTails Pet Shop" 
+                  className="h-16 w-auto object-contain"
+                />
+              </div>
               <h1 className="text-xl font-bold leading-tight">FairyTails Pet Shop</h1>
               <p className="text-sm text-gray-300">Your Trusted Pet Care Partner | support@fairytails.com | GST: 09AHCPC5752E1ZM</p>
             </div>
@@ -229,11 +235,8 @@ const InvoicePage = () => {
             {/* Totals: amount in words left, mini table right */}
             {(() => {
               const subtotal = Number(order.subtotal) || 0;
-              const gstTotal = Number(order.gst) || Math.round(subtotal * 0.18 * 100) / 100;
-              const sgstAmt = Math.round(gstTotal / 2 * 100) / 100;
-              const cgstAmt = gstTotal - sgstAmt;
               const delivery = Number(order.deliveryCharge) || 0;
-              const total = Number(order.total) || subtotal + gstTotal + delivery;
+              const total = Number(order.total) || subtotal + delivery;
               return (
                 <div className="flex flex-wrap items-start justify-between gap-6 mb-5 break-inside-avoid">
                   <div className="text-sm text-gray-500">
@@ -251,20 +254,21 @@ const InvoicePage = () => {
                           <td className="py-2 px-4 text-right font-medium text-gray-900">₹{subtotal.toFixed(2)}</td>
                         </tr>
                         <tr className="border-b border-gray-100">
-                          <td className="py-2 px-4 text-gray-600">SGST 9%</td>
-                          <td className="py-2 px-4 text-right font-medium text-gray-900">₹{sgstAmt.toFixed(2)}</td>
+                          <td className="py-2 px-4 text-gray-600">18% GST</td>
+                          <td className="py-2 px-4 text-right font-medium text-gray-500 text-xs">Included</td>
                         </tr>
                         <tr className="border-b border-gray-100">
-                          <td className="py-2 px-4 text-gray-600">CGST 9%</td>
-                          <td className="py-2 px-4 text-right font-medium text-gray-900">₹{cgstAmt.toFixed(2)}</td>
-                        </tr>
-                        <tr className="border-b border-gray-100">
-                          <td className="py-2 px-4 text-gray-600">GST Amount (18%)</td>
-                          <td className="py-2 px-4 text-right font-medium text-gray-900">₹{gstTotal.toFixed(2)}</td>
-                        </tr>
-                        <tr className="border-b border-gray-100">
-                          <td className="py-2 px-4 text-gray-600">Delivery</td>
-                          <td className="py-2 px-4 text-right font-medium text-gray-900">{delivery === 0 ? 'Free' : `₹${delivery.toFixed(2)}`}</td>
+                          <td className="py-2 px-4 text-gray-600">Delivery Charges</td>
+                          <td className="py-2 px-4 text-right font-medium text-gray-900">
+                            {subtotal >= 500 ? (
+                              <div className="flex items-center justify-end gap-2">
+                                <span className="text-gray-400 line-through text-xs">₹50.00</span>
+                                <span className="text-green-600 font-medium">Free</span>
+                              </div>
+                            ) : (
+                              delivery === 0 ? 'Free' : `₹${delivery.toFixed(2)}`
+                            )}
+                          </td>
                         </tr>
                         <tr className="bg-gray-800 text-white">
                           <td className="py-3 px-4 font-bold">Total Amount</td>

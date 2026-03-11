@@ -213,6 +213,7 @@ const CheckoutPage = () => {
     if (!validate()) return;
 
     const f = formRef.current;
+    const startTime = Date.now();
 
     try {
       setSubmitting(true);
@@ -235,15 +236,26 @@ const CheckoutPage = () => {
 
       if (!orderRes.data.success) {
         setServerError(orderRes.data.message || 'Failed to create order');
+        setSubmitting(false);
         return;
       }
 
       const { data: order, razorpayOrderId, keyId, amountInPaise } = orderRes.data;
 
+      // Helper to ensure at least 3 seconds of "processing" before showing success
+      const showSuccessWithDelay = () => {
+        const elapsed = Date.now() - startTime;
+        const delay = Math.max(0, 3000 - elapsed);
+        setTimeout(() => {
+          window.dispatchEvent(new Event('cart-wishlist-update'));
+          setOrderSuccess(true);
+          setSubmitting(false);
+          setTimeout(() => navigate('/orders'), 2500);
+        }, delay);
+      };
+
       if (f.paymentMethod === 'cash_on_delivery') {
-        window.dispatchEvent(new Event('cart-wishlist-update'));
-        setOrderSuccess(true);
-        setTimeout(() => navigate('/orders'), 2500);
+        showSuccessWithDelay();
         return;
       }
 
@@ -270,11 +282,10 @@ const CheckoutPage = () => {
         );
 
         if (verifyRes.data.success) {
-          window.dispatchEvent(new Event('cart-wishlist-update'));
-          setOrderSuccess(true);
-          setTimeout(() => navigate('/orders'), 2500);
+          showSuccessWithDelay();
         } else {
           setServerError(verifyRes.data.message || 'Payment verification failed');
+          setSubmitting(false);
         }
       } catch (payErr) {
         if (payErr.message === 'Payment closed') {
@@ -282,11 +293,11 @@ const CheckoutPage = () => {
         } else {
           setServerError(payErr.response?.data?.message || payErr.message || 'Payment failed. Please try again.');
         }
+        setSubmitting(false);
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Something went wrong. Please try again.';
       setServerError(msg);
-    } finally {
       setSubmitting(false);
     }
   };
@@ -296,9 +307,8 @@ const CheckoutPage = () => {
   const subtotal = cartItems.reduce((s, i) => s + getItemPricing(i).discountedPrice * i.quantity, 0);
   const mrpTotal = cartItems.reduce((s, i) => s + getItemPricing(i).mrp * i.quantity, 0);
   const savings = mrpTotal - subtotal;
-  const delivery = subtotal >= 500 ? 0 : 50;
-  const gst = Math.round(subtotal * 0.18);  // 18% GST on subtotal
-  const total = subtotal + gst + delivery;
+  const deliveryCharge = subtotal >= 500 ? 0 : 50;
+  const total = subtotal + deliveryCharge; // GST is already included in subtotal
 
   // ─── States ────────────────────────────────────────────────────────────────
   if (!token) return null;
@@ -307,7 +317,7 @@ const CheckoutPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-[#2f5a87] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-500 text-lg">Loading checkout...</p>
         </div>
       </div>
@@ -321,7 +331,7 @@ const CheckoutPage = () => {
           <p className="text-5xl mb-4">🛒</p>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Your cart is empty</h2>
           <p className="text-gray-500 mb-6">Add some products before checking out.</p>
-          <Link to="/" className="inline-block bg-[#65a30d] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#4d7c0f] transition-colors">
+          <Link to="/" className="inline-block bg-[#2f5a87] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#23476a] transition-colors">
             Browse Products
           </Link>
         </div>
@@ -342,7 +352,7 @@ const CheckoutPage = () => {
     `w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${
       errors[field]
         ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-2 focus:ring-red-100'
-        : 'border-gray-200 bg-white focus:border-[#65a30d] focus:ring-2 focus:ring-[#65a30d]/10'
+        : 'border-gray-200 bg-white focus:border-[#2f5a87] focus:ring-2 focus:ring-[#2f5a87]/10'
     }`;
 
   return (
@@ -384,11 +394,11 @@ const CheckoutPage = () => {
                     <label
                       className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         paymentMethod === 'cash_on_delivery'
-                          ? 'border-[#65a30d] bg-[#65a30d]/5'
+                          ? 'border-[#2f5a87] bg-[#2f5a87]/5'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <input type="radio" name="payment" value="cash_on_delivery" checked={paymentMethod === 'cash_on_delivery'} onChange={() => setToggle('paymentMethod', 'cash_on_delivery')} className="w-4 h-4 accent-[#65a30d]" />
+                      <input type="radio" name="payment" value="cash_on_delivery" checked={paymentMethod === 'cash_on_delivery'} onChange={() => setToggle('paymentMethod', 'cash_on_delivery')} className="w-4 h-4 accent-[#2f5a87]" />
                       <div>
                         <p className="font-semibold text-gray-900 text-sm">💵 Cash on Delivery</p>
                         <p className="text-xs text-gray-500">Pay when you receive your order</p>
@@ -397,11 +407,11 @@ const CheckoutPage = () => {
                     <label
                       className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         paymentMethod === 'online'
-                          ? 'border-[#65a30d] bg-[#65a30d]/5'
+                          ? 'border-[#2f5a87] bg-[#2f5a87]/5'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <input type="radio" name="payment" value="online" checked={paymentMethod === 'online'} onChange={() => setToggle('paymentMethod', 'online')} className="w-4 h-4 accent-[#65a30d]" />
+                      <input type="radio" name="payment" value="online" checked={paymentMethod === 'online'} onChange={() => setToggle('paymentMethod', 'online')} className="w-4 h-4 accent-[#2f5a87]" />
                       <div>
                         <p className="font-semibold text-gray-900 text-sm">💳 Pay Online</p>
                         <p className="text-xs text-gray-500">UPI, Cards, Net Banking</p>
@@ -422,7 +432,7 @@ const CheckoutPage = () => {
                           onClick={() => selectSavedAddress(addr)}
                           className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                             useSaved === addr._id && !showNewForm
-                              ? 'border-[#65a30d] bg-[#65a30d]/5'
+                              ? 'border-[#2f5a87] bg-[#2f5a87]/5'
                               : 'border-gray-100 hover:border-gray-300'
                           }`}
                         >
@@ -442,8 +452,8 @@ const CheckoutPage = () => {
                       onClick={openNewForm}
                       className={`mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed text-sm font-semibold transition-all ${
                         showNewForm
-                          ? 'border-[#65a30d] bg-[#65a30d]/5 text-[#65a30d]'
-                          : 'border-gray-200 text-gray-500 hover:border-[#65a30d] hover:text-[#65a30d]'
+                          ? 'border-[#2f5a87] bg-[#2f5a87]/5 text-[#2f5a87]'
+                          : 'border-gray-200 text-gray-500 hover:border-[#2f5a87] hover:text-[#2f5a87]'
                       }`}
                     >
                       <span className="text-lg">+</span> Add New Address
@@ -481,7 +491,7 @@ const CheckoutPage = () => {
                           onClick={() => setToggle('addressType', t)}
                           className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
                             addressType === t
-                              ? 'border-[#65a30d] bg-[#65a30d]/5 text-[#65a30d]'
+                              ? 'border-[#2f5a87] bg-[#2f5a87]/5 text-[#2f5a87]'
                               : 'border-gray-200 text-gray-500 hover:border-gray-300'
                           }`}
                         >
@@ -523,7 +533,7 @@ const CheckoutPage = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="lg:hidden w-full bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-4 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm disabled:opacity-60"
+                  className="lg:hidden w-full bg-[#2f5a87] hover:bg-[#23476a] text-white font-bold py-4 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60"
                 >
                   {submitting ? 'Placing Order...' : `Place Order · ₹${total.toLocaleString()}`}
                 </button>
@@ -571,12 +581,21 @@ const CheckoutPage = () => {
                     <span>₹{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
-                    <span>GST (18%)</span>
-                    <span>₹{gst.toLocaleString()}</span>
+                    <span>18% GST</span>
+                    <span className="text-gray-500 text-xs">Included</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
-                    <span>Delivery</span>
-                    <span className={delivery === 0 ? 'text-green-600 font-medium' : ''}>{delivery === 0 ? 'Free' : `₹${delivery}`}</span>
+                    <span>Delivery Charges</span>
+                    <div className="flex items-center gap-2">
+                      {subtotal >= 500 ? (
+                        <>
+                          <span className="text-gray-400 line-through text-xs">₹50</span>
+                          <span className="text-green-600 font-medium">Free</span>
+                        </>
+                      ) : (
+                        <span>₹{deliveryCharge}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -594,7 +613,7 @@ const CheckoutPage = () => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="hidden lg:block w-full mt-6 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm disabled:opacity-60"
+                  className="hidden lg:block w-full mt-6 bg-[#2f5a87] text-white font-bold py-3.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm disabled:opacity-60"
                 >
                   {submitting ? 'Placing Order...' : 'Place Order'}
                 </button>
@@ -622,7 +641,7 @@ const CheckoutPage = () => {
             <p className="text-gray-400 text-xs mb-6">Redirecting to your orders...</p>
             <button
               onClick={() => navigate('/orders')}
-              className="w-full bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all text-sm"
+              className="w-full bg-gradient-to-r from-[#2f5a87] to-[#23476a] text-white font-bold py-3 rounded-xl hover:from-[#23476a] hover:to-[#1c3553] transition-all text-sm"
             >
               View My Orders
             </button>

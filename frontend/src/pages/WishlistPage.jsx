@@ -1,6 +1,17 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getGuestWishlist, removeFromGuestWishlist, addToGuestCart } from '../utils/guestCart';
+
+const PRODUCT_ENDPOINTS = [
+  '/food',
+  '/clothes',
+  '/toys',
+  '/accessories',
+  '/grooming-essentials',
+  '/health-supplements',
+  '/houses',
+];
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -11,17 +22,81 @@ const WishlistPage = () => {
   const [error, setError] = useState(null);
   const [removing, setRemoving] = useState(null);
   const [addingToCart, setAddingToCart] = useState(null);
+  const [guestItems, setGuestItems] = useState([]);
+  const [guestProducts, setGuestProducts] = useState([]);
 
   const token = localStorage.getItem('token');
+
+  // Fetch product details for guest wishlist items
+  const fetchGuestWishlistProducts = async () => {
+    try {
+      setLoading(true);
+      const guest = getGuestWishlist();
+      setGuestItems(guest);
+      
+      if (guest.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch product details for each productId
+      const productPromises = guest.map(async (item) => {
+        // Extract productId - handle both string and object formats
+        let productId = null;
+        if (typeof item === 'string') {
+          productId = item;
+        } else if (item && typeof item === 'object') {
+          productId = String(item._id || item.productId || '');
+        }
+        
+        if (!productId || productId === 'undefined' || productId === 'null') {
+          return null;
+        }
+        
+        // Try each endpoint to find the product
+        for (const endpoint of PRODUCT_ENDPOINTS) {
+          try {
+            const res = await axios.get(`${API_BASE}${endpoint}/${productId}`, { validateStatus: () => true });
+            if (res.status === 200 && res.data?.success) {
+              return res.data.data;
+            }
+          } catch (err) {
+            continue;
+          }
+        }
+        return null;
+      });
+
+      const products = (await Promise.all(productPromises)).filter(Boolean);
+      setGuestProducts(products);
+    } catch (err) {
+      console.error('Error fetching guest wishlist products:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!token) {
-      setLoading(false);
+      fetchGuestWishlistProducts();
       return;
     }
     fetchWishlist();
-  }, []);
+  }, [token]);
+
+  // Listen for wishlist updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      if (!token) {
+        fetchGuestWishlistProducts();
+      } else {
+        fetchWishlist();
+      }
+    };
+    window.addEventListener('cart-wishlist-update', handleUpdate);
+    return () => window.removeEventListener('cart-wishlist-update', handleUpdate);
+  }, [token]);
 
   const fetchWishlist = async () => {
     try {
@@ -42,12 +117,17 @@ const WishlistPage = () => {
   const removeItem = async (productId) => {
     try {
       setRemoving(productId);
-      const res = await axios.delete(`${API_BASE}/wishlist/${productId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data.success) {
-        setWishlist(res.data.data);
-        window.dispatchEvent(new Event('cart-wishlist-update'));
+      if (!token) {
+        removeFromGuestWishlist(productId);
+        await fetchGuestWishlistProducts();
+      } else {
+        const res = await axios.delete(`${API_BASE}/wishlist/${productId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.success) {
+          setWishlist(res.data.data);
+          window.dispatchEvent(new Event('cart-wishlist-update'));
+        }
       }
     } catch (err) {
       console.error('Remove from wishlist error:', err);
@@ -56,14 +136,49 @@ const WishlistPage = () => {
     }
   };
 
-  const addToCart = async (productId) => {
+  const addToCart = async (product) => {
     try {
-      setAddingToCart(productId);
-      await axios.post(
-        `${API_BASE}/cart`,
-        { productId, quantity: 1, selectedSize: 0 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const id = product._id || product.productId;
+      setAddingToCart(id);
+      
+      // Determine product type
+      let productType = 'Food';
+      for (const endpoint of PRODUCT_ENDPOINTS) {
+        try {
+          const res = await axios.get(`${API_BASE}${endpoint}/${id}`, { validateStatus: () => true });
+          if (res.status === 200 && res.data?.success) {
+            const endpointMap = {
+              '/food': 'Food',
+              '/clothes': 'Clothes',
+              '/toys': 'Toy',
+              '/accessories': 'Accessory',
+              '/grooming-essentials': 'GroomingEssential',
+              '/health-supplements': 'HealthSupplement',
+              '/houses': 'House',
+            };
+            productType = endpointMap[endpoint] || 'Food';
+            break;
+          }
+        } catch (err) {
+          continue;
+        }
+      }
+      
+      if (!token) {
+        // Guest cart
+        addToGuestCart({
+          productId: id,
+          quantity: 1,
+          selectedSize: 0,
+          productType: productType,
+        });
+      } else {
+        await axios.post(
+          `${API_BASE}/cart`,
+          { productId: id, quantity: 1, selectedSize: 0 },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
       window.dispatchEvent(new Event('cart-wishlist-update'));
     } catch (err) {
       console.error('Add to cart error:', err);
@@ -72,30 +187,7 @@ const WishlistPage = () => {
     }
   };
 
-  const items = wishlist?.items || [];
-
-  // Not logged in
-  if (!token) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-12 h-12 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Wishlist Awaits</h2>
-          <p className="text-gray-500 mb-6">Sign in to save your favorite products and never lose track of them.</p>
-          <Link
-            to="/signin"
-            className="inline-block bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all"
-          >
-            Sign In
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const items = token ? (wishlist?.items || []) : guestProducts;
 
   if (loading) {
     return (

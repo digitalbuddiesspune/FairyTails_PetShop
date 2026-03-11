@@ -1,6 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { addToGuestCart, addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } from '../utils/guestCart';
+import LoginRequiredModal from '../components/LoginRequiredModal';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -54,31 +56,54 @@ const ProductDetail = () => {
   const [togglingWishlist, setTogglingWishlist] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [cartMessage, setCartMessage] = useState('');
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const token = localStorage.getItem('token');
 
-  // Check if product is in wishlist
+  // Check if product is in wishlist (both guest and logged in)
   useEffect(() => {
-    if (!token || !id) return;
-    const checkWishlist = async () => {
-      try {
-        const res = await axios.get(`${API_BASE}/wishlist`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.data.success) {
-          const items = res.data.data.items || [];
-          setIsInWishlist(items.some((item) => String(item._id || item) === id));
+    if (!id) return;
+    if (token) {
+      const checkWishlist = async () => {
+        try {
+          const res = await axios.get(`${API_BASE}/wishlist`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.data.success) {
+            const items = res.data.data.items || [];
+            setIsInWishlist(items.some((item) => String(item._id || item) === id));
+          }
+        } catch (err) {
+          // silently fail
         }
-      } catch (err) {
-        // silently fail
-      }
-    };
-    checkWishlist();
+      };
+      checkWishlist();
+    } else {
+      setIsInWishlist(isInGuestWishlist(id));
+    }
   }, [token, id]);
 
   const handleAddToCart = async () => {
     if (!token) {
-      navigate('/signin');
+      // Use guest cart
+      try {
+        setAddingToCart(true);
+        const modelType = productType ? (ENDPOINT_TO_MODEL[productType] || undefined) : 'Food';
+        addToGuestCart({
+          productId: id,
+          quantity: 1,
+          selectedSize,
+          productType: modelType,
+        });
+        setCartMessage('Added to cart!');
+        setTimeout(() => setCartMessage(''), 2500);
+      } catch (err) {
+        console.error('Add to guest cart error:', err);
+        setCartMessage('Failed to add');
+        setTimeout(() => setCartMessage(''), 2500);
+      } finally {
+        setAddingToCart(false);
+      }
       return;
     }
     try {
@@ -108,7 +133,7 @@ const ProductDetail = () => {
 
   const handleBuyNow = async () => {
     if (!token) {
-      navigate('/signin');
+      setShowLoginModal(true);
       return;
     }
     try {
@@ -158,7 +183,21 @@ const ProductDetail = () => {
 
   const handleToggleWishlist = async () => {
     if (!token) {
-      navigate('/signin');
+      // Use guest wishlist with full product data
+      try {
+        setTogglingWishlist(true);
+        if (isInGuestWishlist(id)) {
+          removeFromGuestWishlist(id);
+          setIsInWishlist(false);
+        } else if (product) {
+          addToGuestWishlist(product);
+          setIsInWishlist(true);
+        }
+      } catch (err) {
+        console.error('Toggle guest wishlist error:', err);
+      } finally {
+        setTogglingWishlist(false);
+      }
       return;
     }
     try {
@@ -781,7 +820,7 @@ const ProductDetail = () => {
                     className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 ${
                       availableStock === 0
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white hover:from-[#4d7c0f] hover:to-[#3f6212]'
+                        : 'bg-[#203D5B] text-white hover:bg-[#1a3149]'
                     }`}
                   >
                     {availableStock === 0
@@ -797,7 +836,7 @@ const ProductDetail = () => {
                     className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 ${
                       availableStock === 0
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-[#f59e0b] to-[#d97706] text-white hover:from-[#d97706] hover:to-[#b45309]'
+                        : 'bg-[#205ea9] text-white hover:bg-[#264a6d]'
                     }`}
                   >
                     {buyingNow ? 'Processing...' : '⚡ Buy Now'}
@@ -987,6 +1026,13 @@ const ProductDetail = () => {
           </div>
         </div>
       </section>
+
+      {/* Login Required Modal */}
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        message="You are not logged in. Please log in first to proceed with Buy Now."
+      />
     </div>
   );
 };

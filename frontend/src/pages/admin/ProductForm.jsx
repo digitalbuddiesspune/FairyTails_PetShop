@@ -53,6 +53,8 @@ const INITIAL = {
   accessory: {
     category: 'accessories',
     subCategory: 'dog',
+    productType: '',
+    subSubCategory: '',
     productName: '',
     mrp: '',
     discountPrice: '',
@@ -355,7 +357,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         });
       }
       if (type === 'accessory') {
-        ['size', 'brand', 'material', 'itemCode', 'hsn'].forEach((k) => {
+        ['size', 'brand', 'material', 'itemCode', 'hsn', 'productType', 'subSubCategory'].forEach((k) => {
           if (payload[k] === '' || payload[k] === undefined) delete payload[k];
         });
       }
@@ -782,6 +784,21 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)} required>
           {SUB_CATEGORIES.accessory.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
         </select>
+      </div>
+      <div>
+        <Label>Product Type</Label>
+        <select className="input-field" value={formData.productType || ''} onChange={(e) => set('productType', e.target.value)}>
+          <option value="">None</option>
+          <option value="collar-leash">Collar & Leash</option>
+        </select>
+      </div>
+      <div>
+        <Label>Sub-Sub Category (Optional)</Label>
+        <select className="input-field" value={formData.subSubCategory || ''} onChange={(e) => set('subSubCategory', e.target.value)}>
+          <option value="">None</option>
+          <option value="collar-leash">Collar & Leash</option>
+        </select>
+        <p className="text-xs text-gray-500 mt-1">Optional: Use this if you want to categorize as Collar & Leash</p>
       </div>
 
       {/* Pricing */}
