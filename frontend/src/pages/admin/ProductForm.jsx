@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -154,13 +154,43 @@ const SUB_CATEGORIES = {
 const PET_CATEGORIES_FOOD = ['Dog', 'Cat', 'Bird', 'Fish', 'Other'];
 const PET_CATEGORIES_CLOTHES = ['Dog', 'Cat'];
 
+const slugify = (value) =>
+  String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+const normalizePetName = (value, mode = 'title') => {
+  const singular = String(value || '').trim().replace(/s$/i, '').toLowerCase();
+  if (!singular) return '';
+  return mode === 'lower' ? singular : singular.charAt(0).toUpperCase() + singular.slice(1);
+};
+
 /* ─── Component ───────────────────────────────────────────────────────────── */
 
 const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
   const type = categoryData.type;
   const [formData, setFormData] = useState({ ...INITIAL[type] });
+  const [categoryTree, setCategoryTree] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/categories`);
+        const data = await res.json();
+        if (data.success) {
+          setCategoryTree(Array.isArray(data.data) ? data.data : []);
+        }
+      } catch {
+        setCategoryTree([]);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Populate form when editing
   useEffect(() => {
@@ -297,6 +327,90 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
   const subArrRemove = (arrField, idx) =>
     setFormData((p) => ({ ...p, [arrField]: p[arrField].filter((_, i) => i !== idx) }));
+
+  const fixedCategoryMeta = useMemo(() => {
+    const byType = {
+      toy: ['toys'],
+      accessory: ['accessories'],
+      grooming: ['grooming-and-essential', 'grooming-essentials'],
+      health: ['health-and-supplement', 'health-supplement'],
+      house: ['beds-and-house', 'house'],
+    };
+    const slugs = byType[type] || [];
+    const matched = categoryTree.find((cat) => slugs.includes(slugify(cat?.slug || cat?.name)));
+    return {
+      label: matched?.name || categoryData?.label || '',
+      subcategories: Array.isArray(matched?.subcategories) ? matched.subcategories : [],
+    };
+  }, [categoryData?.label, categoryTree, type]);
+
+  const categoryOptions = useMemo(() => {
+    if (type === 'food') {
+      const optionsFromApi = categoryTree
+        .map((cat) => normalizePetName(cat?.name, 'title'))
+        .filter((name) => PET_CATEGORIES_FOOD.includes(name));
+      return optionsFromApi.length ? [...new Set(optionsFromApi)] : PET_CATEGORIES_FOOD;
+    }
+    if (type === 'clothes') {
+      const optionsFromApi = categoryTree
+        .map((cat) => normalizePetName(cat?.name, 'title'))
+        .filter((name) => PET_CATEGORIES_CLOTHES.includes(name));
+      return optionsFromApi.length ? [...new Set(optionsFromApi)] : PET_CATEGORIES_CLOTHES;
+    }
+    if (['toy', 'accessory', 'grooming', 'health', 'house'].includes(type)) {
+      return [fixedCategoryMeta.label || formData.category || categoryData?.label || ''];
+    }
+    return [];
+  }, [categoryData?.label, categoryTree, fixedCategoryMeta.label, formData.category, type]);
+
+  const subCategoryOptions = useMemo(() => {
+    if (type === 'food') {
+      const selectedPet = normalizePetName(formData.category, 'title');
+      const matchedPet = categoryTree.find((cat) => normalizePetName(cat?.name, 'title') === selectedPet);
+      const optionsFromApi = (matchedPet?.subcategories || []).map((sub) => sub?.name).filter(Boolean);
+      return optionsFromApi.length ? [...new Set(optionsFromApi)] : SUB_CATEGORIES.food;
+    }
+    if (type === 'clothes') return SUB_CATEGORIES.clothes;
+    if (['toy', 'accessory', 'grooming', 'health', 'house'].includes(type)) {
+      const values = fixedCategoryMeta.subcategories
+        .map((sub) => normalizePetName(sub?.name, 'lower'))
+        .filter((name) => SUB_CATEGORIES[type]?.includes(name));
+      return values.length ? [...new Set(values)] : SUB_CATEGORIES[type];
+    }
+    return [];
+  }, [categoryTree, fixedCategoryMeta.subcategories, formData.category, type]);
+
+  const accessorySubSubCategoryOptions = useMemo(() => {
+    if (type !== 'accessory') return [];
+    const selectedSub = normalizePetName(formData.subCategory, 'title');
+    const selectedNode = fixedCategoryMeta.subcategories.find(
+      (sub) => normalizePetName(sub?.name, 'title') === selectedSub
+    );
+    const dynamic = (selectedNode?.subSubCategories || []).map((entry) => slugify(entry)).filter(Boolean);
+    return [...new Set([...dynamic, 'collar-leash'])];
+  }, [fixedCategoryMeta.subcategories, formData.subCategory, type]);
+
+  useEffect(() => {
+    if (!categoryOptions.length || !formData.category) return;
+    if (!categoryOptions.includes(formData.category) && (type === 'food' || type === 'clothes')) {
+      set('category', categoryOptions[0]);
+    }
+  }, [categoryOptions, formData.category, type]);
+
+  useEffect(() => {
+    if (!subCategoryOptions.length) return;
+    if (!subCategoryOptions.includes(formData.subCategory)) {
+      set('subCategory', subCategoryOptions[0]);
+    }
+  }, [subCategoryOptions, formData.subCategory]);
+
+  useEffect(() => {
+    if (type !== 'accessory') return;
+    if (!formData.subSubCategory) return;
+    if (!accessorySubSubCategoryOptions.includes(formData.subSubCategory)) {
+      set('subSubCategory', '');
+    }
+  }, [accessorySubSubCategoryOptions, formData.subSubCategory, type]);
 
   /* ─── Submit ──────────────────────────────────────────────────────────── */
 
@@ -480,13 +594,13 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         <div>
           <Label required>Pet Category</Label>
           <select className="input-field" value={formData.category} onChange={(e) => set('category', e.target.value)} required>
-            {PET_CATEGORIES_FOOD.map((c) => <option key={c} value={c}>{c}</option>)}
+            {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>
           <Label required>Sub-Category</Label>
           <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)} required>
-            {SUB_CATEGORIES.food.map((s) => <option key={s} value={s}>{s}</option>)}
+            {subCategoryOptions.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
       </div>
@@ -582,7 +696,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         <div>
           <Label required>Pet Category</Label>
           <select className="input-field" value={formData.category} onChange={(e) => set('category', e.target.value)}>
-            {PET_CATEGORIES_CLOTHES.map((c) => <option key={c} value={c}>{c}</option>)}
+            {categoryOptions.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
         <div>
@@ -671,9 +785,21 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
           <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Squeaky Ball" required />
         </div>
         <div>
-          <Label required>Sub-Category (Pet)</Label>
+          <Label required>Category</Label>
+          <select className="input-field" value={categoryOptions[0] || 'Toys'} disabled>
+            <option value={categoryOptions[0] || 'Toys'}>{categoryOptions[0] || 'Toys'}</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Sub-Category</Label>
           <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)}>
-            {SUB_CATEGORIES.toy.map((s) => <option key={s} value={s}>{s}</option>)}
+            {subCategoryOptions.map((s) => (
+              <option key={s} value={s}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -775,15 +901,27 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
           <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Nylon Dog Collar" required />
         </div>
         <div>
+          <Label required>Category</Label>
+          <select className="input-field" value={categoryOptions[0] || 'Accessories'} disabled>
+            <option value={categoryOptions[0] || 'Accessories'}>{categoryOptions[0] || 'Accessories'}</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Sub-Category</Label>
+          <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)} required>
+            {subCategoryOptions.map((s) => (
+              <option key={s} value={s}>
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
           <Label>Brand</Label>
           <input className="input-field" value={formData.brand || ''} onChange={(e) => set('brand', e.target.value)} placeholder="e.g. PawGear" />
         </div>
-      </div>
-      <div>
-        <Label required>Sub-Category (Pet)</Label>
-        <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)} required>
-          {SUB_CATEGORIES.accessory.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
-        </select>
       </div>
       <div>
         <Label>Product Type</Label>
@@ -796,7 +934,11 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         <Label>Sub-Sub Category (Optional)</Label>
         <select className="input-field" value={formData.subSubCategory || ''} onChange={(e) => set('subSubCategory', e.target.value)}>
           <option value="">None</option>
-          <option value="collar-leash">Collar & Leash</option>
+          {accessorySubSubCategoryOptions.map((option) => (
+            <option key={option} value={option}>
+              {option.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())}
+            </option>
+          ))}
         </select>
         <p className="text-xs text-gray-500 mt-1">Optional: Use this if you want to categorize as Collar & Leash</p>
       </div>
@@ -904,9 +1046,17 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
           <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Aloe Vera Shampoo" required />
         </div>
         <div>
-          <Label required>Sub-Category (Pet)</Label>
+          <Label required>Category</Label>
+          <select className="input-field" value={categoryOptions[0] || 'Grooming'} disabled>
+            <option value={categoryOptions[0] || 'Grooming'}>{categoryOptions[0] || 'Grooming'}</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Sub-Category</Label>
           <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)}>
-            {SUB_CATEGORIES.grooming.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+            {subCategoryOptions.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
           </select>
         </div>
       </div>
@@ -1008,9 +1158,17 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
           <input className="input-field" value={formData.productName} onChange={(e) => set('productName', e.target.value)} placeholder="e.g. Joint Care Tablets" required />
         </div>
         <div>
-          <Label required>Sub-Category (Pet)</Label>
+          <Label required>Category</Label>
+          <select className="input-field" value={categoryOptions[0] || 'Health'} disabled>
+            <option value={categoryOptions[0] || 'Health'}>{categoryOptions[0] || 'Health'}</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Sub-Category</Label>
           <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)}>
-            {SUB_CATEGORIES.health.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+            {subCategoryOptions.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
           </select>
         </div>
       </div>
@@ -1107,9 +1265,17 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
           <input className="input-field" value={formData.productName || formData.name} onChange={(e) => { set('productName', e.target.value); set('name', e.target.value); }} placeholder="e.g. Cozy Pet Bed" required />
         </div>
         <div>
-          <Label required>Sub-Category (Pet)</Label>
+          <Label required>Category</Label>
+          <select className="input-field" value={categoryOptions[0] || 'Houses'} disabled>
+            <option value={categoryOptions[0] || 'Houses'}>{categoryOptions[0] || 'Houses'}</option>
+          </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label required>Sub-Category</Label>
           <select className="input-field" value={formData.subCategory} onChange={(e) => set('subCategory', e.target.value)}>
-            {SUB_CATEGORIES.house.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
+            {subCategoryOptions.map((s) => <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>)}
           </select>
         </div>
       </div>

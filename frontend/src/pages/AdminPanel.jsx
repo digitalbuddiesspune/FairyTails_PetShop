@@ -6,13 +6,13 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 // ─── Category config: maps tab keys to API endpoints + display helpers ───
 const PRODUCT_CATEGORIES = [
-  { key: 'food', label: 'Food', icon: '🍖', endpoint: '/food?limit=100', color: 'bg-orange-50 border-orange-200 text-orange-700' },
-  { key: 'clothes', label: 'Clothes', icon: '👕', endpoint: '/clothes?limit=100', color: 'bg-pink-50 border-pink-200 text-pink-700' },
-  { key: 'grooming', label: 'Grooming', icon: '✂️', endpoint: '/grooming-essentials?limit=100', color: 'bg-teal-50 border-teal-200 text-teal-700' },
-  { key: 'essentials', label: 'Essentials', icon: '💊', endpoint: '/health-supplements?limit=100', color: 'bg-green-50 border-green-200 text-green-700' },
-  { key: 'toys', label: 'Toys', icon: '🧸', endpoint: '/toys?limit=100', color: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
-  { key: 'housing', label: 'Housing', icon: '🏠', endpoint: '/houses?limit=100', color: 'bg-blue-50 border-blue-200 text-blue-700' },
-  { key: 'accessories', label: 'Accessories', icon: '🎀', endpoint: '/accessories?limit=100', color: 'bg-purple-50 border-purple-200 text-purple-700' },
+  { key: 'food', label: 'Food', icon: '🍖', endpoint: '/food', color: 'bg-orange-50 border-orange-200 text-orange-700' },
+  { key: 'clothes', label: 'Clothes', icon: '👕', endpoint: '/clothes', color: 'bg-pink-50 border-pink-200 text-pink-700' },
+  { key: 'grooming', label: 'Grooming', icon: '✂️', endpoint: '/grooming-essentials', color: 'bg-teal-50 border-teal-200 text-teal-700' },
+  { key: 'essentials', label: 'Essentials', icon: '💊', endpoint: '/health-supplements', color: 'bg-green-50 border-green-200 text-green-700' },
+  { key: 'toys', label: 'Toys', icon: '🧸', endpoint: '/toys', color: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
+  { key: 'housing', label: 'Housing', icon: '🏠', endpoint: '/houses', color: 'bg-blue-50 border-blue-200 text-blue-700' },
+  { key: 'accessories', label: 'Accessories', icon: '🎀', endpoint: '/accessories', color: 'bg-purple-50 border-purple-200 text-purple-700' },
 ];
 
 // Normalize product data across different models for display

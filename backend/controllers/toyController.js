@@ -8,7 +8,7 @@ export const getAllToys = async (req, res) => {
     const { subCategory, brand, material, suitableFor, sort, page = 1, limit = 12 } = req.query;
 
     const filter = {};
-    if (subCategory) filter.subCategory = subCategory; // "Dog" or "Cat"
+    if (subCategory) filter.subCategory = String(subCategory).toLowerCase(); // "dog" or "cat"
     if (brand) filter.brand = { $regex: brand, $options: 'i' };
     if (material) filter.material = { $regex: material, $options: 'i' };
     if (suitableFor) filter.suitableFor = suitableFor;
@@ -176,17 +176,17 @@ export const deleteToy = async (req, res) => {
   }
 };
 
-// @desc    Get toys by subCategory (Dog or Cat)
+// @desc    Get toys by subCategory (dog or cat)
 // @route   GET /api/v1/toys/subcategory/:subCategory
 // @access  Public
 export const getToysBySubCategory = async (req, res) => {
   try {
-    const { subCategory } = req.params;
+    const subCategory = String(req.params.subCategory || '').toLowerCase();
 
-    if (!['Dog', 'Cat'].includes(subCategory)) {
+    if (!['dog', 'cat'].includes(subCategory)) {
       return res.status(400).json({
         success: false,
-        message: 'SubCategory must be either "Dog" or "Cat"',
+        message: 'SubCategory must be either "dog" or "cat"',
       });
     }
 
@@ -217,8 +217,8 @@ export const seedToys = async (req, res) => {
       {
         productName: 'Squeaky Bone Chew Toy',
         brand: 'PawPlay',
-        category: 'Toy',
-        subCategory: 'Dog',
+        category: 'toy',
+        subCategory: 'dog',
         price: 349,
         discountedPrice: 299,
         discountPercentage: 14,
@@ -246,8 +246,8 @@ export const seedToys = async (req, res) => {
       {
         productName: 'Rope Tug Toy - Large',
         brand: 'PawPlay',
-        category: 'Toy',
-        subCategory: 'Dog',
+        category: 'toy',
+        subCategory: 'dog',
         price: 249,
         discountedPrice: 199,
         discountPercentage: 20,
@@ -275,8 +275,8 @@ export const seedToys = async (req, res) => {
       {
         productName: 'Interactive Feather Wand',
         brand: 'MeowFun',
-        category: 'Toy',
-        subCategory: 'Cat',
+        category: 'toy',
+        subCategory: 'cat',
         price: 199,
         discountedPrice: 149,
         discountPercentage: 25,
@@ -304,8 +304,8 @@ export const seedToys = async (req, res) => {
       {
         productName: 'Catnip Mouse Toy - 3 Pack',
         brand: 'MeowFun',
-        category: 'Toy',
-        subCategory: 'Cat',
+        category: 'toy',
+        subCategory: 'cat',
         price: 299,
         discountedPrice: 249,
         discountPercentage: 17,
@@ -333,8 +333,8 @@ export const seedToys = async (req, res) => {
       {
         productName: 'Puppy Teething Ring',
         brand: 'PawPlay',
-        category: 'Toy',
-        subCategory: 'Dog',
+        category: 'toy',
+        subCategory: 'dog',
         price: 199,
         discountedPrice: 159,
         discountPercentage: 20,
@@ -362,8 +362,8 @@ export const seedToys = async (req, res) => {
       {
         productName: 'Laser Pointer Cat Toy',
         brand: 'MeowFun',
-        category: 'Toy',
-        subCategory: 'Cat',
+        category: 'toy',
+        subCategory: 'cat',
         price: 149,
         discountedPrice: 99,
         discountPercentage: 34,

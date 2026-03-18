@@ -124,6 +124,48 @@ const productSchema = new mongoose.Schema(
       type: [String],
     },
 
+    purchasePrice: {
+      type: Number,
+      default: 0,
+    },
+
+    saleDiscount: {
+      type: Number,
+      default: 0,
+    },
+
+    minimumStock: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    itemLocation: {
+      type: String,
+      trim: true,
+    },
+
+    taxRateLabel: {
+      type: String,
+      trim: true,
+    },
+
+    inclusiveOfTax: {
+      type: Boolean,
+      default: true,
+    },
+
+    secondaryUnit: {
+      type: String,
+      trim: true,
+    },
+
+    conversionRate: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     reviews: {
       type: [reviewSchema],
       default: [],

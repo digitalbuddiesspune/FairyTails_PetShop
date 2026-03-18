@@ -109,6 +109,21 @@ const groomingEssentialSchema = new mongoose.Schema(
       type: [String],
     },
 
+    saleDiscount: {
+      type: Number,
+      default: 0,
+    },
+
+    taxRateLabel: {
+      type: String,
+      trim: true,
+    },
+
+    inclusiveOfTax: {
+      type: Boolean,
+      default: true,
+    },
+
     isReturnable: {
       type: Boolean,
       default: true,

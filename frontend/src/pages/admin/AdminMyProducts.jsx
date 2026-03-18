@@ -46,6 +46,36 @@ const getName = (p) => p.productName || p.name || 'N/A';
 const getBrand = (p) => p.brand || '';
 const getImage = (p) => (Array.isArray(p.images) && p.images[0]) || (typeof p.image === 'string' && p.image) || 'https://via.placeholder.com/60?text=No';
 const getSubCat = (p) => p.subCategory || p.category || '';
+const normalizeFilterValue = (value = '') => String(value).trim().toLowerCase().replace(/\s+/g, ' ');
+const formatFilterLabel = (value = '') => {
+  const normalized = normalizeFilterValue(value);
+  if (!normalized) return '';
+  const knownLabels = {
+    'dry food': 'Dry Food',
+    'wet food': 'Wet Food',
+    treats: 'Treats',
+  };
+  if (knownLabels[normalized]) return knownLabels[normalized];
+  return normalized.split(' ').map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
+};
+const PET_VALUES = new Set(['dog', 'cat', 'bird', 'fish', 'other']);
+const normalizePetLabel = (value = '') => {
+  const clean = normalizeFilterValue(value);
+  if (!PET_VALUES.has(clean)) return '';
+  return clean.charAt(0).toUpperCase() + clean.slice(1);
+};
+const isPetValue = (value = '') => PET_VALUES.has(normalizeFilterValue(value));
+const getPetCategory = (p) => {
+  if (isPetValue(p.category)) return normalizePetLabel(p.category);
+  if (isPetValue(p.subCategory)) return normalizePetLabel(p.subCategory);
+  return '';
+};
+const getProductSubcategory = (p) => {
+  // Food uses category (pet) + subCategory (Dry/Wet/Treats)
+  if (isPetValue(p.category) && p.subCategory) return formatFilterLabel(p.subCategory);
+  // Other models usually use subCategory for pet; fall back to product type
+  return formatFilterLabel(p.productType || p.subSubCategory || p._catLabel || p.category || '');
+};
 
 const getPrice = (p) => {
   if (p.prices?.length) return { sale: p.prices[0].discountedPrice, mrp: p.prices[0].mrp };
@@ -77,6 +107,8 @@ const AdminMyProducts = () => {
   const [editProduct, setEditProduct] = useState(null);
   const [detailProduct, setDetailProduct] = useState(null);
   const [categoryCounts, setCategoryCounts] = useState({});
+  const [selectedPetCategory, setSelectedPetCategory] = useState('all');
+  const [selectedSubCategory, setSelectedSubCategory] = useState('all');
 
   // Fetch category counts on mount
   useEffect(() => { fetchCategoryCounts(); }, []);
@@ -86,7 +118,7 @@ const AdminMyProducts = () => {
     try {
       const results = await Promise.allSettled(
         SINGLE_CATEGORIES.map(async (cat) => {
-          const res = await fetch(`${API_BASE}/${cat.endpoint}?limit=1`);
+          const res = await fetch(`${API_BASE}/${cat.endpoint}`);
           const data = await res.json();
           const count = data.total || data.count || (Array.isArray(data.data) ? data.data.length : 0);
           return { key: cat.key, count };
@@ -108,37 +140,104 @@ const AdminMyProducts = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
+      const fetchAllProductsByEndpoint = async (endpoint) => {
+        let page = 1;
+        let allItems = [];
+        let hasNextPage = true;
+        let safety = 0;
+
+        while (hasNextPage && safety < 30) {
+          const res = await fetch(`${API_BASE}/${endpoint}?page=${page}`);
+          const data = await res.json();
+          const batch = Array.isArray(data.data) ? data.data : [];
+          allItems = [...allItems, ...batch];
+
+          const totalPages = Number(data.totalPages);
+          const currentPage = Number(data.currentPage || page);
+          hasNextPage = Number.isFinite(totalPages) && totalPages > currentPage;
+          page = currentPage + 1;
+          safety += 1;
+        }
+
+        return allItems;
+      };
+
       if (selectedKey === 'all') {
         const results = await Promise.allSettled(
           SINGLE_CATEGORIES.map(async (cat) => {
-            const res = await fetch(`${API_BASE}/${cat.endpoint}?limit=200`);
-            const data = await res.json();
-            return (data.data || []).map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label }));
+            const items = await fetchAllProductsByEndpoint(cat.endpoint);
+            return items.map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label }));
           })
         );
         const all = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
         setProducts(all);
       } else {
         const cat = CATEGORIES.find(c => c.key === selectedKey);
-        const res = await fetch(`${API_BASE}/${cat.endpoint}?limit=200`);
-        const data = await res.json();
-        setProducts((data.data || []).map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label })));
+        const items = await fetchAllProductsByEndpoint(cat.endpoint);
+        setProducts(items.map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label })));
       }
     } catch { setProducts([]); }
     finally { setLoading(false); }
   };
 
+  const petCategoryOptions = useMemo(() => {
+    const optionMap = new Map();
+    products.forEach((p) => {
+      const pet = getPetCategory(p);
+      const normalized = normalizeFilterValue(pet);
+      if (normalized && !optionMap.has(normalized)) optionMap.set(normalized, pet);
+    });
+    return Array.from(optionMap.values()).sort((a, b) => a.localeCompare(b));
+  }, [products]);
+
+  const subCategoryOptions = useMemo(() => {
+    if (selectedPetCategory === 'all') return [];
+    const optionMap = new Map();
+    products
+      .filter((p) => normalizeFilterValue(getPetCategory(p)) === normalizeFilterValue(selectedPetCategory))
+      .forEach((p) => {
+        const subCategory = getProductSubcategory(p);
+        const normalized = normalizeFilterValue(subCategory);
+        if (normalized && !optionMap.has(normalized)) optionMap.set(normalized, subCategory);
+      });
+    return Array.from(optionMap.values()).sort((a, b) => a.localeCompare(b));
+  }, [products, selectedPetCategory]);
+
+  const foodOptionTabs = useMemo(() => {
+    if (selectedKey !== 'food') return [];
+    const foodProducts = selectedPetCategory === 'all'
+      ? products
+      : products.filter((p) => normalizeFilterValue(getPetCategory(p)) === normalizeFilterValue(selectedPetCategory));
+    const optionMap = new Map();
+    foodProducts.forEach((p) => {
+      const subCategory = getProductSubcategory(p);
+      const normalized = normalizeFilterValue(subCategory);
+      if (normalized && !optionMap.has(normalized)) optionMap.set(normalized, subCategory);
+    });
+    return Array.from(optionMap.values()).sort((a, b) => a.localeCompare(b));
+  }, [products, selectedKey, selectedPetCategory]);
+
   const filtered = useMemo(() => {
-    if (!searchQuery.trim()) return products;
-    const q = searchQuery.toLowerCase();
-    return products.filter(p =>
-      getName(p).toLowerCase().includes(q) ||
-      getBrand(p).toLowerCase().includes(q) ||
-      getSubCat(p).toLowerCase().includes(q) ||
-      (p.category || '').toLowerCase().includes(q) ||
-      (p._catLabel || '').toLowerCase().includes(q)
-    );
-  }, [products, searchQuery]);
+    const q = searchQuery.trim().toLowerCase();
+    return products.filter((p) => {
+      const petCategory = getPetCategory(p);
+      const subCategory = getProductSubcategory(p);
+      const petCategoryMatch =
+        selectedPetCategory === 'all' || normalizeFilterValue(petCategory) === normalizeFilterValue(selectedPetCategory);
+      const subCategoryMatch =
+        selectedSubCategory === 'all' || normalizeFilterValue(subCategory) === normalizeFilterValue(selectedSubCategory);
+
+      const searchMatch =
+        !q ||
+        getName(p).toLowerCase().includes(q) ||
+        getBrand(p).toLowerCase().includes(q) ||
+        getSubCat(p).toLowerCase().includes(q) ||
+        petCategory.toLowerCase().includes(q) ||
+        (p._catLabel || '').toLowerCase().includes(q);
+
+      return petCategoryMatch && subCategoryMatch && searchMatch;
+    });
+  }, [products, searchQuery, selectedPetCategory, selectedSubCategory]);
 
   const handleDelete = async (product) => {
     const ep = product._endpoint || getEndpoint(detectCategoryType(product));
@@ -178,7 +277,7 @@ const AdminMyProducts = () => {
         {/* ─── Category Tabs ─── */}
         <div className="flex gap-2 mb-2 overflow-x-auto pb-1 scrollbar-thin -mx-1 px-1">
           {CATEGORIES.map(cat => (
-            <button key={cat.key} onClick={() => { setSelectedKey(cat.key); setSearchQuery(''); }}
+            <button key={cat.key} onClick={() => { setSelectedKey(cat.key); setSearchQuery(''); setSelectedPetCategory('all'); setSelectedSubCategory('all'); }}
               className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-semibold text-xs transition-all duration-200 ${
                 selectedKey === cat.key ? cat.activeColor : `${cat.color} hover:shadow-md`
               }`}>
@@ -200,6 +299,72 @@ const AdminMyProducts = () => {
             className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm" />
           {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">✕</button>}
         </div>
+
+        {/* ─── Pet Category + Sub Category Filters ─── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+          <select
+            value={selectedPetCategory}
+            onChange={(e) => {
+              setSelectedPetCategory(e.target.value);
+              setSelectedSubCategory('all');
+            }}
+            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm"
+          >
+            <option value="all">Select Pet Category (All)</option>
+            {petCategoryOptions.map((pet) => (
+              <option key={pet} value={pet}>
+                {pet}
+              </option>
+            ))}
+          </select>
+
+          {selectedKey !== 'food' && (
+            <select
+              value={selectedSubCategory}
+              onChange={(e) => setSelectedSubCategory(e.target.value)}
+              disabled={selectedPetCategory === 'all'}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+            >
+              <option value="all">
+                {selectedPetCategory === 'all' ? 'Select pet category first' : 'Select Sub Category (All)'}
+              </option>
+              {subCategoryOptions.map((subCategory) => (
+                <option key={subCategory} value={subCategory}>
+                  {subCategory}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+
+        {/* ─── Food Product Option Tabs ─── */}
+        {selectedKey === 'food' && (
+          <div className="flex gap-2 mb-2 overflow-x-auto pb-1 scrollbar-thin -mx-1 px-1">
+            <button
+              onClick={() => setSelectedSubCategory('all')}
+              className={`flex-shrink-0 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                selectedSubCategory === 'all'
+                  ? 'bg-orange-500 border-orange-500 text-white'
+                  : 'bg-white border-orange-200 text-orange-700 hover:bg-orange-50'
+              }`}
+            >
+              All Food Products
+            </button>
+            {foodOptionTabs.map((option) => (
+              <button
+                key={option}
+                onClick={() => setSelectedSubCategory(option)}
+                className={`flex-shrink-0 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                  normalizeFilterValue(selectedSubCategory) === normalizeFilterValue(option)
+                    ? 'bg-orange-500 border-orange-500 text-white'
+                    : 'bg-white border-orange-200 text-orange-700 hover:bg-orange-50'
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Count */}
         <p className="text-xs text-gray-500 mb-2">
@@ -237,7 +402,8 @@ const AdminMyProducts = () => {
                       <p className="font-semibold text-gray-900 text-sm leading-tight truncate">{getName(product)}</p>
                       <div className="flex flex-wrap items-center gap-1.5 mt-1">
                         {getBrand(product) && <span className="text-[11px] text-gray-500">{getBrand(product)}</span>}
-                        {getSubCat(product) && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600">{getSubCat(product)}</span>}
+                        {getPetCategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700">Category: {getPetCategory(product)}</span>}
+                        {getProductSubcategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600">Sub: {getProductSubcategory(product)}</span>}
                         {selectedKey === 'all' && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">{product._catLabel}</span>}
                       </div>
                       <div className="flex items-center gap-2 mt-1.5">
@@ -304,7 +470,8 @@ const AdminMyProducts = () => {
                               <p className="font-semibold text-gray-900 text-xs truncate max-w-[200px]">{getName(product)}</p>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 {getBrand(product) && <span className="text-[10px] text-gray-500">{getBrand(product)}</span>}
-                                {getSubCat(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-blue-50 text-blue-600">{getSubCat(product)}</span>}
+                                {getPetCategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-emerald-50 text-emerald-700">Category: {getPetCategory(product)}</span>}
+                                {getProductSubcategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-blue-50 text-blue-600">Sub: {getProductSubcategory(product)}</span>}
                               </div>
                             </div>
                           </div>

@@ -111,6 +111,21 @@ const healthSupplementSchema = new mongoose.Schema(
     usage: {
       type: usageSchema,
     },
+
+    saleDiscount: {
+      type: Number,
+      default: 0,
+    },
+
+    taxRateLabel: {
+      type: String,
+      trim: true,
+    },
+
+    inclusiveOfTax: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,

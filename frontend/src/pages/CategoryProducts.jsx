@@ -247,6 +247,30 @@ const CategoryProducts = () => {
 
   const token = localStorage.getItem('token');
 
+  const fetchAllFoodPages = async (baseParams = {}) => {
+    let page = 1;
+    let allItems = [];
+    let hasNextPage = true;
+    let safety = 0;
+
+    while (hasNextPage && safety < 100) {
+      const res = await axios.get(`${API_BASE}/food`, {
+        params: { ...baseParams, page },
+      });
+      const data = res.data || {};
+      const batch = Array.isArray(data.data) ? data.data : [];
+      allItems = [...allItems, ...batch];
+
+      const totalPages = Number(data.totalPages);
+      const currentPage = Number(data.currentPage || page);
+      hasNextPage = Number.isFinite(totalPages) ? currentPage < totalPages : false;
+      page = currentPage + 1;
+      safety += 1;
+    }
+
+    return allItems;
+  };
+
   // Fetch wishlist IDs for logged-in user
   useEffect(() => {
     if (!token) return;
@@ -305,14 +329,9 @@ const CategoryProducts = () => {
         }
         if (sortBy) params.sort = sortBy;
 
-        const res = await axios.get(`${API_BASE}/food`, { params });
-
-        if (res.data.success) {
-          setProducts(res.data.data);
-          setTotal(res.data.total);
-        } else {
-          setError('Failed to fetch products');
-        }
+        const allItems = await fetchAllFoodPages(params);
+        setProducts(allItems);
+        setTotal(allItems.length);
       } catch (err) {
         console.error('Fetch products error:', err);
         setError(err.response?.data?.message || 'Something went wrong while fetching products.');

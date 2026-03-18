@@ -53,7 +53,7 @@ const AdminDashboard = () => {
             // Fetch product counts from ALL categories
             const endpoints = ['food', 'clothes', 'grooming-essentials', 'health-supplements', 'houses', 'toys', 'accessories'];
             const productResults = await Promise.allSettled(
-                endpoints.map(ep => fetch(`${API_BASE}/${ep}?limit=1`).then(r => r.json()))
+                endpoints.map(ep => fetch(`${API_BASE}/${ep}`).then(r => r.json()))
             );
             const totalProducts = productResults.reduce((sum, r) => {
                 if (r.status === 'fulfilled') {

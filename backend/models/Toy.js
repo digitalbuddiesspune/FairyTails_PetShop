@@ -6,14 +6,17 @@ const toySchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: ["Toy"],
-      default: "Toy",
+      enum: ["toy"],
+      default: "toy",
+      lowercase: true,
+      immutable: true,
     },
 
     subCategory: {
       type: String,
       required: true,
-      enum: ["Dog", "Cat"],
+      enum: ["dog", "cat"],
+      lowercase: true,
     },
 
     productName: {
@@ -100,6 +103,26 @@ const toySchema = new mongoose.Schema(
 
     keyFeatures: {
       type: [String],
+    },
+
+    expiryDate: {
+      type: Date,
+      default: null,
+    },
+
+    saleDiscount: {
+      type: Number,
+      default: 0,
+    },
+
+    taxRateLabel: {
+      type: String,
+      trim: true,
+    },
+
+    inclusiveOfTax: {
+      type: Boolean,
+      default: true,
     },
 
     suitableFor: {

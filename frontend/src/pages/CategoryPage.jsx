@@ -312,6 +312,30 @@ const CategoryPage = () => {
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
 
+  const fetchAllPages = async (endpoint, baseParams = {}) => {
+    let page = 1;
+    let allItems = [];
+    let hasNextPage = true;
+    let safety = 0;
+
+    while (hasNextPage && safety < 100) {
+      const res = await axios.get(`${API_BASE}${endpoint}`, {
+        params: { ...baseParams, page },
+      });
+      const data = res.data || {};
+      const batch = Array.isArray(data.data) ? data.data : [];
+      allItems = [...allItems, ...batch];
+
+      const totalPages = Number(data.totalPages);
+      const currentPage = Number(data.currentPage || page);
+      hasNextPage = Number.isFinite(totalPages) ? currentPage < totalPages : false;
+      page = currentPage + 1;
+      safety += 1;
+    }
+
+    return allItems;
+  };
+
   // Fetch category info
   useEffect(() => {
     const fetchCategory = async () => {
@@ -354,12 +378,10 @@ const CategoryPage = () => {
             params.subCategory = normaliseSubCategory(activeSubCategory);
           }
           if (sortBy) params.sort = sortBy;
-          const res = await axios.get(`${API_BASE}/grooming-essentials`, { params });
-          if (res.data.success) {
-            setProducts(res.data.data);
-            setTotal(res.data.total);
-            setCurrentApiEndpoint('/grooming-essentials');
-          }
+          const allItems = await fetchAllPages('/grooming-essentials', params);
+          setProducts(allItems);
+          setTotal(allItems.length);
+          setCurrentApiEndpoint('/grooming-essentials');
         } else if (isAccessories) {
           // ── Accessories category ──
           const params = {};
@@ -367,12 +389,10 @@ const CategoryPage = () => {
             params.subCategory = normaliseSubCategory(activeSubCategory);
           }
           if (sortBy) params.sort = sortBy;
-          const res = await axios.get(`${API_BASE}/accessories`, { params });
-          if (res.data.success) {
-            setProducts(res.data.data);
-            setTotal(res.data.total);
-            setCurrentApiEndpoint('/accessories');
-          }
+          const allItems = await fetchAllPages('/accessories', params);
+          setProducts(allItems);
+          setTotal(allItems.length);
+          setCurrentApiEndpoint('/accessories');
         } else if (isHealthSup) {
           // ── Health & Supplement category ──
           const params = {};
@@ -380,12 +400,10 @@ const CategoryPage = () => {
             params.subCategory = normaliseSubCategory(activeSubCategory);
           }
           if (sortBy) params.sort = sortBy;
-          const res = await axios.get(`${API_BASE}/health-supplements`, { params });
-          if (res.data.success) {
-            setProducts(res.data.data);
-            setTotal(res.data.total);
-            setCurrentApiEndpoint('/health-supplements');
-          }
+          const allItems = await fetchAllPages('/health-supplements', params);
+          setProducts(allItems);
+          setTotal(allItems.length);
+          setCurrentApiEndpoint('/health-supplements');
         } else if (isHouse) {
           // ── Beds & House category ──
           const params = {};
@@ -393,12 +411,10 @@ const CategoryPage = () => {
             params.subCategory = normaliseSubCategory(activeSubCategory);
           }
           if (sortBy) params.sort = sortBy;
-          const res = await axios.get(`${API_BASE}/houses`, { params });
-          if (res.data.success) {
-            setProducts(res.data.data);
-            setTotal(res.data.total);
-            setCurrentApiEndpoint('/houses');
-          }
+          const allItems = await fetchAllPages('/houses', params);
+          setProducts(allItems);
+          setTotal(allItems.length);
+          setCurrentApiEndpoint('/houses');
         } else if (isToys) {
           // ── Toys category: subcategories are "Dog" / "Cat" ──
           const params = {};
@@ -408,12 +424,10 @@ const CategoryPage = () => {
             params.subCategory = sub.charAt(0).toUpperCase() + sub.slice(1); // "Dog" or "Cat"
           }
           if (sortBy) params.sort = sortBy;
-          const res = await axios.get(`${API_BASE}/toys`, { params });
-          if (res.data.success) {
-            setProducts(res.data.data);
-            setTotal(res.data.total);
-            setCurrentApiEndpoint('/toys');
-          }
+          const allItems = await fetchAllPages('/toys', params);
+          setProducts(allItems);
+          setTotal(allItems.length);
+          setCurrentApiEndpoint('/toys');
         } else if (foodCategory) {
           // ── Dogs / Cats categories ──
           const isClothes = clothesSubCategories.includes(activeSubCategory);
@@ -427,25 +441,21 @@ const CategoryPage = () => {
             };
             if (sortBy) params.sort = sortBy;
             // Fetch all accessories for this pet category, then filter by productType or subSubCategory
-            const res = await axios.get(`${API_BASE}/accessories`, { params });
-            if (res.data.success) {
-              // Filter to show only Collar & Leash products (single type)
-              const filteredProducts = res.data.data.filter(product => 
-                product.productType === 'collar-leash' || product.subSubCategory === 'collar-leash'
-              );
-              setProducts(filteredProducts);
-              setTotal(filteredProducts.length);
-              setCurrentApiEndpoint('/accessories');
-            }
+            const allItems = await fetchAllPages('/accessories', params);
+            // Filter to show only Collar & Leash products (single type)
+            const filteredProducts = allItems.filter(product => 
+              product.productType === 'collar-leash' || product.subSubCategory === 'collar-leash'
+            );
+            setProducts(filteredProducts);
+            setTotal(filteredProducts.length);
+            setCurrentApiEndpoint('/accessories');
           } else if (isClothes) {
             const params = { category: foodCategory };
             if (sortBy) params.sort = sortBy;
-            const res = await axios.get(`${API_BASE}/clothes`, { params });
-            if (res.data.success) {
-              setProducts(res.data.data);
-              setTotal(res.data.total);
-              setCurrentApiEndpoint('/clothes');
-            }
+            const allItems = await fetchAllPages('/clothes', params);
+            setProducts(allItems);
+            setTotal(allItems.length);
+            setCurrentApiEndpoint('/clothes');
           } else if (isAll) {
             // Fetch food + clothes and combine
             const foodParams = { category: foodCategory };
@@ -454,12 +464,10 @@ const CategoryPage = () => {
               foodParams.sort = sortBy;
               clothesParams.sort = sortBy;
             }
-            const [foodRes, clothesRes] = await Promise.all([
-              axios.get(`${API_BASE}/food`, { params: foodParams }),
-              axios.get(`${API_BASE}/clothes`, { params: clothesParams }),
+            const [foodData, clothesData] = await Promise.all([
+              fetchAllPages('/food', foodParams),
+              fetchAllPages('/clothes', clothesParams),
             ]);
-            const foodData = foodRes.data.success ? foodRes.data.data : [];
-            const clothesData = clothesRes.data.success ? clothesRes.data.data : [];
             const combined = [...foodData, ...clothesData];
             setProducts(combined);
             setTotal(combined.length);
@@ -468,12 +476,10 @@ const CategoryPage = () => {
             // Food subcategory filter
             const params = { category: foodCategory, subCategory: activeSubCategory };
             if (sortBy) params.sort = sortBy;
-            const res = await axios.get(`${API_BASE}/food`, { params });
-            if (res.data.success) {
-              setProducts(res.data.data);
-              setTotal(res.data.total);
-              setCurrentApiEndpoint('/food');
-            }
+            const allItems = await fetchAllPages('/food', params);
+            setProducts(allItems);
+            setTotal(allItems.length);
+            setCurrentApiEndpoint('/food');
           }
         } else {
           // Other categories — no products yet

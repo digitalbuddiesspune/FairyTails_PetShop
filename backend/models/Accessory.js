@@ -8,12 +8,14 @@ const accessoriesSchema = new mongoose.Schema(
       required: true,
       enum: ["accessories"],
       default: "accessories",
+      lowercase: true,
+      immutable: true,
     },
 
     subCategory: {
       type: String,
       required: true,
-      enum: ["dog", "cat"],
+      enum: ["cat", "dog"],
       lowercase: true,
     },
 
@@ -54,6 +56,11 @@ const accessoriesSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
+    },
+
+    expiryDate: {
+      type: Date,
+      default: null,
     },
 
     taxes: {
@@ -113,6 +120,21 @@ const accessoriesSchema = new mongoose.Schema(
 
     keyFeatures: {
       type: [String],
+    },
+
+    saleDiscount: {
+      type: Number,
+      default: 0,
+    },
+
+    taxRateLabel: {
+      type: String,
+      trim: true,
+    },
+
+    inclusiveOfTax: {
+      type: Boolean,
+      default: true,
     },
 
     isReturnable: {

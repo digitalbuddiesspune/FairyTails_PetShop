@@ -88,7 +88,7 @@ const HomePage = () => {
       try {
         const results = await Promise.allSettled(
           FEATURED_SOURCES.map(async ({ endpoint, type }) => {
-            const res = await fetch(`${API}${endpoint}?limit=3`);
+            const res = await fetch(`${API}${endpoint}`);
             const data = await res.json();
             const items = data.success ? (data.data || data.products || []) : [];
             return items.map((p) => ({ ...p, _type: type }));

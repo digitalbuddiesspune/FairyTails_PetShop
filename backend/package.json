@@ -5,7 +5,16 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "seed:dry-cat-food": "node scripts/seedDryCatFood.js",
+    "seed:cat-treats": "node scripts/seedCatTreats.js",
+    "seed:dry-dog-food": "node scripts/seedDryDogFood.js",
+    "seed:wet-dog-food": "node scripts/seedWetDogFood.js",
+    "seed:dog-accessories": "node scripts/seedDogAccessories.js",
+    "seed:dog-treats": "node scripts/seedDogTreats.js",
+    "seed:health-supplements": "node scripts/seedHealthSupplements.js",
+    "seed:grooming-essentials": "node scripts/seedGroomingEssentials.js",
+    "seed:dog-toys": "node scripts/seedDogToys.js"
   },
   "keywords": [],
   "author": "",

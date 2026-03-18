@@ -82,7 +82,9 @@ export const createFood = async (req, res) => {
       discountType, availableStock, expiryDate, baseUnit, taxes, images,
       // Optional fields
       itemCode, hsn, brand, details, keyFeatures, flavours,
-      nutrients, healthBenefits,
+      nutrients, healthBenefits, purchasePrice, saleDiscount,
+      minimumStock, itemLocation, taxRateLabel, inclusiveOfTax,
+      secondaryUnit, conversionRate,
     } = req.body;
 
     // Basic validation - only required fields (baseUnit and taxes have defaults in schema)
@@ -103,7 +105,9 @@ export const createFood = async (req, res) => {
       discountType, availableStock, expiryDate, baseUnit, taxes, images,
       // Optional fields
       itemCode, hsn, brand, details, keyFeatures, flavours,
-      nutrients, healthBenefits,
+      nutrients, healthBenefits, purchasePrice, saleDiscount,
+      minimumStock, itemLocation, taxRateLabel, inclusiveOfTax,
+      secondaryUnit, conversionRate,
     });
 
     res.status(201).json({
