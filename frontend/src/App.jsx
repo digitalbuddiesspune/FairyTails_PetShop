@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { useAuth } from 'react-oidc-context';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
 import Footer from './components/Footer';
-import SignUp from './pages/SignUp';
-import SignIn from './pages/SignIn';
+import CognitoAuthRedirect from './pages/CognitoAuthRedirect';
+import AuthCallback from './pages/AuthCallback';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import Contact from './pages/Contact';
 import About from './pages/About';
@@ -32,6 +33,10 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminBanner from './pages/admin/AdminBanner';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import './App.css';
+import { persistCognitoSession } from './auth/session';
+import { syncGuestCartToBackend, syncGuestWishlistToBackend } from './utils/guestCart';
+
+const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -55,14 +60,38 @@ const MainLayout = ({ children }) => {
   );
 };
 
+const AuthSessionBridge = () => {
+  const auth = useAuth();
+
+  useEffect(() => {
+    const run = async () => {
+      if (!auth.isAuthenticated || !auth.user) return;
+      const token = persistCognitoSession(auth.user);
+      if (!token) return;
+
+      await syncGuestCartToBackend(token, API_BASE);
+      await syncGuestWishlistToBackend(token, API_BASE);
+      window.dispatchEvent(new Event('cart-wishlist-update'));
+    };
+
+    run().catch((error) => {
+      console.error('Failed to sync Cognito session:', error);
+    });
+  }, [auth.isAuthenticated, auth.user]);
+
+  return null;
+};
+
 function App() {
   return (
     <Router>
       <ScrollToTop />
+      <AuthSessionBridge />
       <Routes>
         {/* Auth Pages - No Navbar/Footer */}
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<CognitoAuthRedirect mode="signup" />} />
+        <Route path="/signin" element={<CognitoAuthRedirect mode="signin" />} />
+        <Route path="/callback" element={<AuthCallback />} />
 
         {/* Admin Pages */}
         <Route path="/admin/signin" element={<AdminSignIn />} />

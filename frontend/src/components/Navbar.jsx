@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useAuth } from 'react-oidc-context';
 import MobileBottomNav from './MobileBottomNav';
 import CatalogMenuContent from './CatalogMenuContent';
+import { clearUserSession, getAuthToken, getStoredUser, isOidcBackedSession, isUserAuthenticated } from '../auth/session';
 
 // Icon mapping for subcategory names in the dropdown
 // Items with a `src` key render as images; others render as emoji text
@@ -22,15 +24,6 @@ const SubIcon = ({ name }) => {
   return <span className="text-xl">{icon || '📦'}</span>;
 };
 
-// Map category slug → Food model category value for product links
-const slugToFoodCategory = {
-  'dogs': 'Dog',
-  'cats': 'Cat',
-};
-
-// SubCategory names that exist in the Food collection
-const foodSubCategories = ['Dry Food', 'Wet Food', 'Treats'];
-
 // Build the product link for a subcategory
 const getSubcategoryLink = (categorySlug, subName) => {
   // Always pass subCategory so the category page filters correctly
@@ -46,6 +39,7 @@ const DropdownMenu = ({ category, index, onClose }) => {
     if (btn) {
       const rect = btn.getBoundingClientRect();
       const navRect = btn.closest('nav').getBoundingClientRect();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPosition({ left: rect.left - navRect.left });
     }
   }, [index]);
@@ -74,6 +68,7 @@ const DropdownMenu = ({ category, index, onClose }) => {
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const auth = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -109,7 +104,7 @@ const Navbar = () => {
 
   // Fetch cart & wishlist counts (for logged-in users) or guest cart (for non-logged-in)
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
     if (!token) {
       // Use guest cart/wishlist
       const updateGuestCounts = () => {
@@ -135,7 +130,7 @@ const Navbar = () => {
         const wishData = await wishRes.json();
         if (cartData.success) setCartCount(cartData.data?.items?.length || 0);
         if (wishData.success) setWishlistCount(wishData.data?.items?.length || 0);
-      } catch (err) {
+      } catch {
         // silently fail
       }
     };
@@ -151,6 +146,33 @@ const Navbar = () => {
       window.removeEventListener('focus', onFocus);
       window.removeEventListener('cart-wishlist-update', onCountUpdate);
     };
+  }, []);
+
+  useEffect(() => {
+    const onAuthChange = () => {
+      const token = getAuthToken();
+      if (!token) {
+        setCartCount(0);
+        setWishlistCount(0);
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${token}` };
+      Promise.all([
+        fetch(`${import.meta.env.VITE_BACKEND_API}/cart`, { headers }),
+        fetch(`${import.meta.env.VITE_BACKEND_API}/wishlist`, { headers }),
+      ])
+        .then(async ([cartRes, wishRes]) => {
+          const cartData = await cartRes.json();
+          const wishData = await wishRes.json();
+          if (cartData.success) setCartCount(cartData.data?.items?.length || 0);
+          if (wishData.success) setWishlistCount(wishData.data?.items?.length || 0);
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener('auth-changed', onAuthChange);
+    return () => window.removeEventListener('auth-changed', onAuthChange);
   }, []);
 
   const handleCategoryClick = (index, slug, hasSubcategories) => {
@@ -169,7 +191,7 @@ const Navbar = () => {
   };
 
   const handleProfileClick = () => {
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
     if (token) {
       setUserDropdownOpen(prev => !prev);
     } else {
@@ -186,12 +208,32 @@ const Navbar = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const handleLogout = async () => {
+    const shouldUseOidcLogout = Boolean(auth?.isAuthenticated) || isOidcBackedSession();
+    clearUserSession();
     setUserDropdownOpen(false);
     setCartCount(0);
     setWishlistCount(0);
+
+    if (shouldUseOidcLogout) {
+      try {
+        await auth.removeUser();
+      } catch {
+        // Continue with hosted logout URL fallback.
+      }
+      const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
+      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+      const logoutUri =
+        import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI || `${window.location.origin}/`;
+      if (cognitoDomain && clientId) {
+        const logoutUrl =
+          `${cognitoDomain}/logout?client_id=${encodeURIComponent(clientId)}` +
+          `&logout_uri=${encodeURIComponent(logoutUri)}`;
+        window.location.assign(logoutUrl);
+        return;
+      }
+    }
+
     navigate('/signin');
   };
 
@@ -276,11 +318,14 @@ const Navbar = () => {
                 <button onClick={handleProfileClick} className="text-black hover:text-gray-700 transition-colors" title="Profile">
                   <UserIcon />
                 </button>
-                {userDropdownOpen && localStorage.getItem('token') && (
+                {userDropdownOpen && isUserAuthenticated() && (
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[100]" style={{ animation: 'dropIn .2s ease-out' }}>
                     <div className="px-4 py-2.5 border-b border-gray-100">
                       <p className="text-sm font-bold text-gray-900">
-                        {(() => { try { const u = JSON.parse(localStorage.getItem('user')); return `Hi, ${u?.name?.split(' ')[0] || 'User'}`; } catch { return 'Hi, User'; } })()}
+                        {(() => {
+                          const u = getStoredUser();
+                          return `Hi, ${u?.name?.split(' ')[0] || 'User'}`;
+                        })()}
                       </p>
                       <p className="text-[11px] text-gray-400">Welcome back!</p>
                     </div>
@@ -295,7 +340,7 @@ const Navbar = () => {
                       Account Settings
                     </button>
                     <div className="border-t border-gray-100 mt-1 pt-1">
-                      <button onClick={handleLogout}
+                      <button onClick={() => { handleLogout(); }}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                         Log Out
@@ -464,7 +509,7 @@ const Navbar = () => {
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    if (localStorage.getItem('token')) {
+                    if (isUserAuthenticated()) {
                       navigate('/account-settings');
                     } else {
                       navigate('/signin');
@@ -524,7 +569,7 @@ const Navbar = () => {
       {/* Mobile Bottom Navigation - fixed at bottom on small screens */}
       <MobileBottomNav
         cartCount={cartCount}
-        isLoggedIn={!!localStorage.getItem('token')}
+        isLoggedIn={isUserAuthenticated()}
         onCatalogClick={() => setCatalogPanelOpen(true)}
       />
     </header>
