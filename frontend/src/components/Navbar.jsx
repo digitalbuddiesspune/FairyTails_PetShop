@@ -4,6 +4,7 @@ import { useAuth } from 'react-oidc-context';
 import MobileBottomNav from './MobileBottomNav';
 import CatalogMenuContent from './CatalogMenuContent';
 import { clearUserSession, getAuthToken, getStoredUser, isOidcBackedSession, isUserAuthenticated } from '../auth/session';
+import logoImage from '../assets/image.png';
 
 // Icon mapping for subcategory names in the dropdown
 // Items with a `src` key render as images; others render as emoji text
@@ -46,18 +47,18 @@ const DropdownMenu = ({ category, index, onClose }) => {
 
   return (
     <div
-      className="absolute top-full   text-gray-800 rounded-b-lg shadow-xl py-2 min-w-[220px] z-[60] border border-gray-100"
+      className="absolute top-full text-white bg-[#205ea9] rounded-b-lg shadow-xl py-2 min-w-[220px] z-[60] border border-white/25"
       style={{ left: position.left }}
     >
       {category.subcategories.map((sub, subIdx) => (
-        <div key={subIdx}>
+        <div key={subIdx} className="border-b border-white/15 last:border-b-0">
           <Link
             to={getSubcategoryLink(category.slug, sub.name)}
             onClick={onClose}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6EFD8] transition-colors"
+            className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors"
           >
             <SubIcon name={sub.name} />
-            <span className="font-medium">{sub.name}</span>
+            <span className="font-medium text-white">{sub.name}</span>
           </Link>
         </div>
       ))}
@@ -267,9 +268,9 @@ const Navbar = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center shrink-0">
               <img 
-                src={"https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770288839/LOGO-2_l5wmxs.png"} 
+                src={logoImage}
                 alt="FairyTails Pet Shop" 
-                className="h-14 md:h-16 w-auto object-contain"
+                className="h-16 md:h-20 w-auto object-contain"
               />
             </Link>
 
@@ -291,14 +292,14 @@ const Navbar = () => {
 
             {/* Right Icons - Desktop */}
             <div className="flex items-center gap-3 md:gap-4 shrink-0">
-              <Link to="/contact" className="hidden lg:flex items-center gap-1 text-black hover:text-gray-700 font-medium text-sm transition-colors">
+              <Link to="/contact" className="hidden lg:flex items-center gap-1 text-white hover:text-gray-200 font-medium text-sm transition-colors">
                 <PhoneIcon />
                 <span>Contact</span>
               </Link>
-              <Link to="/about" className="hidden lg:flex items-center text-black hover:text-gray-700 font-medium text-sm transition-colors">
+              <Link to="/about" className="hidden lg:flex items-center text-white hover:text-gray-200 font-medium text-sm transition-colors">
                 About
               </Link>
-              <Link to="/wishlist" className="text-black hover:text-gray-700 transition-colors relative" title="Wishlist">
+              <Link to="/wishlist" className="text-white hover:text-gray-200 transition-colors relative" title="Wishlist">
                 <HeartIcon />
                 {wishlistCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
@@ -306,7 +307,7 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
-              <Link to="/cart" className="text-black hover:text-gray-700 transition-colors relative" title="Cart">
+              <Link to="/cart" className="text-white hover:text-gray-200 transition-colors relative" title="Cart">
                 <CartIcon />
                 {cartCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
@@ -315,7 +316,7 @@ const Navbar = () => {
                 )}
               </Link>
               <div className="relative" ref={userDropdownRef}>
-                <button onClick={handleProfileClick} className="text-black hover:text-gray-700 transition-colors" title="Profile">
+                <button onClick={handleProfileClick} className="text-white hover:text-gray-200 transition-colors" title="Profile">
                   <UserIcon />
                 </button>
                 {userDropdownOpen && isUserAuthenticated() && (
@@ -358,21 +359,21 @@ const Navbar = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="p-2 text-black hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+                className="p-2 text-white hover:text-gray-200 hover:bg-white/10 rounded-lg transition-colors shrink-0"
                 aria-label="Open menu"
               >
                 <HamburgerIcon />
               </button>
               <Link to="/" className="flex-1 flex justify-center shrink-0">
                 <img 
-                  src={"https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770288839/LOGO-2_l5wmxs.png"} 
+                  src={logoImage}
                   alt="FairyTails Pet Shop" 
-                  className="h-12 w-auto object-contain"
+                  className="h-14 w-auto object-contain"
                 />
               </Link>
               <button
                 onClick={() => setMobileSearchExpanded(true)}
-                className="p-2 text-black hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+                className="p-2 text-white hover:text-gray-200 hover:bg-white/10 rounded-lg transition-colors shrink-0"
                 aria-label="Search"
               >
                 <SearchIconGray />
@@ -395,7 +396,7 @@ const Navbar = () => {
                 <button
                   type="button"
                   onClick={() => { setMobileSearchExpanded(false); setSearchQuery(''); }}
-                  className="p-2.5 text-black hover:bg-gray-100 rounded-lg shrink-0"
+                  className="p-2.5 text-white hover:bg-white/10 rounded-lg shrink-0"
                   aria-label="Close search"
                 >
                   <CloseIcon />
@@ -406,14 +407,14 @@ const Navbar = () => {
         </div>
       </div>
 
-      <nav className="bg-[#205ea9] text-white w-full border-b border-gray-800 relative hidden md:block">
+      <nav className="bg-white text-black w-full border-b border-gray-200 relative hidden md:block">
         <div className="w-full px-4 lg:px-8">
           <ul className="flex items-center justify-center gap-1 overflow-x-auto scrollbar-hide">
             {categories.map((category, index) => (
               <li key={category._id || index} className="relative" data-idx={index}>
                 <button
                   onClick={() => handleCategoryClick(index, category.slug, category.subcategories?.length > 0)}
-                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] hover:bg-gray-900 transition-colors whitespace-nowrap"
+                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-black hover:text-[#205ea9] hover:bg-gray-100 transition-colors whitespace-nowrap"
                 >
                   {category.name}
                   {category.subcategories?.length > 0 && (
@@ -425,12 +426,12 @@ const Navbar = () => {
             
             {/* Mobile Contact & About */}
             <li className="lg:hidden">
-              <Link to="/contact" className="px-4 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] whitespace-nowrap block">
+              <Link to="/contact" className="px-4 py-3 text-sm font-medium text-black hover:text-[#205ea9] whitespace-nowrap block">
                 Contact
               </Link>
             </li>
             <li className="lg:hidden">
-              <Link to="/about" className="px-4 py-3 text-sm font-medium text-white hover:text-[#7ec1ec] whitespace-nowrap block">
+              <Link to="/about" className="px-4 py-3 text-sm font-medium text-black hover:text-[#205ea9] whitespace-nowrap block">
                 About
               </Link>
             </li>
@@ -628,7 +629,7 @@ const CloseIcon = () => (
 const ChevronDownIcon = ({ isOpen }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
-    className={`h-4 w-4 text-white transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+    className={`h-4 w-4 text-black transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
     fill="none" 
     viewBox="0 0 24 24" 
     stroke="currentColor"

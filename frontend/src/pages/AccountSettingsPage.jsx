@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from 'react-oidc-context';
 import axios from 'axios';
-import cattImage from '../assets/catt.png';
+import { clearUserSession, isOidcBackedSession } from '../auth/session';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -19,6 +20,7 @@ const emptyAddress = { addressType: 'home', firstName: '', lastName: '', phone: 
 
 const AccountSettingsPage = () => {
   const navigate = useNavigate();
+  const auth = useAuth();
   const token = localStorage.getItem('token');
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -153,6 +155,32 @@ const AccountSettingsPage = () => {
     }
   };
 
+  const handleLogout = async () => {
+    const shouldUseOidcLogout = Boolean(auth?.isAuthenticated) || isOidcBackedSession();
+    clearUserSession();
+
+    if (shouldUseOidcLogout) {
+      try {
+        await auth.removeUser();
+      } catch {
+        // Continue with hosted logout URL.
+      }
+      const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
+      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+      const logoutUri =
+        import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI || `${window.location.origin}/`;
+      if (cognitoDomain && clientId) {
+        const logoutUrl =
+          `${cognitoDomain}/logout?client_id=${encodeURIComponent(clientId)}` +
+          `&logout_uri=${encodeURIComponent(logoutUri)}`;
+        window.location.assign(logoutUrl);
+        return;
+      }
+    }
+
+    navigate('/signin');
+  };
+
   if (!user) return null;
 
   return (
@@ -179,11 +207,22 @@ const AccountSettingsPage = () => {
 
       {/* ── Page Title ─── */}
       <div className="container mx-auto px-4 pt-8 pb-4 relative z-10">
-        <div className="flex items-center gap-4">
-          <img src={'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976442/catt_na3yls.png'} alt="Cat" className="w-14 h-14 object-contain" />
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <img src={'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976442/catt_na3yls.png'} alt="Cat" className="w-14 h-14 object-contain" />
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Account Settings</h1>
+              <p className="text-sm text-gray-400 mt-0.5">Manage your profile & addresses</p>
+            </div>
+          </div>
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Account Settings</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Manage your profile & addresses</p>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+            >
+              Log Out
+            </button>
           </div>
         </div>
       </div>
