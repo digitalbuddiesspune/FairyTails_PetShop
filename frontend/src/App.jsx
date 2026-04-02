@@ -32,7 +32,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminBanner from './pages/admin/AdminBanner';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import './App.css';
-import { persistCognitoSession } from './auth/session';
+import { isAdminAuthenticated, persistCognitoSession } from './auth/session';
 import { syncGuestCartToBackend, syncGuestWishlistToBackend } from './utils/guestCart';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -57,6 +57,13 @@ const MainLayout = ({ children }) => {
       <Footer />
     </div>
   );
+};
+
+const AdminRouteGuard = ({ children }) => {
+  if (!isAdminAuthenticated()) {
+    return <Navigate to="/admin/signin" replace />;
+  }
+  return children;
 };
 
 const AuthSessionBridge = () => {
@@ -93,9 +100,9 @@ function App() {
         <Route path="/callback" element={<AuthCallback />} />
 
         {/* Admin Pages */}
-        <Route path="/admin/signin" element={<CognitoAuthRedirect mode="signin" />} />
+        <Route path="/admin/signin" element={<CognitoAuthRedirect mode="admin-signin" />} />
 
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={<AdminRouteGuard><AdminLayout /></AdminRouteGuard>}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="my-products" element={<AdminMyProducts />} />

@@ -57,7 +57,10 @@ export const uploadAdminImage = async (req, res) => {
       })
     );
 
-    const imageUrl = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+    const cloudFrontBaseUrl = (
+      process.env.CLOUDFRONT_URL || 'https://cdn.fairytailspetshop.com'
+    ).replace(/\/+$/, '');
+    const imageUrl = `${cloudFrontBaseUrl}/${key}`;
     return res.status(200).json({
       success: true,
       message: 'Image uploaded successfully',
