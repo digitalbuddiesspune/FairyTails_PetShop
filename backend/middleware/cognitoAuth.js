@@ -117,10 +117,11 @@ export const protectWithCognito = async (req, res, next) => {
     req.authProvider = 'cognito';
     return next();
   } catch (error) {
+    console.error('User auth verification failed:', error?.message || error);
     return res.status(401).json({
       success: false,
       message: 'Not authorized, token failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: error?.message || 'Unknown token verification error',
     });
   }
 };
@@ -193,10 +194,11 @@ export const protectAdminWithCognito = async (req, res, next) => {
     req.authProvider = 'cognito';
     return next();
   } catch (error) {
+    console.error('Admin auth verification failed:', error?.message || error);
     return res.status(401).json({
       success: false,
       message: 'Not authorized, token failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: error?.message || 'Unknown token verification error',
     });
   }
 };
