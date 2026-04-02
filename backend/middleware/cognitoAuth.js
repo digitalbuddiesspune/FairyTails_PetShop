@@ -34,8 +34,15 @@ const getBearerToken = (authorizationHeader = '') => {
 const randomPassword = () => crypto.randomBytes(24).toString('hex');
 
 const normalizeEmail = (payload) => {
-  const email = payload?.email || payload?.username || payload?.['cognito:username'];
-  return typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const raw = payload?.email || payload?.username || payload?.['cognito:username'];
+  const email = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
+  const isValidEmail = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/.test(email);
+  if (isValidEmail) return email;
+
+  const stableId = payload?.sub || payload?.username || payload?.['cognito:username'];
+  if (!stableId) return '';
+  const normalizedId = String(stableId).trim().toLowerCase().replace(/[^a-z0-9._-]/g, '-');
+  return `${normalizedId}@cognito.local`;
 };
 
 const normalizeName = (payload) => {
