@@ -47,18 +47,18 @@ const DropdownMenu = ({ category, index, onClose }) => {
 
   return (
     <div
-      className="absolute top-full text-white bg-[#205ea9] rounded-b-lg shadow-xl py-2 min-w-[220px] z-[60] border border-white/25"
+      className="absolute top-full text-black bg-white rounded-b-lg shadow-xl py-2 min-w-[220px] z-[60] border border-gray-200"
       style={{ left: position.left }}
     >
       {category.subcategories.map((sub, subIdx) => (
-        <div key={subIdx} className="border-b border-white/15 last:border-b-0">
+        <div key={subIdx} className="border-b border-gray-200 last:border-b-0">
           <Link
             to={getSubcategoryLink(category.slug, sub.name)}
             onClick={onClose}
-            className="flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors"
+            className="flex items-center gap-3 px-4 py-3 text-black hover:bg-gray-100 transition-colors"
           >
             <SubIcon name={sub.name} />
-            <span className="font-medium text-white">{sub.name}</span>
+            <span className="font-medium text-black">{sub.name}</span>
           </Link>
         </div>
       ))}
