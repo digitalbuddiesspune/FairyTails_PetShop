@@ -41,11 +41,38 @@ const normalizeName = (payload) => {
   return String(name).trim();
 };
 
+const parseJwtPayload = (token) => {
+  try {
+    const parts = String(token || '').split('.');
+    if (parts.length < 2) return null;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+    return JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+  } catch {
+    return null;
+  }
+};
+
 const verifyCognitoToken = async (token) => {
+  const tokenPayload = parseJwtPayload(token);
+  const tokenUse = tokenPayload?.token_use;
+
+  if (tokenUse === 'access') {
+    return accessTokenVerifier.verify(token);
+  }
+  if (tokenUse === 'id') {
+    return idTokenVerifier.verify(token);
+  }
+
+  // Unknown token type: try access first, then id as fallback.
   try {
     return await accessTokenVerifier.verify(token);
-  } catch {
-    return idTokenVerifier.verify(token);
+  } catch (accessError) {
+    try {
+      return await idTokenVerifier.verify(token);
+    } catch {
+      throw accessError;
+    }
   }
 };
 
