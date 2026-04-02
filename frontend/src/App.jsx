@@ -19,7 +19,6 @@ import OrderDetailsPage from './pages/OrderDetailsPage';
 import InvoicePage from './pages/InvoicePage';
 import WishlistPage from './pages/WishlistPage';
 import SearchPage from './pages/SearchPage';
-import AdminSignIn from './pages/AdminSignIn';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
@@ -94,7 +93,7 @@ function App() {
         <Route path="/callback" element={<AuthCallback />} />
 
         {/* Admin Pages */}
-        <Route path="/admin/signin" element={<AdminSignIn />} />
+        <Route path="/admin/signin" element={<CognitoAuthRedirect mode="signin" />} />
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />

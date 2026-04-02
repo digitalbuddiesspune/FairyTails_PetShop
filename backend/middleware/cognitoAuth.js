@@ -1,14 +1,11 @@
 import { CognitoJwtVerifier } from 'aws-jwt-verify';
 import crypto from 'crypto';
-import jwt from 'jsonwebtoken';
 
 import User from '../models/User.js';
 import Admin from '../models/Admin.js';
 
 const COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID || 'ap-south-1_6kSN7qDBD';
-const COGNITO_CLIENT_ID = process.env.COGNITO_CLIENT_ID || '2bg7a4mpp4ci2l0qph9km9nlb7';
 const COGNITO_ADMIN_GROUP = (process.env.COGNITO_ADMIN_GROUP || 'admin').toLowerCase();
-const JWT_SECRET = process.env.JWT_SECRET || 'fairytails_petshop_secret_key_2024';
 const COGNITO_ADMIN_EMAILS = (process.env.COGNITO_ADMIN_EMAILS || '')
   .split(',')
   .map((email) => email.trim().toLowerCase())
@@ -78,27 +75,6 @@ const verifyCognitoToken = async (token) => {
   }
 };
 
-const verifyLegacyJwt = (token) => {
-  try {
-    return jwt.verify(token, JWT_SECRET);
-  } catch {
-    return null;
-  }
-};
-
-const verifyToken = async (token) => {
-  try {
-    const payload = await verifyCognitoToken(token);
-    return { provider: 'cognito', payload };
-  } catch (cognitoError) {
-    const legacyPayload = verifyLegacyJwt(token);
-    if (legacyPayload) {
-      return { provider: 'legacy', payload: legacyPayload };
-    }
-    throw cognitoError;
-  }
-};
-
 export const protectWithCognito = async (req, res, next) => {
   try {
     const token = getBearerToken(req.headers.authorization);
@@ -106,26 +82,7 @@ export const protectWithCognito = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Not authorized, no token' });
     }
 
-    const verified = await verifyToken(token);
-
-    if (verified.provider === 'legacy') {
-      const userId = verified.payload?.id;
-      if (!userId) {
-        return res.status(401).json({ success: false, message: 'Not authorized, invalid token payload' });
-      }
-
-      const user = await User.findById(userId).select('-password');
-      if (!user) {
-        return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
-      }
-
-      req.user = user;
-      req.auth = verified.payload;
-      req.authProvider = 'legacy-jwt';
-      return next();
-    }
-
-    const payload = verified.payload;
+    const payload = await verifyCognitoToken(token);
     const email = normalizeEmail(payload);
     if (!email) {
       return res.status(401).json({ success: false, message: 'Not authorized, invalid Cognito token' });
@@ -162,34 +119,7 @@ export const protectAdminWithCognito = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Not authorized, no token' });
     }
 
-    const verified = await verifyToken(token);
-
-    if (verified.provider === 'legacy') {
-      const payload = verified.payload;
-      const adminId = payload?.id;
-      if (!adminId) {
-        return res.status(401).json({ success: false, message: 'Not authorized, invalid token payload' });
-      }
-
-      if (payload?.role && payload.role !== 'admin') {
-        return res.status(403).json({
-          success: false,
-          message: 'Not authorized as admin',
-        });
-      }
-
-      const admin = await Admin.findById(adminId).select('-password');
-      if (!admin) {
-        return res.status(401).json({ success: false, message: 'Not authorized, admin not found' });
-      }
-
-      req.admin = admin;
-      req.auth = payload;
-      req.authProvider = 'legacy-jwt';
-      return next();
-    }
-
-    const payload = verified.payload;
+    const payload = await verifyCognitoToken(token);
     const email = normalizeEmail(payload);
     if (!email) {
       return res.status(401).json({ success: false, message: 'Not authorized, invalid Cognito token' });
