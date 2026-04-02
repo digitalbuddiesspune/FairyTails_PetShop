@@ -1,4 +1,5 @@
 const USER_TOKEN_KEY = 'token';
+const ADMIN_TOKEN_KEY = 'adminToken';
 const USER_DATA_KEY = 'user';
 const OIDC_META_KEY = 'oidc_user';
 
@@ -39,6 +40,8 @@ export const persistCognitoSession = (oidcUser) => {
 
   const mappedUser = buildUserFromOidc(oidcUser);
   localStorage.setItem(USER_TOKEN_KEY, token);
+  // Mirror token for legacy admin calls that still read adminToken.
+  localStorage.setItem(ADMIN_TOKEN_KEY, token);
   localStorage.setItem(USER_DATA_KEY, JSON.stringify(mappedUser));
   localStorage.setItem(OIDC_META_KEY, 'true');
   window.dispatchEvent(new Event('auth-changed'));
@@ -60,6 +63,7 @@ export const bootstrapTokenFromOidcStorage = (oidcConfig) => {
 
 export const clearUserSession = () => {
   localStorage.removeItem(USER_TOKEN_KEY);
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
   localStorage.removeItem(USER_DATA_KEY);
   localStorage.removeItem(OIDC_META_KEY);
   // Clear oidc-client-ts persisted user/session caches.
