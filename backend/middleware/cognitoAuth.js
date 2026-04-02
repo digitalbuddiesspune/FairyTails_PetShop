@@ -17,11 +17,13 @@ const COGNITO_ADMIN_EMAILS = (process.env.COGNITO_ADMIN_EMAILS || '')
 const accessTokenVerifier = CognitoJwtVerifier.create({
   userPoolId: COGNITO_USER_POOL_ID,
   tokenUse: 'access',
+  clientId: null,
 });
 
 const idTokenVerifier = CognitoJwtVerifier.create({
   userPoolId: COGNITO_USER_POOL_ID,
   tokenUse: 'id',
+  clientId: null,
 });
 
 const getBearerToken = (authorizationHeader = '') => {
