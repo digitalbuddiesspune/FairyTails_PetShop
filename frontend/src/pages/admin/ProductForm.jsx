@@ -175,6 +175,8 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({ ...INITIAL[type] });
   const [categoryTree, setCategoryTree] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploadingImageIndex, setUploadingImageIndex] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -327,6 +329,41 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
   const subArrRemove = (arrField, idx) =>
     setFormData((p) => ({ ...p, [arrField]: p[arrField].filter((_, i) => i !== idx) }));
+
+  const handleImageUpload = async (field, idx, file) => {
+    if (!file) return;
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      setError('Admin token missing. Please sign in again.');
+      return;
+    }
+
+    const uploadKey = `${field}-${idx}`;
+    setUploadingImageIndex(uploadKey);
+    setError('');
+    setUploadSuccess('');
+    try {
+      const form = new FormData();
+      form.append('image', file);
+
+      const response = await fetch(`${API_BASE}/admin/upload/image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Image upload failed');
+      }
+      arrSet(field, idx, data.data.url);
+      setUploadSuccess('Image uploaded successfully from device.');
+      setTimeout(() => setUploadSuccess(''), 2500);
+    } catch (uploadError) {
+      setError(uploadError.message || 'Image upload failed');
+    } finally {
+      setUploadingImageIndex(null);
+    }
+  };
 
   const fixedCategoryMeta = useMemo(() => {
     const byType = {
@@ -556,6 +593,11 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
   const renderStringArrayField = (field, label, placeholder, required = false) => (
     <div>
       <Label required={required}>{label}</Label>
+      {field === 'images' && (
+        <p className="text-xs text-gray-500 mb-2">
+          You can either paste an image URL or upload from your device.
+        </p>
+      )}
       {(formData[field] || ['']).map((val, i) => (
         <div key={i} className="flex gap-2 mb-2">
           <input
@@ -564,6 +606,22 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
             placeholder={placeholder}
             className="input-field"
           />
+          {field === 'images' && (
+            <label className="px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer whitespace-nowrap flex items-center">
+              {uploadingImageIndex === `${field}-${i}` ? 'Uploading...' : 'Upload'}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingImageIndex === `${field}-${i}`}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  handleImageUpload(field, i, file);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+          )}
           {i > 0 && (
             <button type="button" onClick={() => arrRemove(field, i)} className="text-red-400 hover:text-red-600 text-lg px-1">×</button>
           )}
@@ -1394,6 +1452,11 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
           {error && (
             <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">
               {error}
+            </div>
+          )}
+          {uploadSuccess && (
+            <div className="bg-green-50 text-green-700 p-3 rounded-xl text-sm border border-green-100">
+              {uploadSuccess}
             </div>
           )}
 

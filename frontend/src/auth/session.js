@@ -45,6 +45,19 @@ export const persistCognitoSession = (oidcUser) => {
   return token;
 };
 
+export const bootstrapTokenFromOidcStorage = (oidcConfig) => {
+  const authority = oidcConfig?.authority;
+  const clientId = oidcConfig?.client_id;
+  if (!authority || !clientId) return null;
+
+  const key = `oidc.user:${authority}:${clientId}`;
+  const oidcUser =
+    safeJsonParse(localStorage.getItem(key)) || safeJsonParse(sessionStorage.getItem(key));
+
+  if (!oidcUser) return null;
+  return persistCognitoSession(oidcUser);
+};
+
 export const clearUserSession = () => {
   localStorage.removeItem(USER_TOKEN_KEY);
   localStorage.removeItem(USER_DATA_KEY);

@@ -262,7 +262,7 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full">
       {/* Top Bar */}
       <div className="bg-[#205ea9] w-full">
-        <div className="w-full px-4 lg:px-8 py-2">
+        <div className="w-full px-4 lg:px-8">
           {/* Desktop layout */}
           <div className="hidden md:flex items-center justify-between gap-4">
             {/* Logo */}
@@ -270,7 +270,7 @@ const Navbar = () => {
               <img 
                 src={logoImage}
                 alt="FairyTails Pet Shop" 
-                className="h-16 md:h-20 w-auto object-contain"
+                className="h-24 md:h-24 w-auto object-contain"
               />
             </Link>
 
