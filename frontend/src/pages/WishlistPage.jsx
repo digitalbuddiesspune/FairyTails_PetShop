@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getGuestWishlist, removeFromGuestWishlist, addToGuestCart } from '../utils/guestCart';
+import { getApiBearerToken } from '../auth/session';
 
 const PRODUCT_ENDPOINTS = [
   '/food',
@@ -24,8 +25,15 @@ const WishlistPage = () => {
   const [addingToCart, setAddingToCart] = useState(null);
   const [guestItems, setGuestItems] = useState([]);
   const [guestProducts, setGuestProducts] = useState([]);
+  const [authEpoch, setAuthEpoch] = useState(0);
 
-  const token = localStorage.getItem('token');
+  useEffect(() => {
+    const onAuth = () => setAuthEpoch((e) => e + 1);
+    window.addEventListener('auth-changed', onAuth);
+    return () => window.removeEventListener('auth-changed', onAuth);
+  }, []);
+
+  const token = getApiBearerToken();
 
   // Fetch product details for guest wishlist items
   const fetchGuestWishlistProducts = async () => {
@@ -78,17 +86,19 @@ const WishlistPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (!token) {
+    const t = getApiBearerToken();
+    if (!t) {
       fetchGuestWishlistProducts();
       return;
     }
     fetchWishlist();
-  }, [token]);
+  }, [authEpoch]);
 
   // Listen for wishlist updates
   useEffect(() => {
     const handleUpdate = () => {
-      if (!token) {
+      const t = getApiBearerToken();
+      if (!t) {
         fetchGuestWishlistProducts();
       } else {
         fetchWishlist();
@@ -96,13 +106,15 @@ const WishlistPage = () => {
     };
     window.addEventListener('cart-wishlist-update', handleUpdate);
     return () => window.removeEventListener('cart-wishlist-update', handleUpdate);
-  }, [token]);
+  }, []);
 
   const fetchWishlist = async () => {
+    const t = getApiBearerToken();
+    if (!t) return;
     try {
       setLoading(true);
       const res = await axios.get(`${API_BASE}/wishlist`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${t}` },
       });
       if (res.data.success) {
         setWishlist(res.data.data);
@@ -117,12 +129,13 @@ const WishlistPage = () => {
   const removeItem = async (productId) => {
     try {
       setRemoving(productId);
-      if (!token) {
+      const t = getApiBearerToken();
+      if (!t) {
         removeFromGuestWishlist(productId);
         await fetchGuestWishlistProducts();
       } else {
         const res = await axios.delete(`${API_BASE}/wishlist/${productId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${t}` },
         });
         if (res.data.success) {
           setWishlist(res.data.data);
@@ -164,7 +177,8 @@ const WishlistPage = () => {
         }
       }
       
-      if (!token) {
+      const t = getApiBearerToken();
+      if (!t) {
         // Guest cart
         addToGuestCart({
           productId: id,
@@ -176,7 +190,7 @@ const WishlistPage = () => {
         await axios.post(
           `${API_BASE}/cart`,
           { productId: id, quantity: 1, selectedSize: 0 },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${t}` } }
         );
       }
       window.dispatchEvent(new Event('cart-wishlist-update'));

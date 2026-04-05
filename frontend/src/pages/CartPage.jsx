@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getGuestCart, updateGuestCartItem, removeFromGuestCart, clearGuestCart, getGuestCartCount } from '../utils/guestCart';
+import { getApiBearerToken } from '../auth/session';
 import LoginRequiredModal from '../components/LoginRequiredModal';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -61,8 +62,15 @@ const CartPage = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [guestCart, setGuestCart] = useState([]);
   const [guestCartProducts, setGuestCartProducts] = useState([]);
+  const [authEpoch, setAuthEpoch] = useState(0);
 
-  const token = localStorage.getItem('token');
+  useEffect(() => {
+    const onAuth = () => setAuthEpoch((e) => e + 1);
+    window.addEventListener('auth-changed', onAuth);
+    return () => window.removeEventListener('auth-changed', onAuth);
+  }, []);
+
+  const token = getApiBearerToken();
 
   // Map productType to API endpoint
   const PRODUCT_TYPE_TO_ENDPOINT = {
@@ -125,17 +133,19 @@ const CartPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (!token) {
+    const t = getApiBearerToken();
+    if (!t) {
       fetchGuestCartProducts();
       return;
     }
     fetchCart();
-  }, [token]);
+  }, [authEpoch]);
 
   // Listen for cart updates
   useEffect(() => {
     const handleUpdate = () => {
-      if (!token) {
+      const t = getApiBearerToken();
+      if (!t) {
         fetchGuestCartProducts();
       } else {
         fetchCart();
@@ -143,13 +153,15 @@ const CartPage = () => {
     };
     window.addEventListener('cart-wishlist-update', handleUpdate);
     return () => window.removeEventListener('cart-wishlist-update', handleUpdate);
-  }, [token]);
+  }, []);
 
   const fetchCart = async () => {
+    const t = getApiBearerToken();
+    if (!t) return;
     try {
       setLoading(true);
       const res = await axios.get(`${API_BASE}/cart`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${t}` },
       });
       if (res.data.success) {
         setCart(res.data.data);
@@ -164,14 +176,15 @@ const CartPage = () => {
   const updateQuantity = async (itemId, newQuantity) => {
     try {
       setUpdating(itemId);
-      if (!token) {
+      const t = getApiBearerToken();
+      if (!t) {
         updateGuestCartItem(itemId, newQuantity);
         await fetchGuestCartProducts();
       } else {
         const res = await axios.put(
           `${API_BASE}/cart/${itemId}`,
           { quantity: newQuantity },
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${t}` } }
         );
         if (res.data.success) {
           setCart(res.data.data);
@@ -188,12 +201,13 @@ const CartPage = () => {
   const removeItem = async (itemId) => {
     try {
       setUpdating(itemId);
-      if (!token) {
+      const t = getApiBearerToken();
+      if (!t) {
         removeFromGuestCart(itemId);
         await fetchGuestCartProducts();
       } else {
         const res = await axios.delete(`${API_BASE}/cart/${itemId}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${t}` },
         });
         if (res.data.success) {
           setCart(res.data.data);
@@ -209,13 +223,14 @@ const CartPage = () => {
 
   const clearCart = async () => {
     try {
-      if (!token) {
+      const t = getApiBearerToken();
+      if (!t) {
         clearGuestCart();
         setGuestCart([]);
         setGuestCartProducts([]);
       } else {
         const res = await axios.delete(`${API_BASE}/cart`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: `Bearer ${t}` },
         });
         if (res.data.success) {
           setCart(res.data.data);

@@ -1,8 +1,29 @@
+import { oidcConfig } from './oidcConfig.js';
+
 const USER_TOKEN_KEY = 'token';
 const ADMIN_TOKEN_KEY = 'adminToken';
 const USER_DATA_KEY = 'user';
 const ADMIN_DATA_KEY = 'admin';
 const OIDC_META_KEY = 'oidc_user';
+
+const getOidcUserStorageKey = () => {
+  const authority = oidcConfig?.authority;
+  const clientId = oidcConfig?.client_id;
+  if (!authority || !clientId) return null;
+  return `oidc.user:${authority}:${clientId}`;
+};
+
+/** Bearer token for API calls: prefer live OIDC session (refreshed tokens), then legacy `token` key. */
+export const getApiBearerToken = () => {
+  const key = getOidcUserStorageKey();
+  if (key) {
+    const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+    const oidcUser = safeJsonParse(raw);
+    const t = oidcUser?.access_token || oidcUser?.id_token;
+    if (t) return t;
+  }
+  return localStorage.getItem(USER_TOKEN_KEY);
+};
 
 const safeJsonParse = (value) => {
   try {
@@ -48,7 +69,7 @@ const tokenHasAdminGroup = (idToken) => {
   return Array.isArray(groups) && groups.includes('admin');
 };
 
-export const getAuthToken = () => localStorage.getItem(USER_TOKEN_KEY);
+export const getAuthToken = () => getApiBearerToken();
 
 export const isUserAuthenticated = () => Boolean(getAuthToken());
 

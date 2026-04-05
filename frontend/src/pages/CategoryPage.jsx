@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { getApiBearerToken } from '../auth/session';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -66,7 +67,6 @@ const sortOptions = [
 // ─── ProductCard ────────────────────────────────────────────────────────────
 const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint }) => {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
   const [addingToCart, setAddingToCart] = useState(false);
 
   const isInWishlist = wishlistIds.includes(product._id);
@@ -168,6 +168,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
 
   const handleAddToCart = async (e) => {
     e.stopPropagation();
+    const token = getApiBearerToken();
     if (!token) {
       // Use guest cart
       try {
@@ -193,6 +194,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
 
   const handleWishlistToggle = async (e) => {
     e.stopPropagation();
+    const token = getApiBearerToken();
     if (!token) {
       // Use guest wishlist with full product data
       const { addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } = await import('../utils/guestCart');
@@ -306,11 +308,17 @@ const CategoryPage = () => {
   const [sortBy, setSortBy] = useState('');
   const [wishlistIds, setWishlistIds] = useState([]);
   const [currentApiEndpoint, setCurrentApiEndpoint] = useState(null);
+  const [authEpoch, setAuthEpoch] = useState(0);
 
   const activeSubCategory = searchParams.get('subCategory') || 'All';
-  const token = localStorage.getItem('token');
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
+
+  useEffect(() => {
+    const onAuth = () => setAuthEpoch((e) => e + 1);
+    window.addEventListener('auth-changed', onAuth);
+    return () => window.removeEventListener('auth-changed', onAuth);
+  }, []);
 
   const fetchAllPages = async (endpoint, baseParams = {}) => {
     let page = 1;
@@ -498,7 +506,11 @@ const CategoryPage = () => {
 
   // Fetch wishlist
   useEffect(() => {
-    if (!token) return;
+    const token = getApiBearerToken();
+    if (!token) {
+      setWishlistIds([]);
+      return;
+    }
     const fetchWishlist = async () => {
       try {
         const res = await axios.get(`${API_BASE}/wishlist`, { headers: { Authorization: `Bearer ${token}` } });
@@ -506,9 +518,10 @@ const CategoryPage = () => {
       } catch (err) { /* silent */ }
     };
     fetchWishlist();
-  }, [token]);
+  }, [authEpoch]);
 
   const handleWishlistToggle = async (productId) => {
+    const token = getApiBearerToken();
     if (!token) return;
     try {
       const res = await axios.post(`${API_BASE}/wishlist`, { productId }, { headers: { Authorization: `Bearer ${token}` } });

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { addToGuestCart, addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } from '../utils/guestCart';
+import { clearUserSession, getApiBearerToken } from '../auth/session';
 import LoginRequiredModal from '../components/LoginRequiredModal';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -57,17 +58,23 @@ const ProductDetail = () => {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [cartMessage, setCartMessage] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [authEpoch, setAuthEpoch] = useState(0);
 
-  const token = localStorage.getItem('token');
+  useEffect(() => {
+    const onAuth = () => setAuthEpoch((e) => e + 1);
+    window.addEventListener('auth-changed', onAuth);
+    return () => window.removeEventListener('auth-changed', onAuth);
+  }, []);
 
   // Check if product is in wishlist (both guest and logged in)
   useEffect(() => {
     if (!id) return;
-    if (token) {
+    const t = getApiBearerToken();
+    if (t) {
       const checkWishlist = async () => {
         try {
           const res = await axios.get(`${API_BASE}/wishlist`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${t}` },
           });
           if (res.data.success) {
             const items = res.data.data.items || [];
@@ -81,10 +88,11 @@ const ProductDetail = () => {
     } else {
       setIsInWishlist(isInGuestWishlist(id));
     }
-  }, [token, id]);
+  }, [id, authEpoch]);
 
   const handleAddToCart = async () => {
-    if (!token) {
+    const t = getApiBearerToken();
+    if (!t) {
       // Use guest cart
       try {
         setAddingToCart(true);
@@ -112,14 +120,14 @@ const ProductDetail = () => {
       await axios.post(
         `${API_BASE}/cart`,
         { productId: id, quantity: 1, selectedSize, productType: modelType },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
       setCartMessage('Added to cart!');
       window.dispatchEvent(new Event('cart-wishlist-update'));
       setTimeout(() => setCartMessage(''), 2500);
     } catch (err) {
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
+        clearUserSession();
         navigate('/signin');
         return;
       }
@@ -132,7 +140,8 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = async () => {
-    if (!token) {
+    const t = getApiBearerToken();
+    if (!t) {
       setShowLoginModal(true);
       return;
     }
@@ -143,14 +152,14 @@ const ProductDetail = () => {
       // Clear cart first to ensure only current product is in checkout
       try {
         const cartRes = await axios.get(`${API_BASE}/cart`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${t}` }
         });
         if (cartRes.data.success && cartRes.data.data.items?.length > 0) {
           // Delete all items from cart
           await Promise.all(
             cartRes.data.data.items.map(item => 
               axios.delete(`${API_BASE}/cart/${item._id}`, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${t}` }
               })
             )
           );
@@ -163,13 +172,13 @@ const ProductDetail = () => {
       await axios.post(
         `${API_BASE}/cart`,
         { productId: id, quantity: 1, selectedSize, productType: modelType },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
       window.dispatchEvent(new Event('cart-wishlist-update'));
       navigate('/checkout');
     } catch (err) {
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
+        clearUserSession();
         navigate('/signin');
         return;
       }
@@ -182,7 +191,8 @@ const ProductDetail = () => {
   };
 
   const handleToggleWishlist = async () => {
-    if (!token) {
+    const t = getApiBearerToken();
+    if (!t) {
       // Use guest wishlist with full product data
       try {
         setTogglingWishlist(true);
@@ -205,7 +215,7 @@ const ProductDetail = () => {
       const res = await axios.post(
         `${API_BASE}/wishlist`,
         { productId: id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
       if (res.data.success) {
         setIsInWishlist(res.data.action === 'added');
@@ -213,7 +223,7 @@ const ProductDetail = () => {
       }
     } catch (err) {
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
+        clearUserSession();
         navigate('/signin');
         return;
       }
