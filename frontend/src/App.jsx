@@ -74,6 +74,19 @@ const AuthSessionBridge = () => {
   const auth = useAuth();
 
   useEffect(() => {
+    let isMounted = true;
+
+    const renewSession = async () => {
+      try {
+        const renewedUser = await auth.signinSilent();
+        if (isMounted && renewedUser) {
+          persistCognitoSession(renewedUser);
+        }
+      } catch (error) {
+        console.error('Silent token renewal failed:', error);
+      }
+    };
+
     const run = async () => {
       if (!auth.isAuthenticated || !auth.user) return;
       const token = persistCognitoSession(auth.user);
@@ -84,10 +97,32 @@ const AuthSessionBridge = () => {
       window.dispatchEvent(new Event('cart-wishlist-update'));
     };
 
+    // Keep local session in sync whenever oidc-client renews tokens.
+    const onUserLoaded = (user) => {
+      if (user) persistCognitoSession(user);
+    };
+    const onAccessTokenExpiring = () => {
+      renewSession().catch(() => {});
+    };
+    const onAccessTokenExpired = () => {
+      renewSession().catch(() => {});
+    };
+
+    auth.events?.addUserLoaded?.(onUserLoaded);
+    auth.events?.addAccessTokenExpiring?.(onAccessTokenExpiring);
+    auth.events?.addAccessTokenExpired?.(onAccessTokenExpired);
+
     run().catch((error) => {
       console.error('Failed to sync Cognito session:', error);
     });
-  }, [auth.isAuthenticated, auth.user]);
+
+    return () => {
+      isMounted = false;
+      auth.events?.removeUserLoaded?.(onUserLoaded);
+      auth.events?.removeAccessTokenExpiring?.(onAccessTokenExpiring);
+      auth.events?.removeAccessTokenExpired?.(onAccessTokenExpired);
+    };
+  }, [auth]);
 
   return null;
 };
