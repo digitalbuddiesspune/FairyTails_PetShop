@@ -19,6 +19,10 @@ import OrderDetailsPage from './pages/OrderDetailsPage';
 import InvoicePage from './pages/InvoicePage';
 import WishlistPage from './pages/WishlistPage';
 import SearchPage from './pages/SearchPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import RefundPolicy from './pages/RefundPolicy';
+import ShippingPolicy from './pages/ShippingPolicy';
+import TermsAndConditions from './pages/TermsAndConditions';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
@@ -156,6 +160,26 @@ function App() {
         <Route path="/search" element={
           <MainLayout>
             <SearchPage />
+          </MainLayout>
+        } />
+        <Route path="/privacy-policy" element={
+          <MainLayout>
+            <PrivacyPolicy />
+          </MainLayout>
+        } />
+        <Route path="/refund-policy" element={
+          <MainLayout>
+            <RefundPolicy />
+          </MainLayout>
+        } />
+        <Route path="/shipping-policy" element={
+          <MainLayout>
+            <ShippingPolicy />
+          </MainLayout>
+        } />
+        <Route path="/terms-and-conditions" element={
+          <MainLayout>
+            <TermsAndConditions />
           </MainLayout>
         } />
         <Route path="/product/:id" element={
