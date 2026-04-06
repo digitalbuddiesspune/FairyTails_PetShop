@@ -742,8 +742,10 @@ const ProductDetailModal = ({ product, onClose }) => {
 const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
   const [form, setForm] = useState({});
   const [loading, setLoading] = useState(false);
+  const [uploadingImageIndex, setUploadingImageIndex] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [uploadSuccess, setUploadSuccess] = useState('');
 
   useEffect(() => {
     const p = { ...product };
@@ -839,6 +841,44 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
   const setSubArr = (arrField, idx, subField, val) => setForm(prev => { const a = [...(prev[arrField] || [])]; a[idx] = { ...a[idx], [subField]: val }; return { ...prev, [arrField]: a }; });
   const addSubArr = (field, def) => setForm(prev => ({ ...prev, [field]: [...(prev[field] || []), { ...def }] }));
   const rmSubArr = (field, idx) => setForm(prev => { const a = (prev[field] || []).filter((_, i) => i !== idx); return { ...prev, [field]: a }; });
+
+  const handleImageUpload = async (field, idx, file) => {
+    if (!file) return;
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      setError('Admin token missing. Please sign in again.');
+      return;
+    }
+
+    const uploadKey = `${field}-${idx}`;
+    setUploadingImageIndex(uploadKey);
+    setError('');
+    setUploadSuccess('');
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch(`${API_BASE}/admin/upload/image`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Image upload failed');
+      }
+
+      setArr(field, idx, data.data.url);
+      setUploadSuccess('Image uploaded successfully from device.');
+      setTimeout(() => setUploadSuccess(''), 2500);
+    } catch (uploadError) {
+      setError(uploadError.message || 'Image upload failed');
+    } finally {
+      setUploadingImageIndex(null);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -996,6 +1036,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
         <form onSubmit={handleSave} className="px-5 py-4 sm:px-6 sm:py-5 space-y-4 overflow-y-auto flex-1">
           {error && <div className="bg-red-50 text-red-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-red-200">{error}</div>}
           {success && <div className="bg-green-50 text-green-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-green-200">{success}</div>}
+          {uploadSuccess && <div className="bg-green-50 text-green-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-green-200">{uploadSuccess}</div>}
 
           {/* ─── FOOD FIELDS ─── */}
           {catKey === 'food' && <>
@@ -1007,7 +1048,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
             <Row><Input label="Available Stock" type="number" value={form.availableStock} onChange={v => set('availableStock', v)} /><Input label="Expiry Date" type="date" value={form.expiryDate} onChange={v => set('expiryDate', v)} /></Row>
             <SubArrayField label="Prices" items={form.prices || []} fields={[{key:'capacity',placeholder:'Capacity',w:'flex-1'},{key:'mrp',placeholder:'MRP',type:'number',w:'w-full sm:w-24'},{key:'discountedPrice',placeholder:'Sale Price',type:'number',w:'w-full sm:w-24'}]}
               onChange={(i,k,v) => setSubArr('prices',i,k,v)} onAdd={() => addSubArr('prices',{capacity:'',mrp:'',discountedPrice:''})} onRemove={i => rmSubArr('prices',i)} />
-            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
+            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" enableUpload uploadingImageIndex={uploadingImageIndex} onUpload={(i, file) => handleImageUpload('images', i, file)} />
             <ArrayField label="Flavours" items={form.flavours} onChange={(i,v) => setArr('flavours',i,v)} onAdd={() => addArr('flavours')} onRemove={i => rmArr('flavours',i)} placeholder="Flavour" />
             <ArrayField label="Details" items={form.details} onChange={(i,v) => setArr('details',i,v)} onAdd={() => addArr('details')} onRemove={i => rmArr('details',i)} placeholder="Detail" />
             <ArrayField label="Key Features" items={form.keyFeatures} onChange={(i,v) => setArr('keyFeatures',i,v)} onAdd={() => addArr('keyFeatures')} onRemove={i => rmArr('keyFeatures',i)} placeholder="Feature" />
@@ -1026,7 +1067,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
             <SubArrayField label="Sizes" items={form.sizes || []} fields={[{key:'size',placeholder:'Size',w:'w-full sm:w-20',type:'select',options:['XS','S','M','L','XL']},{key:'mrp',placeholder:'MRP',type:'number',w:'w-full sm:w-24'},{key:'discountedPrice',placeholder:'Sale',type:'number',w:'w-full sm:w-24'},{key:'availableStock',placeholder:'Stock',type:'number',w:'w-full sm:w-20'}]}
               onChange={(i,k,v) => setSubArr('sizes',i,k,v)} onAdd={() => addSubArr('sizes',{size:'M',mrp:'',discountedPrice:'',availableStock:''})} onRemove={i => rmSubArr('sizes',i)} />
             <ArrayField label="Colors" items={form.color} onChange={(i,v) => setArr('color',i,v)} onAdd={() => addArr('color')} onRemove={i => rmArr('color',i)} placeholder="Color" />
-            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
+            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" enableUpload uploadingImageIndex={uploadingImageIndex} onUpload={(i, file) => handleImageUpload('images', i, file)} />
             <ArrayField label="Product Details" items={form.productDetails} onChange={(i,v) => setArr('productDetails',i,v)} onAdd={() => addArr('productDetails')} onRemove={i => rmArr('productDetails',i)} placeholder="Detail" />
             <ArrayField label="Key Features" items={form.keyFeatures} onChange={(i,v) => setArr('keyFeatures',i,v)} onAdd={() => addArr('keyFeatures')} onRemove={i => rmArr('keyFeatures',i)} placeholder="Feature" />
             <ArrayField label="Care Instructions" items={form.careInstructions} onChange={(i,v) => setArr('careInstructions',i,v)} onAdd={() => addArr('careInstructions')} onRemove={i => rmArr('careInstructions',i)} placeholder="Instruction" />
@@ -1058,7 +1099,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
             <Input label="Material" value={form.material} onChange={v => set('material', v)} />
             <Select label="Suitable For" value={form.suitableFor || 'All'} onChange={v => set('suitableFor', v)} options={['Puppy','Adult','All']} />
             <ArrayField label="Colors" items={form.color} onChange={(i,v) => setArr('color',i,v)} onAdd={() => addArr('color')} onRemove={i => rmArr('color',i)} placeholder="Color" />
-            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
+            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" enableUpload uploadingImageIndex={uploadingImageIndex} onUpload={(i, file) => handleImageUpload('images', i, file)} />
             <ArrayField label="Product Details" items={form.productDetails} onChange={(i,v) => setArr('productDetails',i,v)} onAdd={() => addArr('productDetails')} onRemove={i => rmArr('productDetails',i)} placeholder="Detail" />
             <ArrayField label="Key Features" items={form.keyFeatures} onChange={(i,v) => setArr('keyFeatures',i,v)} onAdd={() => addArr('keyFeatures')} onRemove={i => rmArr('keyFeatures',i)} placeholder="Feature" />
           </>}
@@ -1093,7 +1134,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
                 ))}
               </div>
             </div>
-            <ArrayField label="Images" items={form.images || (form.image ? [form.image] : [])} onChange={(i,v) => { setArr('images',i,v); if (i === 0) set('image', v); }} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
+            <ArrayField label="Images" items={form.images || (form.image ? [form.image] : [])} onChange={(i,v) => { setArr('images',i,v); if (i === 0) set('image', v); }} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" enableUpload uploadingImageIndex={uploadingImageIndex} onUpload={(i, file) => handleImageUpload('images', i, file)} />
           </>}
 
           {/* ─── ACCESSORIES FIELDS ─── */}
@@ -1115,7 +1156,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
             <Input label="Size" value={form.size} onChange={v => set('size', v)} placeholder="e.g. S, XL, Large, Medium, Size01, 1kg, 250ml, etc." />
             <Input label="Material" value={form.material} onChange={v => set('material', v)} />
             <ArrayField label="Colors" items={form.color} onChange={(i,v) => setArr('color',i,v)} onAdd={() => addArr('color')} onRemove={i => rmArr('color',i)} placeholder="Color" />
-            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
+            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" enableUpload uploadingImageIndex={uploadingImageIndex} onUpload={(i, file) => handleImageUpload('images', i, file)} />
             <ArrayField label="Product Details" items={form.productDetails} onChange={(i,v) => setArr('productDetails',i,v)} onAdd={() => addArr('productDetails')} onRemove={i => rmArr('productDetails',i)} placeholder="Detail" />
             <ArrayField label="Key Features" items={form.keyFeatures} onChange={(i,v) => setArr('keyFeatures',i,v)} onAdd={() => addArr('keyFeatures')} onRemove={i => rmArr('keyFeatures',i)} placeholder="Feature" />
           </>}
@@ -1146,7 +1187,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
             <Input label="Brand" value={form.brand} onChange={v => set('brand', v)} />
             <Select label="Suitable For" value={form.suitableFor || 'Both'} onChange={v => set('suitableFor', v)} options={['Dogs','Cats','Both']} />
             <Textarea label="Description" value={form.description} onChange={v => set('description', v)} />
-            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
+            <ArrayField label="Images" items={form.images} onChange={(i,v) => setArr('images',i,v)} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" enableUpload uploadingImageIndex={uploadingImageIndex} onUpload={(i, file) => handleImageUpload('images', i, file)} />
             <ArrayField label="Key Features" items={form.keyFeatures} onChange={(i,v) => setArr('keyFeatures',i,v)} onAdd={() => addArr('keyFeatures')} onRemove={i => rmArr('keyFeatures',i)} placeholder="Feature" />
             <ArrayField label="Usage Instructions" items={form.usageInstructions} onChange={(i,v) => setArr('usageInstructions',i,v)} onAdd={() => addArr('usageInstructions')} onRemove={i => rmArr('usageInstructions',i)} placeholder="Instruction" />
           </>}
@@ -1181,7 +1222,7 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
                 <input type="text" placeholder="Age Group" value={form.usage?.ageGroup || ''} onChange={e => setNested('usage','ageGroup',e.target.value)} className="inp" />
               </div>
             </div>
-            <ArrayField label="Images" items={form.images || (form.image ? [form.image] : [])} onChange={(i,v) => { setArr('images',i,v); if (i === 0) set('image', v); }} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" />
+            <ArrayField label="Images" items={form.images || (form.image ? [form.image] : [])} onChange={(i,v) => { setArr('images',i,v); if (i === 0) set('image', v); }} onAdd={() => addArr('images')} onRemove={i => rmArr('images',i)} placeholder="Image URL" enableUpload uploadingImageIndex={uploadingImageIndex} onUpload={(i, file) => handleImageUpload('images', i, file)} />
           </>}
         </form>
 
@@ -1239,7 +1280,7 @@ const Textarea = ({ label, value, onChange }) => (
   </div>
 );
 
-const ArrayField = ({ label, items, onChange, onAdd, onRemove, placeholder }) => (
+const ArrayField = ({ label, items, onChange, onAdd, onRemove, placeholder, enableUpload = false, uploadingImageIndex = null, onUpload }) => (
   <div>
     <div className="flex items-center justify-between mb-1.5">
       <label className="text-sm font-semibold text-gray-700">{label}</label>
@@ -1250,6 +1291,22 @@ const ArrayField = ({ label, items, onChange, onAdd, onRemove, placeholder }) =>
         <div key={i} className="flex gap-2 items-center">
           <input type="text" value={val ?? ''} onChange={e => onChange(i, e.target.value)} placeholder={placeholder}
             className="flex-1 px-3.5 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+          {enableUpload && (
+            <label className="px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer whitespace-nowrap flex items-center">
+              {uploadingImageIndex === `images-${i}` ? 'Uploading...' : 'Upload'}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingImageIndex === `images-${i}`}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (onUpload) onUpload(i, file);
+                  e.target.value = '';
+                }}
+              />
+            </label>
+          )}
           {(items || []).length > 1 && <button type="button" onClick={() => onRemove(i)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>}
