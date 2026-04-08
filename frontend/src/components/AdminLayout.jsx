@@ -446,7 +446,7 @@ const AdminLayout = () => {
                                 </div>
 
                                 {pwError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{pwError}</p>}
-                                {pwSuccess && <p className="text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">{pwSuccess}</p>}
+                                {pwSuccess && <p className="text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">{pwSuccess}</p>}
                             </div>
 
                             <div className="flex gap-3 mt-6">

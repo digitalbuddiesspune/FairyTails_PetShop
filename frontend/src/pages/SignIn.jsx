@@ -111,7 +111,7 @@ const SignIn = () => {
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all"
               placeholder="Enter your email"
             />
           </div>
@@ -125,7 +125,7 @@ const SignIn = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all pr-12"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all pr-12"
                 placeholder="Enter your password"
               />
               <button
@@ -139,7 +139,7 @@ const SignIn = () => {
           </div>
 
           <div className="flex items-center justify-end">
-            <Link to="/forgot-password" className="text-sm text-[#65a30d] hover:text-[#4d7c0f] transition-colors">
+            <Link to="/forgot-password" className="text-sm text-[#205EA9] hover:text-[#1d4f8f] transition-colors">
               Forgot your password?
             </Link>
           </div>
@@ -147,7 +147,7 @@ const SignIn = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#65a30d] hover:bg-[#4d7c0f] text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            className="w-full py-3 bg-[#205EA9] hover:bg-[#1d4f8f] text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
           >
             {loading ? (
               <>
@@ -173,7 +173,7 @@ const SignIn = () => {
         {/* Sign Up Link */}
         <p className="text-center text-gray-600">
           Don't have an account?{' '}
-          <Link to="/signup" className="font-semibold text-[#65a30d] hover:text-[#4d7c0f]">
+          <Link to="/signup" className="font-semibold text-[#205EA9] hover:text-[#1d4f8f]">
             Sign Up
           </Link>
         </p>

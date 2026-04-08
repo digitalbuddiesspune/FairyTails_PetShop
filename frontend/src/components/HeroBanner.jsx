@@ -166,7 +166,7 @@ const HeroBanner = () => {
                   onClick={() => goToSlide(index)}
                   className={`transition-all rounded-full ${
                     currentSlide === index
-                      ? "bg-[#a3e635] w-8 h-3"
+                      ? "bg-[#205EA9] w-8 h-3"
                       : "bg-white/70 w-3 h-3"
                   }`}
                 />

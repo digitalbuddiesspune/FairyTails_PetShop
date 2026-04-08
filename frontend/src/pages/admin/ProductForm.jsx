@@ -1455,7 +1455,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
             </div>
           )}
           {uploadSuccess && (
-            <div className="bg-green-50 text-green-700 p-3 rounded-xl text-sm border border-green-100">
+            <div className="bg-blue-50 text-blue-700 p-3 rounded-xl text-sm border border-blue-100">
               {uploadSuccess}
             </div>
           )}

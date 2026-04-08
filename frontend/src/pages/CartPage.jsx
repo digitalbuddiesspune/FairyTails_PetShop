@@ -458,7 +458,7 @@ const CartPage = () => {
                         {subtotal >= 500 ? (
                           <>
                             <span className="text-gray-400 line-through text-xs">₹50</span>
-                            <span className="text-green-600 font-medium">Free</span>
+                            <span className="text-blue-600 font-medium">Free</span>
                           </>
                         ) : (
                           <span>₹{deliveryCharge}</span>

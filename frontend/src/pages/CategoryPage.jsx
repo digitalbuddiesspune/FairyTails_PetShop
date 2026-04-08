@@ -51,10 +51,10 @@ const categoryAccents = {
   'toys': { tab: 'bg-blue-500', tabText: 'text-blue-700', tabBg: 'bg-blue-50', border: 'border-blue-200' },
   'accessories': { tab: 'bg-rose-500', tabText: 'text-rose-700', tabBg: 'bg-rose-50', border: 'border-rose-200' },
   'grooming-and-essential': { tab: 'bg-cyan-500', tabText: 'text-cyan-700', tabBg: 'bg-cyan-50', border: 'border-cyan-200' },
-  'health-and-supplement': { tab: 'bg-green-500', tabText: 'text-green-700', tabBg: 'bg-green-50', border: 'border-green-200' },
+  'health-and-supplement': { tab: 'bg-blue-500', tabText: 'text-blue-700', tabBg: 'bg-blue-50', border: 'border-blue-200' },
   'beds-and-house': { tab: 'bg-pink-500', tabText: 'text-pink-700', tabBg: 'bg-pink-50', border: 'border-pink-200' },
 };
-const defaultAccent = { tab: 'bg-[#65a30d]', tabText: 'text-gray-700', tabBg: 'bg-gray-50', border: 'border-gray-200' };
+const defaultAccent = { tab: 'bg-[#205EA9]', tabText: 'text-gray-700', tabBg: 'bg-gray-50', border: 'border-gray-200' };
 
 const sortOptions = [
   { value: '', label: 'Newest First' },
@@ -256,10 +256,10 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
       </div>
       <div className="p-3 sm:p-4">
         {product.brand && (
-          <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">{product.brand}</p>
+          <p className="text-xs font-semibold text-[#205EA9] uppercase tracking-wide mb-1">{product.brand}</p>
         )}
         <Link to={productUrl}>
-          <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#65a30d] transition-colors">{displayName}</h3>
+          <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#205EA9] transition-colors">{displayName}</h3>
         </Link>
         <span className="inline-block bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full mb-2 sm:mb-3">{product.subCategory}</span>
         {/* Show capacity for food or size for accessories */}
@@ -280,12 +280,14 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
             )}
           </div>
         )}
-        <div className="flex gap-2 mt-1">
-          <Link to={productUrl} className="flex-1 text-center bg-[#205ea9] hover:bg-[#1a4a7a] text-white font-semibold py-2.5 rounded-xl active:scale-[0.98] transition-all duration-200 text-sm">
-            View Details
-          </Link>
-          <button onClick={handleAddToCart} disabled={addingToCart} className="px-4 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all duration-200 text-sm border border-gray-200 disabled:opacity-50" title="Add to Cart">
-            {addingToCart ? '...' : '🛒'}
+        <div className="mt-2 flex justify-center">
+          <button
+            onClick={handleAddToCart}
+            disabled={addingToCart}
+            className="w-full max-w-[240px] bg-[#205EA9] text-white font-semibold py-3.5 rounded-xl hover:bg-[#205EA9] active:scale-[0.98] transition-all duration-200 text-base disabled:opacity-50"
+            title="Add to Cart"
+          >
+            {addingToCart ? 'Adding...' : '🛒 Add to Cart'}
           </button>
         </div>
       </div>
@@ -547,7 +549,7 @@ const CategoryPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-500 text-lg">Loading...</p>
         </div>
       </div>
@@ -562,7 +564,7 @@ const CategoryPage = () => {
           <p className="text-6xl mb-4">😿</p>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Category Not Found</h2>
           <p className="text-gray-500 mb-6">{error || 'The category you are looking for does not exist.'}</p>
-          <Link to="/" className="inline-block bg-[#65a30d] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#4d7c0f] transition-colors">
+          <Link to="/" className="inline-block bg-[#205EA9] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1d4f8f] transition-colors">
             Back to Home
           </Link>
         </div>
@@ -645,7 +647,7 @@ const CategoryPage = () => {
         <div className="container mx-auto px-4">
           {productsLoading && (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mb-4"></div>
+              <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mb-4"></div>
               <p className="text-gray-500 text-lg">Loading products...</p>
             </div>
           )}
@@ -665,7 +667,7 @@ const CategoryPage = () => {
                   View All
                 </button>
               )}
-              <Link to="/" className="bg-[#65a30d] text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-[#4d7c0f] transition-colors inline-block">
+              <Link to="/" className="bg-[#205EA9] text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-[#1d4f8f] transition-colors inline-block">
                 Back to Home
               </Link>
             </div>

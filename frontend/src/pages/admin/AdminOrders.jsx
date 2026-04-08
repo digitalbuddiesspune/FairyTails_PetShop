@@ -8,14 +8,14 @@ const STATUS_CONFIG = {
   placed:     { label: 'Confirm',    bg: 'bg-blue-50 text-blue-600 border-blue-200' },
   processing: { label: 'Processing', bg: 'bg-yellow-50 text-yellow-600 border-yellow-200' },
   shipped:    { label: 'Shipped',    bg: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
-  delivered:  { label: 'Delivered',  bg: 'bg-green-50 text-green-600 border-green-200' },
+  delivered:  { label: 'Delivered',  bg: 'bg-blue-50 text-blue-600 border-blue-200' },
   cancelled:  { label: 'Cancelled',  bg: 'bg-red-50 text-red-600 border-red-200' },
   failed:     { label: 'Failed',     bg: 'bg-red-50 text-red-600 border-red-200' },
 };
 
 const PAYMENT_CONFIG = {
   unpaid:  { label: 'Unpaid',  bg: 'bg-orange-50 text-orange-600 border-orange-200' },
-  paid:    { label: 'Paid',    bg: 'bg-green-50 text-green-600 border-green-200' },
+  paid:    { label: 'Paid',    bg: 'bg-blue-50 text-blue-600 border-blue-200' },
   refund:  { label: 'Refunded',  bg: 'bg-purple-50 text-purple-600 border-purple-200' },
   failed:  { label: 'Failed',  bg: 'bg-red-50 text-red-600 border-red-200' },
 };
@@ -265,7 +265,7 @@ const AdminOrders = () => {
             <button
               onClick={downloadXLS}
               disabled={filteredOrders.length === 0}
-              className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
               Download XLS

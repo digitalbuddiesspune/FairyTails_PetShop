@@ -18,7 +18,7 @@ const RefundPolicy = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#65a30d] to-[#84cc16] py-10 md:py-14">
+      <div className="bg-gradient-to-r from-[#205EA9] to-[#205EA9] py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-6">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@ const RefundPolicy = () => {
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">On this page</h3>
               <nav className="space-y-1">
                 {sections.map((s) => (
-                  <a key={s.id} href={`#${s.id}`} className="block text-sm text-gray-600 hover:text-[#65a30d] hover:bg-[#65a30d]/5 px-3 py-2 rounded-lg transition-colors">
+                  <a key={s.id} href={`#${s.id}`} className="block text-sm text-gray-600 hover:text-[#205EA9] hover:bg-[#205EA9]/5 px-3 py-2 rounded-lg transition-colors">
                     {s.title}
                   </a>
                 ))}
@@ -65,10 +65,10 @@ const RefundPolicy = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Eligibility for Returns</h2>
                 <p className="text-gray-600 leading-relaxed mb-4">You may return a product if:</p>
                 <ul className="space-y-2 text-gray-600">
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>The product is unused, unopened, and in its original packaging.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>The return request is raised within <strong>7 days</strong> of delivery.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>The product received is damaged, defective, or different from what was ordered.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>The product has not expired (for food, health supplements, and grooming products).</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>The product is unused, unopened, and in its original packaging.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>The return request is raised within <strong>7 days</strong> of delivery.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>The product received is damaged, defective, or different from what was ordered.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>The product has not expired (for food, health supplements, and grooming products).</li>
                 </ul>
               </section>
 
@@ -97,7 +97,7 @@ const RefundPolicy = () => {
                     { step: '5', title: 'Refund Processed', desc: 'Once verified, the refund is initiated to your original payment method.' },
                   ].map((item) => (
                     <div key={item.step} className="flex gap-4 items-start">
-                      <div className="w-8 h-8 rounded-full bg-[#65a30d] text-white flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
+                      <div className="w-8 h-8 rounded-full bg-[#205EA9] text-white flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
                       <div>
                         <h4 className="font-semibold text-gray-900">{item.title}</h4>
                         <p className="text-gray-600 text-sm">{item.desc}</p>
@@ -133,9 +133,9 @@ const RefundPolicy = () => {
                   You can cancel your order under the following conditions:
                 </p>
                 <ul className="space-y-2 text-gray-600">
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span><strong>Before shipment:</strong> Full cancellation is allowed. Refund will be processed within 3–5 business days.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span><strong>After shipment:</strong> Cancellation is not possible. You may request a return once delivered.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span><strong>Partial cancellation:</strong> If you ordered multiple items, individual items can be cancelled before they are shipped.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span><strong>Before shipment:</strong> Full cancellation is allowed. Refund will be processed within 3–5 business days.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span><strong>After shipment:</strong> Cancellation is not possible. You may request a return once delivered.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span><strong>Partial cancellation:</strong> If you ordered multiple items, individual items can be cancelled before they are shipped.</li>
                 </ul>
               </section>
 
@@ -151,9 +151,9 @@ const RefundPolicy = () => {
                 <p className="text-gray-600 leading-relaxed mb-4">
                   If you have questions about a return, refund, or cancellation, reach out to our support team:
                 </p>
-                <div className="bg-[#65a30d]/5 border border-[#65a30d]/20 rounded-xl p-5 space-y-2">
+                <div className="bg-[#205EA9]/5 border border-[#205EA9]/20 rounded-xl p-5 space-y-2">
                   <p className="text-gray-700"><strong>Email:</strong> support@fairytails.com</p>
-                  <p className="text-gray-700"><strong>Phone:</strong> +91 98765 43210</p>
+                  <p className="text-gray-700"><strong>Phone:</strong> +91 90217 85257</p>
                   <p className="text-gray-700"><strong>Hours:</strong> Mon–Sat, 9:00 AM – 7:00 PM IST</p>
                 </div>
               </section>
@@ -161,7 +161,7 @@ const RefundPolicy = () => {
             </div>
 
             <div className="mt-8 text-center">
-              <Link to="/" className="text-[#65a30d] hover:underline font-medium text-sm">← Back to Home</Link>
+              <Link to="/" className="text-[#205EA9] hover:underline font-medium text-sm">← Back to Home</Link>
             </div>
           </main>
         </div>

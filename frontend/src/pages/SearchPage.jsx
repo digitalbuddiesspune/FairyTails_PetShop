@@ -66,7 +66,7 @@ const SearchPage = () => {
 
         {loading && (
           <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#65a30d] border-t-transparent" />
+            <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#205EA9] border-t-transparent" />
           </div>
         )}
 
@@ -122,7 +122,7 @@ const SearchPage = () => {
                     <p className="font-medium text-gray-900 text-sm line-clamp-2">{displayName}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{product.brand}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="font-bold text-[#65a30d]">₹{discountedPrice ?? '—'}</span>
+                      <span className="font-bold text-[#205EA9]">₹{discountedPrice ?? '—'}</span>
                       {discountPercent > 0 && (
                         <span className="text-xs text-gray-400 line-through">₹{mrp}</span>
                       )}

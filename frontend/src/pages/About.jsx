@@ -16,7 +16,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#205ea9] to-[#1a4a7a] py-12 md:py-20">
+      <div className="bg-gradient-to-r from-[#205EA9] to-[#205EA9] py-12 md:py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">About FairyTails</h1>
           <p className="text-white/90 text-lg max-w-2xl mx-auto">
@@ -84,7 +84,7 @@ const About = () => {
               { icon: '🤝', title: 'Trust & Care', desc: 'Building lasting relationships with pet parents.' },
             ].map((value, index) => (
               <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6 text-center border border-gray-200">
-                <div className="w-16 h-16 bg-[#D6EFD8] rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-[#dbeafe] rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">{value.icon}</span>
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{value.title}</h3>
@@ -120,7 +120,7 @@ const About = () => {
           </p>
           <a 
             href="/" 
-            className="inline-block bg-[#205ea9] hover:bg-[#1a4a7a] text-white font-bold px-8 py-3 rounded-xl transition-colors"
+            className="inline-block bg-[#205EA9] hover:bg-[#205EA9] text-white font-bold px-8 py-3 rounded-xl transition-colors"
           >
             Start Shopping 🛒
           </a>

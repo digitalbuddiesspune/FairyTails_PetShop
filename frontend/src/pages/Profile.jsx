@@ -147,7 +147,7 @@ const Profile = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">Your Orders</h2>
             {ordersLoading ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : orders.length === 0 ? (
               <div className="flex-1 flex items-center justify-center">
@@ -156,7 +156,7 @@ const Profile = () => {
                     <span className="text-5xl">📦</span>
                   </div>
                   <p className="text-blue-600 font-bold mb-5 text-lg">No orders yet</p>
-                  <Link to="/" className="inline-block bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-7 py-3 rounded-xl transition-colors font-semibold shadow-lg">
+                  <Link to="/" className="inline-block bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-7 py-3 rounded-xl transition-colors font-semibold shadow-lg">
                     Start Shopping
                   </Link>
                 </div>
@@ -168,7 +168,7 @@ const Profile = () => {
                     placed: { label: 'Confirm', color: 'bg-blue-100 text-blue-700' },
                     processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700' },
                     shipped: { label: 'Shipped', color: 'bg-indigo-100 text-indigo-700' },
-                    delivered: { label: 'Delivered', color: 'bg-green-100 text-green-700' },
+                    delivered: { label: 'Delivered', color: 'bg-blue-100 text-blue-700' },
                     cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-700' },
                   };
                   const st = statusMap[order.status] || statusMap.placed;
@@ -213,7 +213,7 @@ const Profile = () => {
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">Your Addresses</h2>
             {addressesLoading ? (
               <div className="flex-1 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : addresses.length === 0 ? (
               <div className="flex-1 flex items-center justify-center">
@@ -222,7 +222,7 @@ const Profile = () => {
                     <span className="text-5xl">📍</span>
                   </div>
                   <p className="text-gray-500 font-medium mb-5 text-lg">No addresses saved</p>
-                  <Link to="/checkout" className="inline-block bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-7 py-3 rounded-xl transition-colors font-semibold shadow-lg">
+                  <Link to="/checkout" className="inline-block bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-7 py-3 rounded-xl transition-colors font-semibold shadow-lg">
                     + Add New Address
                   </Link>
                 </div>
@@ -258,7 +258,7 @@ const Profile = () => {
                 </div>
                 <p className="text-blue-600 font-bold mb-2 text-xl">No active subscriptions</p>
                 <p className="text-gray-500 text-sm mb-6">Subscribe for regular pet essentials delivery</p>
-                <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <button className="bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                   Browse Plans
                 </button>
               </div>
@@ -276,11 +276,11 @@ const Profile = () => {
                 </div>
                 <p className="text-gray-700 font-medium mb-4 text-lg">Share your referral code and earn rewards!</p>
                 <div className="bg-white p-4 rounded-xl flex items-center justify-center border border-blue-200 mb-6">
-                  <span className="font-mono text-2xl font-bold text-[#65a30d]">
+                  <span className="font-mono text-2xl font-bold text-[#205EA9]">
                     {user?.name?.toUpperCase().replace(/\s/g, '')?.slice(0, 6) || 'FAIRY'}2024
                   </span>
                 </div>
-                <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <button className="bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                   Copy Code
                 </button>
               </div>
@@ -292,7 +292,7 @@ const Profile = () => {
           <div className="animate-fadeIn h-full flex flex-col justify-center items-center py-4">
 
             {updateSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-2 rounded-xl mb-4 flex items-center justify-center gap-2 text-base max-w-lg mx-auto w-full">
+              <div className="bg-blue-50 border border-blue-200 text-blue-600 px-4 py-2 rounded-xl mb-4 flex items-center justify-center gap-2 text-base max-w-lg mx-auto w-full">
                 <span>✓</span> {updateSuccess}
               </div>
             )}
@@ -322,7 +322,7 @@ const Profile = () => {
                     <div className="text-center pt-2">
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="bg-[#205ea9] hover:bg-[#4d7c0f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        className="bg-[#205ea9] hover:bg-[#1d4f8f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                       >
                         Edit Profile
                       </button>
@@ -336,7 +336,7 @@ const Profile = () => {
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-base transition-all"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none text-base transition-all"
                       />
                     </div>
                     <div>
@@ -345,7 +345,7 @@ const Profile = () => {
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-base transition-all"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none text-base transition-all"
                       />
                     </div>
                     <div>
@@ -354,13 +354,13 @@ const Profile = () => {
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none text-base transition-all"
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none text-base transition-all"
                       />
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 pt-3 justify-center">
                       <button
                         type="submit"
-                        className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        className="bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                       >
                         Save
                       </button>
@@ -405,7 +405,7 @@ const Profile = () => {
                   <div className="relative bg-white rounded-full w-full h-full flex items-center justify-center border-2 border-[#fff7ed] shadow-inner text-2xl">
                     {user.name ? user.name.charAt(0).toUpperCase() : '👤'}
                   </div>
-                  <div className="absolute bottom-0 right-0 bg-[#65a30d] w-4 h-4 rounded-full border border-white"></div>
+                  <div className="absolute bottom-0 right-0 bg-[#205EA9] w-4 h-4 rounded-full border border-white"></div>
                 </div>
                 <h1 className="text-lg font-bold text-gray-800 mb-0.5">Hi, {getFirstName(user.name)}</h1>
                 <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Pet Lover</p>
@@ -418,8 +418,8 @@ const Profile = () => {
                     key={item.id}
                     onClick={() => handleMenuClick(item.id)}
                     className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 ${activeTab === item.id
-                      ? 'bg-[#65a30d] text-white shadow-lg shadow-[#65a30d]/30 scale-100'
-                      : 'text-gray-600 hover:bg-[#fefce8] hover:text-[#65a30d]'
+                      ? 'bg-[#205EA9] text-white shadow-lg shadow-[#205EA9]/30 scale-100'
+                      : 'text-gray-600 hover:bg-[#fefce8] hover:text-[#205EA9]'
                       } ${item.id === 'logout' ? 'mt-4 !text-red-500 hover:bg-red-50 hover:!text-red-600' : ''}`}
                   >
                     <span className={`p-2 rounded-xl ${activeTab === item.id ? 'bg-white/20' : 'bg-transparent'}`}>
@@ -440,11 +440,11 @@ const Profile = () => {
               {/* Internal Background Decor - Pet Themed Patterns */}
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-[#fcd34d]/20 to-transparent rounded-full blur-3xl -mr-20 -mt-20" />
-                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-[#86efac]/20 to-transparent rounded-full blur-3xl -ml-20 -mb-20" />
+                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-[#205EA9]/20 to-transparent rounded-full blur-3xl -ml-20 -mb-20" />
 
                 {/* Floating Paw Prints (Moved Inside) */}
                 <PawPrint className="absolute top-10 right-10 text-[#fcd34d]/30 w-14 h-14 rotate-12 animate-float" />
-                <PawPrint className="absolute bottom-20 left-10 text-[#86efac]/30 w-20 h-20 -rotate-12 animate-float-delayed" />
+                <PawPrint className="absolute bottom-20 left-10 text-[#205EA9]/30 w-20 h-20 -rotate-12 animate-float-delayed" />
                 <BoneIcon className="absolute top-1/2 left-[10%] text-[#fdba74]/20 w-10 h-10 rotate-45 animate-pulse-slow" />
               </div>
               {/* Content Header Image/Banner */}

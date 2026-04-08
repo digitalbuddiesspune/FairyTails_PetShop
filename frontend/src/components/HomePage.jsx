@@ -9,7 +9,7 @@ const categoryColors = {
   'toys': 'bg-blue-100',
   'accessories': 'bg-rose-100',
   'grooming-and-essential': 'bg-cyan-100',
-  'health-and-supplement': 'bg-green-100',
+  'health-and-supplement': 'bg-blue-100',
   'beds-and-house': 'bg-pink-100',
 };
 
@@ -138,6 +138,7 @@ const HomePage = () => {
       id: 'dogs',
       name: 'Dogs',
       title: 'Everything for Your Best Friend',
+      Link:'/category/dogs',
       description: 'From premium dog food to toys and accessories, find everything your canine companion needs. We carry top brands and vet-recommended products to keep your dog healthy, happy, and well-groomed.',
       features: ['Premium dog food & treats', 'Durable chew & fetch toys', 'Comfortable collars & leashes', 'Grooming essentials'],
       color: 'bg-amber-50',
@@ -151,6 +152,7 @@ const HomePage = () => {
       id: 'cats',
       name: 'Cats',
       title: 'Purr-fect Products for Your Feline',
+      Link:'/category/cats',
       description: 'Explore our curated collection of cat essentials. From nutritious meals and interactive toys to cozy beds and scratching posts, we have everything to keep your cat content and entertained.',
       features: ['Nutritious cat food & treats', 'Interactive & feather toys', 'Scratching posts & trees', 'Litter & hygiene products'],
       color: 'bg-purple-50',
@@ -165,6 +167,7 @@ const HomePage = () => {
       name: 'Toys',
       title: 'Endless Fun & Entertainment',
       description: 'Keep your pets active and entertained with our exciting range of toys. From interactive puzzles to squeaky toys, we have something to delight every pet personality.',
+      Link:'/category/toys',
       features: ['Safe & durable materials', 'Interactive designs', 'Mental stimulation toys', 'Variety for all pet sizes'],
       color: 'bg-blue-50',
       accentColor: 'bg-blue-500',
@@ -178,6 +181,7 @@ const HomePage = () => {
       name: 'Accessories',
       title: 'Style Meets Functionality',
       description: 'Discover our collection of pet accessories including collars, leashes, bowls, carriers, and clothing. Designed for safety, comfort, and style for your furry companions.',
+      Link:'/category/accessories',
       features: ['Adjustable collars & leashes', 'Travel-friendly carriers', 'Stylish pet clothing', 'Durable bowls & feeders'],
       color: 'bg-rose-50',
       accentColor: 'bg-rose-500',
@@ -191,6 +195,7 @@ const HomePage = () => {
       name: 'Grooming & Essential',
       title: 'Keep Them Clean & Fresh',
       description: 'Pamper your pets with our professional-grade grooming products. From gentle shampoos and conditioners to brushes and nail care, everything you need to keep your pet looking their best.',
+      Link:'/category/grooming-essential',
       features: ['Natural shampoos & conditioners', 'Professional brushes & combs', 'Nail clippers & grinders', 'Dental care products'],
       color: 'bg-cyan-50',
       accentColor: 'bg-cyan-500',
@@ -204,10 +209,11 @@ const HomePage = () => {
       name: 'Health & Supplement',
       title: 'Wellness from the Inside Out',
       description: 'Support your pet\'s overall health with our range of veterinary-approved supplements and health products. From vitamins and joint support to digestive aids, help your pets thrive at every life stage.',
+      Link:'/category/health-and-supplement',
       features: ['Vet-approved formulas', 'Joint & mobility support', 'Skin & coat supplements', 'Digestive health boosters'],
-      color: 'bg-green-50',
-      accentColor: 'bg-green-500',
-      textColor: 'text-green-600',
+      color: 'bg-blue-50',
+      accentColor: 'bg-blue-500',
+      textColor: 'text-blue-600',
       images: [
         'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770974498/Untitled_1080_x_1080_px_1600_x_900_px_csu6c4.svg',
       ]
@@ -217,6 +223,7 @@ const HomePage = () => {
       name: 'Beds & House',
       title: 'Cozy Spaces for Your Companions',
       description: 'Create the perfect resting spot for your pets with our comfortable beds, houses, and crates. Give them a cozy place they can call their own for relaxation and peaceful sleep.',
+      Link:'/category/beds-and-house',
       features: ['Orthopedic & memory foam beds', 'Easy to clean & maintain', 'Multiple sizes available', 'Weatherproof outdoor houses'],
       color: 'bg-pink-50',
       accentColor: 'bg-pink-500',
@@ -376,12 +383,12 @@ const HomePage = () => {
                     </li>
                   ))}
                 </ul>
-                <a
-                  href={`#shop-${section.id}`}
-                  className={`inline-block px-8 py-3 rounded-full font-semibold ${section.accentColor} text-white hover:opacity-90 transition-opacity shadow-lg`}
-                >
-                  Shop {section.name} →
-                </a>
+                <Link
+  to={section.Link}
+  className={`inline-block px-8 py-3 rounded-full font-semibold ${section.accentColor} text-white hover:opacity-90 transition-opacity shadow-lg`}
+>
+  Shop {section.name} →
+</Link>
               </div>
 
               {/* Images Side */}
@@ -500,21 +507,21 @@ const HomePage = () => {
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-20 h-20 bg-[#a3e635] rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-20 h-20 bg-[#205EA9] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-4xl">✓</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Quality Products</h3>
               <p className="text-gray-600">We source only the best products from trusted brands for your beloved pets.</p>
             </div>
             <div className="text-center">
-              <div className="w-20 h-20 bg-[#a3e635] rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-20 h-20 bg-[#205EA9] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-4xl">💚</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Pet-First Approach</h3>
               <p className="text-gray-600">Every decision we make is guided by what's best for your pet's health and happiness.</p>
             </div>
             <div className="text-center">
-              <div className="w-20 h-20 bg-[#a3e635] rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-20 h-20 bg-[#205EA9] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-4xl">🌟</span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Expert Support</h3>

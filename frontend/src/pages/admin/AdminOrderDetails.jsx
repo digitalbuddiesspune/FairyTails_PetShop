@@ -8,13 +8,13 @@ const STATUS_CONFIG = {
   placed:     { label: 'Confirm',    color: 'bg-blue-100 text-blue-700',   selectBg: 'bg-blue-50 border-blue-300 text-blue-700' },
   processing: { label: 'Processing', color: 'bg-yellow-100 text-yellow-700', selectBg: 'bg-yellow-50 border-yellow-300 text-yellow-700' },
   shipped:    { label: 'Shipped',    color: 'bg-indigo-100 text-indigo-700', selectBg: 'bg-indigo-50 border-indigo-300 text-indigo-700' },
-  delivered:  { label: 'Delivered',  color: 'bg-green-100 text-green-700',  selectBg: 'bg-green-50 border-green-300 text-green-700' },
+  delivered:  { label: 'Delivered',  color: 'bg-blue-100 text-blue-700',  selectBg: 'bg-blue-50 border-blue-300 text-blue-700' },
   cancelled:  { label: 'Cancelled',  color: 'bg-red-100 text-red-700',     selectBg: 'bg-red-50 border-red-300 text-red-700' },
 };
 
 const PAYMENT_CONFIG = {
   unpaid: { label: 'Unpaid', selectBg: 'bg-orange-50 border-orange-300 text-orange-700' },
-  paid:   { label: 'Paid',   selectBg: 'bg-green-50 border-green-300 text-green-700' },
+  paid:   { label: 'Paid',   selectBg: 'bg-blue-50 border-blue-300 text-blue-700' },
   refund: { label: 'Refunded', selectBg: 'bg-purple-50 border-purple-300 text-purple-700' },
   failed: { label: 'Failed', selectBg: 'bg-red-50 border-red-300 text-red-700' },
 };
@@ -230,12 +230,12 @@ const AdminOrderDetails = () => {
             return (
               <React.Fragment key={s}>
                 {i > 0 && (
-                  <div className={`h-0.5 flex-1 min-w-0 shrink mt-[0.85rem] -mx-0.5 ${rightDone && !isCancelled ? 'bg-green-400' : 'bg-gray-200'}`} />
+                  <div className={`h-0.5 flex-1 min-w-0 shrink mt-[0.85rem] -mx-0.5 ${rightDone && !isCancelled ? 'bg-blue-400' : 'bg-gray-200'}`} />
                 )}
                 <div className="flex flex-col items-center flex-1 min-w-0 shrink-0">
                   <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs border-2 transition-all shrink-0 ${
                     done && !isCancelled
-                      ? 'bg-green-500 border-green-500 text-white'
+                      ? 'bg-blue-500 border-blue-500 text-white'
                       : isCancelled && order.status === 'cancelled'
                         ? 'bg-red-500 border-red-500 text-white'
                         : 'bg-gray-100 border-gray-200 text-gray-300'
@@ -298,7 +298,7 @@ const AdminOrderDetails = () => {
               }
               return (
                 <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
-                  order.paymentStatus === 'paid' ? 'bg-green-100 text-green-600' : 
+                  order.paymentStatus === 'paid' ? 'bg-blue-100 text-blue-600' : 
                   order.paymentStatus === 'refund' ? 'bg-purple-100 text-purple-600' :
                   'bg-orange-100 text-orange-600'
                 }`}>
@@ -416,8 +416,8 @@ const AdminOrderDetails = () => {
           </div>
           {(order.discount || 0) > 0 && (
             <div className="flex justify-between">
-              <span className="text-green-500">Discount</span>
-              <span className="text-green-500">-₹{(order.discount || 0).toLocaleString()}</span>
+              <span className="text-blue-500">Discount</span>
+              <span className="text-blue-500">-₹{(order.discount || 0).toLocaleString()}</span>
             </div>
           )}
           <div className="flex justify-between">
@@ -430,7 +430,7 @@ const AdminOrderDetails = () => {
               {(order.subtotal || 0) >= 500 ? (
                 <>
                   <span className="text-gray-400 line-through text-xs">₹50</span>
-                  <span className="text-green-600 font-medium text-xs">Free</span>
+                  <span className="text-blue-600 font-medium text-xs">Free</span>
                 </>
               ) : (
                 <span className="text-gray-700">

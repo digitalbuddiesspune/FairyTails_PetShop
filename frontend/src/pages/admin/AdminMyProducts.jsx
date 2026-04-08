@@ -9,7 +9,7 @@ const CATEGORIES = [
   { key: 'food', label: 'Foods', icon: '🍖', endpoint: 'food', color: 'bg-orange-100 border-orange-300 text-orange-700', activeColor: 'bg-orange-500 border-orange-500 text-white shadow-lg shadow-orange-200' },
   { key: 'clothes', label: 'Clothes', icon: '👕', endpoint: 'clothes', color: 'bg-blue-100 border-blue-300 text-blue-700', activeColor: 'bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-200' },
   { key: 'grooming', label: 'Grooming', icon: '✂️', endpoint: 'grooming-essentials', color: 'bg-cyan-100 border-cyan-300 text-cyan-700', activeColor: 'bg-cyan-500 border-cyan-500 text-white shadow-lg shadow-cyan-200' },
-  { key: 'health', label: 'Health', icon: '💊', endpoint: 'health-supplements', color: 'bg-green-100 border-green-300 text-green-700', activeColor: 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-200' },
+  { key: 'health', label: 'Health', icon: '💊', endpoint: 'health-supplements', color: 'bg-blue-100 border-blue-300 text-blue-700', activeColor: 'bg-blue-500 border-blue-500 text-white shadow-lg shadow-blue-200' },
   { key: 'houses', label: 'Houses', icon: '🏠', endpoint: 'houses', color: 'bg-purple-100 border-purple-300 text-purple-700', activeColor: 'bg-purple-500 border-purple-500 text-white shadow-lg shadow-purple-200' },
   { key: 'toys', label: 'Toys', icon: '🧸', endpoint: 'toys', color: 'bg-yellow-100 border-yellow-300 text-yellow-700', activeColor: 'bg-yellow-500 border-yellow-500 text-white shadow-lg shadow-yellow-200' },
   { key: 'accessories', label: 'Accessories', icon: '🎀', endpoint: 'accessories', color: 'bg-pink-100 border-pink-300 text-pink-700', activeColor: 'bg-pink-500 border-pink-500 text-white shadow-lg shadow-pink-200' },
@@ -402,7 +402,7 @@ const AdminMyProducts = () => {
                       <p className="font-semibold text-gray-900 text-sm leading-tight truncate">{getName(product)}</p>
                       <div className="flex flex-wrap items-center gap-1.5 mt-1">
                         {getBrand(product) && <span className="text-[11px] text-gray-500">{getBrand(product)}</span>}
-                        {getPetCategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700">Category: {getPetCategory(product)}</span>}
+                        {getPetCategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[#205EA9]/10 text-[#205EA9]">Category: {getPetCategory(product)}</span>}
                         {getProductSubcategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600">Sub: {getProductSubcategory(product)}</span>}
                         {selectedKey === 'all' && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">{product._catLabel}</span>}
                       </div>
@@ -418,7 +418,7 @@ const AdminMyProducts = () => {
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                     <div className="flex items-center gap-2">
                       {stock !== '—' ? (
-                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${stock > 10 ? 'bg-green-50 text-green-700' : stock > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${stock > 10 ? 'bg-blue-50 text-blue-700' : stock > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
                           {stock} {stock === 0 ? '(Out)' : 'in stock'}
                         </span>
                       ) : <span className="text-xs text-gray-400">—</span>}
@@ -470,7 +470,7 @@ const AdminMyProducts = () => {
                               <p className="font-semibold text-gray-900 text-xs truncate max-w-[200px]">{getName(product)}</p>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 {getBrand(product) && <span className="text-[10px] text-gray-500">{getBrand(product)}</span>}
-                                {getPetCategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-emerald-50 text-emerald-700">Category: {getPetCategory(product)}</span>}
+                                {getPetCategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-[#205EA9]/10 text-[#205EA9]">Category: {getPetCategory(product)}</span>}
                                 {getProductSubcategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-blue-50 text-blue-600">Sub: {getProductSubcategory(product)}</span>}
                               </div>
                             </div>
@@ -487,7 +487,7 @@ const AdminMyProducts = () => {
                         <td className="px-3 py-2"><p className="text-xs text-gray-600">{getExpiry(product)}</p></td>
                         <td className="px-3 py-2">
                           {stock === '—' ? <span className="text-xs text-gray-400">—</span> : (
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${stock > 10 ? 'bg-green-50 text-green-700' : stock > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${stock > 10 ? 'bg-blue-50 text-blue-700' : stock > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
                               {stock} {stock === 0 ? '(Out)' : 'in stock'}
                             </span>
                           )}
@@ -547,7 +547,7 @@ const AdminMyProducts = () => {
       {/* Delete Success Toast */}
       {deleteSuccess && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[80] animate-slideDown">
-          <div className="bg-green-600 text-white px-6 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-semibold text-sm">
+          <div className="bg-blue-600 text-white px-6 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-semibold text-sm">
             <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
             </div>
@@ -653,12 +653,12 @@ const ProductDetailModal = ({ product, onClose }) => {
     }
 
     // Boolean
-    if (typeof val === 'boolean') return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${val ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>{val ? 'Yes' : 'No'}</span>;
+    if (typeof val === 'boolean') return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${val ? 'bg-blue-50 text-blue-700' : 'bg-red-50 text-red-700'}`}>{val ? 'Yes' : 'No'}</span>;
 
     // Number
     if (typeof val === 'number') {
       if (key.toLowerCase().includes('price') || key.toLowerCase().includes('mrp')) return <span className="font-semibold text-gray-900">₹{val.toLocaleString('en-IN')}</span>;
-      if (key.toLowerCase().includes('stock')) return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${val > 10 ? 'bg-green-50 text-green-700' : val > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>{val} {val === 0 ? '(Out of stock)' : 'in stock'}</span>;
+      if (key.toLowerCase().includes('stock')) return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${val > 10 ? 'bg-blue-50 text-blue-700' : val > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>{val} {val === 0 ? '(Out of stock)' : 'in stock'}</span>;
       return <span>{val}</span>;
     }
 
@@ -1035,8 +1035,8 @@ const EditProductModal = ({ product, catKey, onClose, onSuccess }) => {
         {/* Scrollable form body */}
         <form onSubmit={handleSave} className="px-5 py-4 sm:px-6 sm:py-5 space-y-4 overflow-y-auto flex-1">
           {error && <div className="bg-red-50 text-red-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-red-200">{error}</div>}
-          {success && <div className="bg-green-50 text-green-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-green-200">{success}</div>}
-          {uploadSuccess && <div className="bg-green-50 text-green-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-green-200">{uploadSuccess}</div>}
+          {success && <div className="bg-blue-50 text-blue-600 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-blue-200">{success}</div>}
+          {uploadSuccess && <div className="bg-blue-50 text-blue-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-medium border border-blue-200">{uploadSuccess}</div>}
 
           {/* ─── FOOD FIELDS ─── */}
           {catKey === 'food' && <>

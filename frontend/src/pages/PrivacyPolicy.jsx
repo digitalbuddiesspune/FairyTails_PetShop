@@ -19,7 +19,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#65a30d] to-[#84cc16] py-10 md:py-14">
+      <div className="bg-gradient-to-r from-[#205EA9] to-[#205EA9] py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-6">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,14 +46,14 @@ const PrivacyPolicy = () => {
                   <a
                     key={section.id}
                     href={`#${section.id}`}
-                    className="block px-3 py-2 text-sm text-gray-600 hover:text-[#65a30d] hover:bg-[#f0fdf4] rounded-lg transition-colors"
+                    className="block px-3 py-2 text-sm text-gray-600 hover:text-[#205EA9] hover:bg-[#eff6ff] rounded-lg transition-colors"
                   >
                     {section.title}
                   </a>
                 ))}
               </nav>
               <div className="mt-6 pt-6 border-t border-gray-100">
-                <Link to="/contact" className="flex items-center gap-2 text-sm text-[#65a30d] hover:underline">
+                <Link to="/contact" className="flex items-center gap-2 text-sm text-[#205EA9] hover:underline">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -69,7 +69,7 @@ const PrivacyPolicy = () => {
               {/* Introduction */}
               <section id="introduction" className="scroll-mt-24">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-[#f0fdf4] rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-[#eff6ff] rounded-xl flex items-center justify-center">
                     <span className="text-xl">👋</span>
                   </div>
                   <h2 className="text-2xl font-bold text-gray-900">Introduction</h2>
@@ -102,7 +102,7 @@ const PrivacyPolicy = () => {
                       <ul className="space-y-2">
                         {['Create an account', 'Make a purchase', 'Subscribe to newsletter', 'Contact support', 'Participate in promotions'].map((item) => (
                           <li key={item} className="flex items-center gap-2 text-sm text-gray-600">
-                            <svg className="w-4 h-4 text-[#65a30d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4 text-[#205EA9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                             </svg>
                             {item}
@@ -162,8 +162,8 @@ const PrivacyPolicy = () => {
                   <h2 className="text-2xl font-bold text-gray-900">Information Sharing</h2>
                 </div>
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                  <div className="bg-[#f0fdf4] border border-[#bbf7d0] rounded-xl p-4 mb-6">
-                    <p className="text-[#166534] font-medium flex items-center gap-2">
+                  <div className="bg-[#eff6ff] border border-[#bfdbfe] rounded-xl p-4 mb-6">
+                    <p className="text-[#1e3a8a] font-medium flex items-center gap-2">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
@@ -178,7 +178,7 @@ const PrivacyPolicy = () => {
                       { title: 'Business Transfers', desc: 'In connection with a merger, acquisition, or sale of assets' },
                     ].map((item) => (
                       <div key={item.title} className="flex gap-3">
-                        <div className="w-2 h-2 bg-[#65a30d] rounded-full mt-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-[#205EA9] rounded-full mt-2 flex-shrink-0"></div>
                         <div>
                           <span className="font-medium text-gray-900">{item.title}:</span>
                           <span className="text-gray-600 ml-1">{item.desc}</span>
@@ -252,16 +252,16 @@ const PrivacyPolicy = () => {
                   </div>
                   <h2 className="text-2xl font-bold text-gray-900">Contact Us</h2>
                 </div>
-                <div className="bg-gradient-to-r from-[#65a30d] to-[#84cc16] rounded-2xl p-6 md:p-8 text-white">
+                <div className="bg-gradient-to-r from-[#205EA9] to-[#205EA9] rounded-2xl p-6 md:p-8 text-white">
                   <p className="text-white/90 mb-6">Have questions about our privacy practices? We're here to help.</p>
                   <div className="grid sm:grid-cols-3 gap-4">
                     <a href="mailto:privacy@fairytails.com" className="bg-white/20 hover:bg-white/30 rounded-xl p-4 text-center transition-colors">
                       <span className="text-2xl block mb-2">📧</span>
                       <span className="text-sm">privacy@fairytails.com</span>
                     </a>
-                    <a href="tel:+919876543210" className="bg-white/20 hover:bg-white/30 rounded-xl p-4 text-center transition-colors">
+                    <a href="tel:+919021785257" className="bg-white/20 hover:bg-white/30 rounded-xl p-4 text-center transition-colors">
                       <span className="text-2xl block mb-2">📞</span>
-                      <span className="text-sm">+91 98765 43210</span>
+                      <span className="text-sm">+91 90217 85257</span>
                     </a>
                     <div className="bg-white/20 rounded-xl p-4 text-center">
                       <span className="text-2xl block mb-2">📍</span>

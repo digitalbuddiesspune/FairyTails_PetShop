@@ -138,7 +138,7 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
       {/* Content Section */}
       <div className="p-3 sm:p-4">
         {/* Brand */}
-        <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">
+        <p className="text-xs font-semibold text-[#205EA9] uppercase tracking-wide mb-1">
           {product.brand}
         </p>
 
@@ -186,20 +186,14 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-2 mt-1">
-          <button
-            onClick={() => navigate(`/product/${product._id}?type=/food`)}
-            className="flex-1 bg-[#205ea9] hover:bg-[#1a4a7a] text-white font-semibold py-2.5 rounded-xl active:scale-[0.98] transition-all duration-200 text-sm"
-          >
-            View Details
-          </button>
+        <div className="mt-2 flex justify-center">
           <button
             onClick={handleAddToCart}
             disabled={addingToCart}
-            className="px-4 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-200 active:scale-[0.98] transition-all duration-200 text-sm border border-gray-200 disabled:opacity-50"
+            className="w-full max-w-[240px] bg-[#205EA9] text-white font-semibold py-3.5 rounded-xl hover:bg-[#205EA9] active:scale-[0.98] transition-all duration-200 text-base disabled:opacity-50"
             title="Add to Cart"
           >
-            {addingToCart ? '...' : '🛒'}
+            {addingToCart ? 'Adding...' : '🛒 Add to Cart'}
           </button>
         </div>
       </div>
@@ -376,7 +370,7 @@ const CategoryProducts = () => {
   if (categorySlug) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-2 border-[#65a30d] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#205EA9] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -433,7 +427,7 @@ const CategoryProducts = () => {
                 onClick={() => handleSubCategoryChange(sub)}
                 className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
                   activeSubCategory === sub
-                    ? 'bg-[#65a30d] text-white shadow-md shadow-green-200'
+                    ? 'bg-[#205EA9] text-white shadow-md shadow-blue-200'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -454,7 +448,7 @@ const CategoryProducts = () => {
           {/* Loading State */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mb-4"></div>
+              <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mb-4"></div>
               <p className="text-gray-500 text-lg">Loading products...</p>
             </div>
           )}
@@ -467,7 +461,7 @@ const CategoryProducts = () => {
               <p className="text-gray-500 mb-6 text-center max-w-md">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-[#65a30d] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#4d7c0f] transition-colors"
+                className="bg-[#205EA9] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1d4f8f] transition-colors"
               >
                 Try Again
               </button>
@@ -495,7 +489,7 @@ const CategoryProducts = () => {
                 )}
                 <Link
                   to="/"
-                  className="bg-[#65a30d] text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-[#4d7c0f] transition-colors"
+                  className="bg-[#205EA9] text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-[#1d4f8f] transition-colors"
                 >
                   Back to Home
                 </Link>

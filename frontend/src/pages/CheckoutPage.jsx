@@ -571,7 +571,7 @@ const CheckoutPage = () => {
                 <div className="border-t border-gray-100 pt-4 space-y-2.5 text-sm">
                  
                   {savings > 0 && (
-                    <div className="flex justify-between text-green-600">
+                    <div className="flex justify-between text-blue-600">
                       <span>Discount</span>
                       <span>- ₹{savings.toLocaleString()}</span>
                     </div>
@@ -590,7 +590,7 @@ const CheckoutPage = () => {
                       {subtotal >= 500 ? (
                         <>
                           <span className="text-gray-400 line-through text-xs">₹50</span>
-                          <span className="text-green-600 font-medium">Free</span>
+                          <span className="text-blue-600 font-medium">Free</span>
                         </>
                       ) : (
                         <span>₹{deliveryCharge}</span>
@@ -605,7 +605,7 @@ const CheckoutPage = () => {
                     <span>₹{total.toLocaleString()}</span>
                   </div>
                   {savings > 0 && (
-                    <p className="text-xs text-green-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
+                    <p className="text-xs text-blue-600 mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
                   )}
                 </div>
 
@@ -613,7 +613,7 @@ const CheckoutPage = () => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="hidden lg:block w-full mt-6 bg-[#2f5a87] text-white font-bold py-3.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm disabled:opacity-60"
+                  className="hidden lg:block w-full mt-6 bg-[#2f5a87] text-white font-bold py-3.5 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] active:scale-[0.98] transition-all text-sm disabled:opacity-60"
                 >
                   {submitting ? 'Placing Order...' : 'Place Order'}
                 </button>
@@ -631,8 +631,8 @@ const CheckoutPage = () => {
       {orderSuccess && (
         <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center px-4">
           <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl animate-popIn">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-5">
+              <svg className="w-10 h-10 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>

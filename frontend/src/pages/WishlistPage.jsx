@@ -207,7 +207,7 @@ const WishlistPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-500 text-lg">Loading your wishlist...</p>
         </div>
       </div>
@@ -221,7 +221,7 @@ const WishlistPage = () => {
           <p className="text-5xl mb-4">⚠️</p>
           <h3 className="text-xl font-bold text-gray-800 mb-2">Something went wrong</h3>
           <p className="text-gray-500 mb-6">{error}</p>
-          <button onClick={fetchWishlist} className="bg-[#65a30d] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#4d7c0f]">
+          <button onClick={fetchWishlist} className="bg-[#205EA9] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1d4f8f]">
             Try Again
           </button>
         </div>
@@ -257,7 +257,7 @@ const WishlistPage = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Your wishlist is empty</h3>
               <p className="text-gray-500 mb-6">Browse our collection and add products you love!</p>
-              <Link to="/" className="inline-block bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all">
+              <Link to="/" className="inline-block bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all">
                 Explore Products
               </Link>
             </div>
@@ -316,9 +316,9 @@ const WishlistPage = () => {
 
                     {/* Content */}
                     <div className="p-3 sm:p-4">
-                      <p className="text-xs font-semibold text-[#65a30d] uppercase tracking-wide mb-1">{product.brand}</p>
+                      <p className="text-xs font-semibold text-[#205EA9] uppercase tracking-wide mb-1">{product.brand}</p>
                       <Link to={`/product/${product._id}`}>
-                        <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#65a30d] transition-colors">
+                        <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#205EA9] transition-colors">
                           {product.productName}
                         </h3>
                       </Link>
@@ -340,7 +340,7 @@ const WishlistPage = () => {
                         <button
                           onClick={() => addToCart(product._id)}
                           disabled={isAdding}
-                          className="flex-1 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-semibold py-2.5 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] active:scale-[0.98] transition-all text-sm disabled:opacity-50"
+                          className="flex-1 bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white font-semibold py-2.5 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] active:scale-[0.98] transition-all text-sm disabled:opacity-50"
                         >
                           {isAdding ? 'Adding...' : '🛒 Add to Cart'}
                         </button>

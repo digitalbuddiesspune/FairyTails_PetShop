@@ -263,7 +263,7 @@ const InvoicePage = () => {
                             {subtotal >= 500 ? (
                               <div className="flex items-center justify-end gap-2">
                                 <span className="text-gray-400 line-through text-xs">₹50.00</span>
-                                <span className="text-green-600 font-medium">Free</span>
+                                <span className="text-blue-600 font-medium">Free</span>
                               </div>
                             ) : (
                               delivery === 0 ? 'Free' : `₹${delivery.toFixed(2)}`

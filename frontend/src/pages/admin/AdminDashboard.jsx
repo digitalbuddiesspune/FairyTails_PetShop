@@ -250,7 +250,7 @@ const AdminDashboard = () => {
             placed: 'bg-blue-100 text-blue-700',
             processing: 'bg-yellow-100 text-yellow-700',
             shipped: 'bg-indigo-100 text-indigo-700',
-            delivered: 'bg-green-100 text-green-700',
+            delivered: 'bg-blue-100 text-blue-700',
             cancelled: 'bg-red-100 text-red-700'
         };
         return (
@@ -270,7 +270,7 @@ const AdminDashboard = () => {
         }
 
         const map = {
-            paid: 'bg-green-100 text-green-700',
+            paid: 'bg-blue-100 text-blue-700',
             unpaid: 'bg-yellow-100 text-yellow-700',
             refund: 'bg-purple-100 text-purple-700',
         };
@@ -322,7 +322,7 @@ const AdminDashboard = () => {
                     title="Today's Delivered"
                     value={stats.todayDelivered}
                     icon={<CheckCircle className="w-6 h-6 text-white" />}
-                    color="bg-gradient-to-r from-emerald-500 to-emerald-600"
+                    color="bg-gradient-to-r from-[#205EA9] to-[#205EA9]"
                     onClick={() => handleStatCardClick('todayDelivered')}
                 />
                 <StatCard
@@ -361,8 +361,8 @@ const AdminDashboard = () => {
                             ₹{chartData.reduce((acc, curr) => acc + curr.revenue, 0).toLocaleString()}
                         </h3>
                     </div>
-                    <div className="p-3 bg-green-50 rounded-xl">
-                        <CreditCard className="w-6 h-6 text-green-600" />
+                    <div className="p-3 bg-blue-50 rounded-xl">
+                        <CreditCard className="w-6 h-6 text-blue-600" />
                     </div>
                 </div>
             </div>
@@ -410,7 +410,7 @@ const AdminDashboard = () => {
                             <YAxis
                                 yAxisId="right"
                                 orientation="right"
-                                stroke="#10B981"
+                                stroke="#205EA9"
                                 axisLine={false}
                                 tickLine={false}
                             />
@@ -419,7 +419,7 @@ const AdminDashboard = () => {
                                 cursor={{ fill: '#F3F4F6' }}
                             />
                             <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                            <Bar yAxisId="right" dataKey="orders" name="Total Orders" fill="#10B981" radius={[4, 4, 0, 0]} barSize={30} />
+                            <Bar yAxisId="right" dataKey="orders" name="Total Orders" fill="#205EA9" radius={[4, 4, 0, 0]} barSize={30} />
                             <Bar yAxisId="left" dataKey="revenue" name="Total Sales Amount" fill="#8B5CF6" radius={[4, 4, 0, 0]} barSize={30} />
                         </BarChart>
                     </ResponsiveContainer>

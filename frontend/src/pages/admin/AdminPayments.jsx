@@ -114,7 +114,7 @@ const AdminPayments = () => {
     
     const status = order.paymentStatus;
     if (status === 'paid') {
-      return <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">Paid</span>;
+      return <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">Paid</span>;
     } else if (status === 'unpaid') {
       return <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Unpaid</span>;
     } else if (status === 'refund') {
@@ -163,7 +163,7 @@ const AdminPayments = () => {
         <button 
           onClick={downloadXLS}
           disabled={filteredOrders.length === 0}
-          className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Download size={16} />
           Download XLS
@@ -178,7 +178,7 @@ const AdminPayments = () => {
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500 mb-1">PAID REVENUE</p>
-          <h3 className="text-3xl font-bold text-green-600">₹{paidRevenue.toLocaleString()}</h3>
+          <h3 className="text-3xl font-bold text-blue-600">₹{paidRevenue.toLocaleString()}</h3>
         </div>
       </div>
 

@@ -156,7 +156,7 @@ const SignUp = () => {
     const percentage = (passed / checks.length) * 100;
     
     let color = 'bg-red-400';
-    if (percentage >= 80) color = 'bg-green-500';
+    if (percentage >= 80) color = 'bg-blue-500';
     else if (percentage >= 60) color = 'bg-yellow-400';
     else if (percentage >= 40) color = 'bg-orange-400';
 
@@ -222,7 +222,7 @@ const SignUp = () => {
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.name ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm`}
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.name ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm`}
                 placeholder="Name Surname"
               />
               {fieldErrors.name && (
@@ -244,7 +244,7 @@ const SignUp = () => {
                     setFieldErrors(prev => ({ ...prev, phone: '' }));
                   }
                 }}
-                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.phone ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm`}
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.phone ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm`}
                 placeholder="9876543210"
               />
               {fieldErrors.phone && (
@@ -260,7 +260,7 @@ const SignUp = () => {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.email ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm`}
+              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.email ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm`}
               placeholder="Enter your email"
             />
             {fieldErrors.email && (
@@ -276,7 +276,7 @@ const SignUp = () => {
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
-                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.password ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm pr-12`}
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.password ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm pr-12`}
                 placeholder="Create password"
               />
               <button
@@ -300,7 +300,7 @@ const SignUp = () => {
               type={showPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={handleChange}
-              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.confirmPassword ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#65a30d] focus:border-transparent outline-none transition-all text-sm`}
+              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.confirmPassword ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm`}
               placeholder="Confirm password"
             />
             {fieldErrors.confirmPassword && (
@@ -311,7 +311,7 @@ const SignUp = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#65a30d] hover:bg-[#4d7c0f] text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mt-2"
+            className="w-full py-3 bg-[#205EA9] hover:bg-[#1d4f8f] text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mt-2"
           >
             {loading ? (
               <>
@@ -327,7 +327,7 @@ const SignUp = () => {
         {/* Sign In Link */}
         <p className="text-center text-gray-600 mt-5">
           Already have an account?{' '}
-          <Link to="/signin" className="font-semibold text-[#65a30d] hover:text-[#4d7c0f]">
+          <Link to="/signin" className="font-semibold text-[#205EA9] hover:text-[#1d4f8f]">
             Sign In
           </Link>
         </p>
@@ -337,7 +337,7 @@ const SignUp = () => {
 };
 
 const CheckItem = ({ label, passed }) => (
-  <div className={`flex items-center gap-1 text-xs ${passed ? 'text-green-600' : 'text-gray-400'}`}>
+  <div className={`flex items-center gap-1 text-xs ${passed ? 'text-blue-600' : 'text-gray-400'}`}>
     <span>{passed ? '✓' : '○'}</span>
     <span>{label}</span>
   </div>

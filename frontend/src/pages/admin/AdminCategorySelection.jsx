@@ -4,7 +4,7 @@ const categories = [
     { id: 'Food', label: 'Foods', icon: '🍖', color: 'bg-orange-100 text-orange-600', endpoint: 'food', type: 'food' },
     { id: 'Clothes', label: 'Clothes', icon: '👕', color: 'bg-blue-100 text-blue-600', endpoint: 'clothes', type: 'clothes' },
     { id: 'Acc', label: 'Accessories', icon: '🎀', color: 'bg-pink-100 text-pink-600', endpoint: 'accessories', type: 'accessory' },
-    { id: 'Toy', label: 'Toys', icon: '🎾', color: 'bg-green-100 text-green-600', endpoint: 'toys', type: 'toy' },
+    { id: 'Toy', label: 'Toys', icon: '🎾', color: 'bg-blue-100 text-blue-600', endpoint: 'toys', type: 'toy' },
     { id: 'House', label: 'Houses', icon: '🏠', color: 'bg-purple-100 text-purple-600', endpoint: 'houses', type: 'house' },
     { id: 'Grooming', label: 'Grooming', icon: '🛁', color: 'bg-cyan-100 text-cyan-600', endpoint: 'grooming-essentials', type: 'grooming' },
     { id: 'Health', label: 'Health', icon: '💊', color: 'bg-red-100 text-red-600', endpoint: 'health-supplements', type: 'health' },

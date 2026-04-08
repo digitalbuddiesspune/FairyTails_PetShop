@@ -41,7 +41,7 @@ const CatalogPage = () => {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -108,7 +108,7 @@ const CatalogPage = () => {
                                     <li>
                                         <button
                                             onClick={() => handleNavigate(`/category/${category.slug}`)}
-                                            className="w-full flex items-center gap-3 py-2 text-sm text-gray-600 hover:text-[#65a30d] text-left transition-colors font-medium border-b border-gray-100 last:border-0"
+                                            className="w-full flex items-center gap-3 py-2 text-sm text-gray-600 hover:text-[#205EA9] text-left transition-colors font-medium border-b border-gray-100 last:border-0"
                                         >
                                             <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
                                             All {category.name}
@@ -118,7 +118,7 @@ const CatalogPage = () => {
                                         <li key={sIdx}>
                                             <button
                                                 onClick={() => handleNavigate(`/category/${category.slug}?subCategory=${encodeURIComponent(sub.name)}`)}
-                                                className="w-full flex items-center gap-3 py-2 text-sm text-gray-600 hover:text-[#65a30d] text-left transition-colors font-medium border-b border-gray-100 last:border-0"
+                                                className="w-full flex items-center gap-3 py-2 text-sm text-gray-600 hover:text-[#205EA9] text-left transition-colors font-medium border-b border-gray-100 last:border-0"
                                             >
                                                 <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
                                                 {sub.name}

@@ -17,7 +17,7 @@ const STATUS_CONFIG = {
 
   shipped:    { label: 'Shipped',    color: 'bg-indigo-100 text-indigo-700' },
 
-  delivered:  { label: 'Delivered',  color: 'bg-green-100 text-green-700' },
+  delivered:  { label: 'Delivered',  color: 'bg-blue-100 text-blue-700' },
 
   cancelled:  { label: 'Cancelled',  color: 'bg-red-100 text-red-700' },
 
@@ -141,7 +141,7 @@ const OrderDetailsPage = () => {
 
       <div className="min-h-screen bg-white flex items-center justify-center">
 
-        <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin" />
+        <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin" />
 
       </div>
 
@@ -222,7 +222,7 @@ const OrderDetailsPage = () => {
             </div>
             <button
               onClick={() => window.open(`/invoice/${order._id}`, '_blank')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#205ea9] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#65a30d]/25 hover:from-[#4d7c0f] hover:to-[#3f6212] hover:shadow-[#65a30d]/30 active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#205ea9] text-white text-sm font-bold rounded-xl shadow-lg shadow-[#205EA9]/25 hover:from-[#1d4f8f] hover:to-[#203D5B] hover:shadow-[#205EA9]/30 active:scale-[0.98] transition-all"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -241,11 +241,11 @@ const OrderDetailsPage = () => {
                   return (
                     <React.Fragment key={s}>
                       {i > 0 && (
-                        <div className={`h-0.5 flex-1 mx-1 rounded ${done ? 'bg-green-400' : 'bg-gray-200'}`} />
+                        <div className={`h-0.5 flex-1 mx-1 rounded ${done ? 'bg-blue-400' : 'bg-gray-200'}`} />
                       )}
                       <div className="flex flex-col items-center shrink-0 w-[80px]">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-base border-2 transition-all ${
-                          done ? 'bg-green-500 border-green-500 text-white' : 'bg-gray-100 border-gray-200 text-gray-300'
+                          done ? 'bg-blue-500 border-blue-500 text-white' : 'bg-gray-100 border-gray-200 text-gray-300'
                         }`}>
                           {done ? (
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
@@ -322,8 +322,8 @@ const OrderDetailsPage = () => {
               </div>
               {(order.discount || 0) > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-green-500">Discount</span>
-                  <span className="text-green-500">-₹{(order.discount || 0).toLocaleString()}</span>
+                  <span className="text-blue-500">Discount</span>
+                  <span className="text-blue-500">-₹{(order.discount || 0).toLocaleString()}</span>
                 </div>
               )}
               <div className="flex justify-between">
@@ -336,7 +336,7 @@ const OrderDetailsPage = () => {
                   {(order.subtotal || 0) >= 500 ? (
                     <>
                       <span className="text-gray-400 line-through text-xs">₹50</span>
-                      <span className="text-green-600 font-medium">Free</span>
+                      <span className="text-blue-600 font-medium">Free</span>
                     </>
                   ) : (
                     <span className="text-gray-800">

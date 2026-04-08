@@ -9,7 +9,7 @@ const PRODUCT_CATEGORIES = [
   { key: 'food', label: 'Food', icon: '🍖', endpoint: '/food', color: 'bg-orange-50 border-orange-200 text-orange-700' },
   { key: 'clothes', label: 'Clothes', icon: '👕', endpoint: '/clothes', color: 'bg-pink-50 border-pink-200 text-pink-700' },
   { key: 'grooming', label: 'Grooming', icon: '✂️', endpoint: '/grooming-essentials', color: 'bg-teal-50 border-teal-200 text-teal-700' },
-  { key: 'essentials', label: 'Essentials', icon: '💊', endpoint: '/health-supplements', color: 'bg-green-50 border-green-200 text-green-700' },
+  { key: 'essentials', label: 'Essentials', icon: '💊', endpoint: '/health-supplements', color: 'bg-blue-50 border-blue-200 text-blue-700' },
   { key: 'toys', label: 'Toys', icon: '🧸', endpoint: '/toys', color: 'bg-yellow-50 border-yellow-200 text-yellow-700' },
   { key: 'housing', label: 'Housing', icon: '🏠', endpoint: '/houses', color: 'bg-blue-50 border-blue-200 text-blue-700' },
   { key: 'accessories', label: 'Accessories', icon: '🎀', endpoint: '/accessories', color: 'bg-purple-50 border-purple-200 text-purple-700' },
@@ -439,7 +439,7 @@ const AdminPanel = () => {
 
         <form onSubmit={handleSubmitProduct} className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
           {formError && <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm font-medium border border-red-200">{formError}</div>}
-          {formSuccess && <div className="bg-green-50 text-green-600 px-4 py-3 rounded-xl text-sm font-medium border border-green-200">{formSuccess}</div>}
+          {formSuccess && <div className="bg-blue-50 text-blue-600 px-4 py-3 rounded-xl text-sm font-medium border border-blue-200">{formSuccess}</div>}
 
           {/* Category selector (only when adding new) */}
           {!editingProduct && (
@@ -503,7 +503,7 @@ const AdminPanel = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard Overview</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <StatCard title="Total Users" value={stats.totalUsers} icon="👥" color="bg-blue-50 border-blue-200" textColor="text-blue-600" />
-              <StatCard title="Total Orders" value={stats.totalOrders} icon="📦" color="bg-green-50 border-green-200" textColor="text-green-600" />
+              <StatCard title="Total Orders" value={stats.totalOrders} icon="📦" color="bg-blue-50 border-blue-200" textColor="text-blue-600" />
               <StatCard title="Total Products" value={stats.totalProducts} icon="🛍️" color="bg-purple-50 border-purple-200" textColor="text-purple-600" />
               <StatCard title="Revenue" value={`₹${stats.totalRevenue}`} icon="💰" color="bg-amber-50 border-amber-200" textColor="text-amber-600" />
             </div>

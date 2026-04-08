@@ -30,10 +30,10 @@ const AdminProducts = () => {
             {/* Success Toast */}
             {successMsg && (
                 <div className="fixed top-6 right-6 z-[60] animate-slideIn">
-                    <div className="flex items-center gap-3 bg-green-50 border border-green-200 text-green-700 px-5 py-3.5 rounded-xl shadow-lg">
-                        <span className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-lg shrink-0">✓</span>
+                    <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 text-blue-700 px-5 py-3.5 rounded-xl shadow-lg">
+                        <span className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-lg shrink-0">✓</span>
                         <span className="font-medium text-sm">{successMsg}</span>
-                        <button onClick={() => setSuccessMsg('')} className="text-green-400 hover:text-green-600 ml-2 text-lg">×</button>
+                        <button onClick={() => setSuccessMsg('')} className="text-blue-400 hover:text-blue-600 ml-2 text-lg">×</button>
                     </div>
                 </div>
             )}

@@ -63,7 +63,7 @@ const AddressPage = () => {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-500 text-lg">Loading your addresses...</p>
         </div>
       </div>
@@ -110,7 +110,7 @@ const AddressPage = () => {
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">No addresses saved</h3>
               <p className="text-gray-500 mb-6">Add an address during checkout to see it here.</p>
-              <Link to="/checkout" className="inline-block bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all">
+              <Link to="/checkout" className="inline-block bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all">
                 + Add New Address
               </Link>
             </div>

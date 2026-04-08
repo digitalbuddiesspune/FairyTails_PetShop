@@ -451,7 +451,7 @@ const ProductDetail = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#65a30d] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-500 text-lg">Loading product...</p>
         </div>
       </div>
@@ -467,7 +467,7 @@ const ProductDetail = () => {
           <p className="text-gray-500 mb-6">{error || 'This product does not exist.'}</p>
           <Link
             to="/"
-            className="inline-block bg-[#65a30d] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#4d7c0f] transition-colors"
+            className="inline-block bg-[#205EA9] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#1d4f8f] transition-colors"
           >
             Back to Home
           </Link>
@@ -487,15 +487,15 @@ const ProductDetail = () => {
       <div className="bg-white border-b border-gray-100">
         <div className="container mx-auto px-4 sm:px-6 py-3">
           <nav className="text-xs sm:text-sm text-gray-500 flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
-            <Link to="/" className="hover:text-[#65a30d] transition-colors">Home</Link>
+            <Link to="/" className="hover:text-[#205EA9] transition-colors">Home</Link>
             <span>/</span>
-            <Link to={breadcrumb.categoryLink} className="hover:text-[#65a30d] transition-colors">
+            <Link to={breadcrumb.categoryLink} className="hover:text-[#205EA9] transition-colors">
               {breadcrumb.categoryLabel}
             </Link>
             {breadcrumb.subCategoryLink && (
               <>
                 <span>/</span>
-                <Link to={breadcrumb.subCategoryLink} className="hover:text-[#65a30d] transition-colors">
+                <Link to={breadcrumb.subCategoryLink} className="hover:text-[#205EA9] transition-colors">
                   {breadcrumb.subCategoryLabel}
                 </Link>
               </>
@@ -556,7 +556,7 @@ const ProductDetail = () => {
                           onClick={() => setSelectedImage(i)}
                           className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border-2 overflow-hidden transition-all shrink-0 ${
                             selectedImage === i
-                              ? 'border-[#65a30d] shadow-md'
+                              ? 'border-[#205EA9] shadow-md'
                               : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
@@ -576,7 +576,7 @@ const ProductDetail = () => {
               <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8">
                 {/* Badges */}
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <span className="bg-[#65a30d]/10 text-[#65a30d] text-xs font-bold px-3 py-1 rounded-full">
+                  <span className="bg-[#205EA9]/10 text-[#205EA9] text-xs font-bold px-3 py-1 rounded-full">
                     {showDogIcon ? (
                       <img src={DOG_ICON} alt="Dog" className="w-4 h-4 object-contain inline" />
                     ) : showCatIcon ? (
@@ -598,7 +598,7 @@ const ProductDetail = () => {
 
                 {/* Brand */}
                 {brand && (
-                  <p className="text-sm font-semibold text-[#65a30d] uppercase tracking-wide mb-1">
+                  <p className="text-sm font-semibold text-[#205EA9] uppercase tracking-wide mb-1">
                     {brand}
                   </p>
                 )}
@@ -663,7 +663,7 @@ const ProductDetail = () => {
                               outOfStock
                                 ? 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
                                 : selectedSize === i
-                                  ? 'border-[#65a30d] bg-[#65a30d]/5 text-[#65a30d]'
+                                  ? 'border-[#205EA9] bg-[#205EA9]/5 text-[#205EA9]'
                                   : 'border-gray-200 text-gray-600 hover:border-gray-300'
                             }`}
                           >
@@ -790,7 +790,7 @@ const ProductDetail = () => {
                   {product.isReturnable !== undefined && (
                     <div className="text-sm">
                       <span className="font-semibold text-gray-700">Returnable: </span>
-                      <span className={product.isReturnable ? 'text-green-600' : 'text-red-500'}>
+                      <span className={product.isReturnable ? 'text-blue-600' : 'text-red-500'}>
                         {product.isReturnable ? 'Yes' : 'No'}
                       </span>
                     </div>
@@ -804,14 +804,14 @@ const ProductDetail = () => {
                       ? 'text-red-600'
                       : availableStock <= 10
                         ? 'text-orange-600'
-                        : 'text-green-600'
+                        : 'text-blue-600'
                   }`}>
                     <span className={`w-2.5 h-2.5 rounded-full ${
                       availableStock <= 0
                         ? 'bg-red-500'
                         : availableStock <= 10
                           ? 'bg-orange-500'
-                          : 'bg-green-500'
+                          : 'bg-blue-500'
                     }`} />
                     {availableStock <= 0
                       ? 'Out of Stock'
@@ -858,13 +858,13 @@ const ProductDetail = () => {
               {product.keyFeatures?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <span className="w-8 h-8 bg-[#65a30d]/10 rounded-lg flex items-center justify-center text-sm">✨</span>
+                    <span className="w-8 h-8 bg-[#205EA9]/10 rounded-lg flex items-center justify-center text-sm">✨</span>
                     Key Features
                   </h3>
                   <ul className="space-y-2.5">
                     {product.keyFeatures.map((f, i) => (
                       <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
-                        <span className="text-[#65a30d] mt-0.5 text-xs">●</span>
+                        <span className="text-[#205EA9] mt-0.5 text-xs">●</span>
                         {f}
                       </li>
                     ))}
@@ -876,13 +876,13 @@ const ProductDetail = () => {
               {product.healthBenefits?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-sm">💚</span>
+                    <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm">💚</span>
                     Health Benefits
                   </h3>
                   <ul className="space-y-2.5">
                     {product.healthBenefits.map((b, i) => (
                       <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
-                        <span className="text-green-500 mt-0.5 text-xs">●</span>
+                        <span className="text-blue-500 mt-0.5 text-xs">●</span>
                         {b}
                       </li>
                     ))}

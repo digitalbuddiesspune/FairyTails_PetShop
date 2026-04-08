@@ -21,7 +21,7 @@ const TermsAndConditions = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#65a30d] to-[#84cc16] py-10 md:py-14">
+      <div className="bg-gradient-to-r from-[#205EA9] to-[#205EA9] py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-6">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@ const TermsAndConditions = () => {
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">On this page</h3>
               <nav className="space-y-1">
                 {sections.map((s) => (
-                  <a key={s.id} href={`#${s.id}`} className="block text-sm text-gray-600 hover:text-[#65a30d] hover:bg-[#65a30d]/5 px-3 py-2 rounded-lg transition-colors">
+                  <a key={s.id} href={`#${s.id}`} className="block text-sm text-gray-600 hover:text-[#205EA9] hover:bg-[#205EA9]/5 px-3 py-2 rounded-lg transition-colors">
                     {s.title}
                   </a>
                 ))}
@@ -68,11 +68,11 @@ const TermsAndConditions = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Account</h2>
                 <p className="text-gray-600 leading-relaxed mb-3">When you create an account with us, you agree to:</p>
                 <ul className="space-y-2 text-gray-600">
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>Provide accurate, current, and complete information during registration.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>Maintain and promptly update your account information.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>Keep your password confidential and not share it with others.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>Be responsible for all activities under your account.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>Notify us immediately if you suspect unauthorized use of your account.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>Provide accurate, current, and complete information during registration.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>Maintain and promptly update your account information.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>Keep your password confidential and not share it with others.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>Be responsible for all activities under your account.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>Notify us immediately if you suspect unauthorized use of your account.</li>
                 </ul>
                 <p className="text-gray-600 mt-3">
                   We reserve the right to suspend or terminate accounts that violate these terms or engage in fraudulent activity.
@@ -82,11 +82,11 @@ const TermsAndConditions = () => {
               <section id="products">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Products & Pricing</h2>
                 <ul className="space-y-2 text-gray-600">
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>All product descriptions, images, and specifications are provided for informational purposes. Actual products may slightly vary.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>Prices are listed in Indian Rupees (INR) and include 18% GST.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>We reserve the right to modify prices at any time without prior notice. Price changes do not affect already-placed orders.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>In case of a pricing error, we may cancel the order and issue a full refund.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>Product availability is subject to stock levels and may change without notice.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>All product descriptions, images, and specifications are provided for informational purposes. Actual products may slightly vary.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>Prices are listed in Indian Rupees (INR) and include 18% GST.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>We reserve the right to modify prices at any time without prior notice. Price changes do not affect already-placed orders.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>In case of a pricing error, we may cancel the order and issue a full refund.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>Product availability is subject to stock levels and may change without notice.</li>
                 </ul>
               </section>
 
@@ -94,11 +94,11 @@ const TermsAndConditions = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Orders & Payment</h2>
                 <p className="text-gray-600 leading-relaxed mb-3">By placing an order, you agree that:</p>
                 <ul className="space-y-2 text-gray-600">
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>You are legally capable of entering into a binding contract.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>All information provided during checkout is accurate.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>We accept Cash on Delivery (COD) and online payments (UPI, credit/debit cards, net banking).</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>An order confirmation does not guarantee acceptance. We reserve the right to reject or cancel orders at any time.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span>For COD orders, failure to accept delivery may result in the address being blocked for future COD orders.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>You are legally capable of entering into a binding contract.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>All information provided during checkout is accurate.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>We accept Cash on Delivery (COD) and online payments (UPI, credit/debit cards, net banking).</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>An order confirmation does not guarantee acceptance. We reserve the right to reject or cancel orders at any time.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span>For COD orders, failure to accept delivery may result in the address being blocked for future COD orders.</li>
                 </ul>
               </section>
 
@@ -157,10 +157,10 @@ const TermsAndConditions = () => {
                 <p className="text-gray-600 leading-relaxed mb-4">
                   If you have any questions about these Terms & Conditions, please contact us:
                 </p>
-                <div className="bg-[#65a30d]/5 border border-[#65a30d]/20 rounded-xl p-5 space-y-2">
+                <div className="bg-[#205EA9]/5 border border-[#205EA9]/20 rounded-xl p-5 space-y-2">
                   <p className="text-gray-700"><strong>FairyTails Pet Shop</strong></p>
                   <p className="text-gray-700"><strong>Email:</strong> support@fairytails.com</p>
-                  <p className="text-gray-700"><strong>Phone:</strong> +91 98765 43210</p>
+                  <p className="text-gray-700"><strong>Phone:</strong> +91 90217 85257</p>
                   <p className="text-gray-700"><strong>Address:</strong> Hinjewadi, Pune, Maharashtra – 411057, India</p>
                 </div>
               </section>
@@ -168,7 +168,7 @@ const TermsAndConditions = () => {
             </div>
 
             <div className="mt-8 text-center">
-              <Link to="/" className="text-[#65a30d] hover:underline font-medium text-sm">← Back to Home</Link>
+              <Link to="/" className="text-[#205EA9] hover:underline font-medium text-sm">← Back to Home</Link>
             </div>
           </main>
         </div>

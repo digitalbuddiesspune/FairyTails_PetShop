@@ -3,13 +3,13 @@ import { Link } from 'react-router-dom';
 const Footer = () => {
   const footerLinks = {
     'Shop by Category': [
-      { name: 'Dogs', path: '#dogs' },
-      { name: 'Cats', path: '#cats' },
-      { name: 'Toys', path: '#toys' },
-      { name: 'Accessories', path: '#accessories' },
-      { name: 'Grooming & Essential', path: '#grooming-essential' },
-      { name: 'Health & Supplement', path: '#health-supplement' },
-      { name: 'Beds & House', path: '#beds-house' },
+      { name: 'Dogs', path: '/category/dogs' },
+      { name: 'Cats', path: '/category/cats' },
+      { name: 'Toys', path: '/category/toys' },
+      { name: 'Accessories', path: '/category/accessories' },
+      { name: 'Grooming & Essential', path: '/category/grooming-and-essential' },
+      { name: 'Health & Supplement', path: '/category/health-and-supplement' },
+      { name: 'Beds & House', path: '/category/beds-and-house' },
     ],
     'Policies': [
       { name: 'Privacy Policy', path: '/privacy-policy' },
@@ -38,16 +38,16 @@ const Footer = () => {
             </p>
             {/* Social Links */}
             <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-[#a3e635] transition-colors">
+              <a href="#" className="text-gray-400 hover:text-[#205EA9] transition-colors">
                 <FacebookIcon />
               </a>
-              <a href="#" className="text-gray-400 hover:text-[#a3e635] transition-colors">
+              <a href="#" className="text-gray-400 hover:text-[#205EA9] transition-colors">
                 <InstagramIcon />
               </a>
-              <a href="#" className="text-gray-400 hover:text-[#a3e635] transition-colors">
+              <a href="#" className="text-gray-400 hover:text-[#205EA9] transition-colors">
                 <TwitterIcon />
               </a>
-              <a href="#" className="text-gray-400 hover:text-[#a3e635] transition-colors">
+              <a href="#" className="text-gray-400 hover:text-[#205EA9] transition-colors">
                 <YoutubeIcon />
               </a>
             </div>
@@ -63,14 +63,14 @@ const Footer = () => {
                     {link.path.startsWith('/') ? (
                       <Link
                         to={link.path}
-                        className="text-gray-400 text-sm hover:text-[#a3e635] transition-colors"
+                        className="text-gray-400 text-sm hover:text-[#205EA9] transition-colors"
                       >
                         {link.name}
                       </Link>
                     ) : (
                       <a
                         href={link.path}
-                        className="text-gray-400 text-sm hover:text-[#a3e635] transition-colors"
+                        className="text-gray-400 text-sm hover:text-[#205EA9] transition-colors"
                       >
                         {link.name}
                       </a>
@@ -86,13 +86,13 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400">
-              <a href="mailto:support@fairytails.com" className="flex items-center gap-2 hover:text-[#a3e635] transition-colors">
+              <a href="mailto:support@fairytails.com" className="flex items-center gap-2 hover:text-[#205EA9] transition-colors">
                 <EmailIcon />
                 support@fairytails.com
               </a>
-              <a href="tel:+919876543210" className="flex items-center gap-2 hover:text-[#a3e635] transition-colors">
+              <a href="tel:+919021785257" className="flex items-center gap-2 hover:text-[#205EA9] transition-colors">
                 <PhoneIcon />
-                +91 98765 43210
+                +91 90217 85257
               </a>
             </div>
             {/* Payment Methods */}
@@ -113,13 +113,13 @@ const Footer = () => {
       <div className="border-t border-gray-800 w-full">
         <div className="w-full px-4 lg:px-8 py-4">
           <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-500">
-            <Link to="/privacy-policy" className="hover:text-[#a3e635] transition-colors">Privacy Policy</Link>
+            <Link to="/privacy-policy" className="hover:text-[#205EA9] transition-colors">Privacy Policy</Link>
             <span className="text-gray-700">·</span>
-            <Link to="/refund-policy" className="hover:text-[#a3e635] transition-colors">Refund & Cancellation Policy</Link>
+            <Link to="/refund-policy" className="hover:text-[#205EA9] transition-colors">Refund & Cancellation Policy</Link>
             <span className="text-gray-700">·</span>
-            <Link to="/shipping-policy" className="hover:text-[#a3e635] transition-colors">Shipping Policy</Link>
+            <Link to="/shipping-policy" className="hover:text-[#205EA9] transition-colors">Shipping Policy</Link>
             <span className="text-gray-700">·</span>
-            <Link to="/terms-and-conditions" className="hover:text-[#a3e635] transition-colors">Terms & Conditions</Link>
+            <Link to="/terms-and-conditions" className="hover:text-[#205EA9] transition-colors">Terms & Conditions</Link>
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@ const Footer = () => {
       <div className="border-t border-gray-800 w-full">
         <div className="w-full px-4 lg:px-8 py-4">
           <p className="text-center text-gray-500 text-sm">
-            © 2026 FairyTails Pet Shop. All rights reserved. Made with 💚 for pets everywhere.
+            © 2026 FairyTails Pet Shop. All rights reserved. Made with  💙 for pets everywhere.
           </p>
         </div>
       </div>

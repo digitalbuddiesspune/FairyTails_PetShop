@@ -233,7 +233,7 @@ const AccountSettingsPage = () => {
 
           {/* Success / Error Messages */}
           {updateSuccess && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl flex items-center gap-2 text-sm font-medium">
+            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl flex items-center gap-2 text-sm font-medium">
               <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               {updateSuccess}
             </div>
@@ -249,7 +249,7 @@ const AccountSettingsPage = () => {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             {/* Avatar & Name Header */}
             <div className="bg-gradient-to-r from-[#fefce8] to-[#fff7ed] p-6 flex items-center gap-4 border-b border-gray-100">
-              <div className="w-16 h-16 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center text-2xl font-bold text-[#65a30d] shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center text-2xl font-bold text-[#205EA9] shadow-sm">
                 {user.name ? user.name.charAt(0).toUpperCase() : '👤'}
               </div>
               <div>
@@ -276,7 +276,7 @@ const AccountSettingsPage = () => {
                   <div className="pt-3">
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="bg-[#2f5a87] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all shadow-md hover:shadow-lg"
+                      className="bg-[#2f5a87] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all shadow-md hover:shadow-lg"
                     >
                       ✏️ Edit Profile
                     </button>
@@ -287,20 +287,20 @@ const AccountSettingsPage = () => {
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1.5">Full Name</label>
                     <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none transition-all" />
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1.5">Email Address</label>
                     <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none transition-all" />
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1.5">Phone Number</label>
                     <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#65a30d]/20 focus:border-[#65a30d] outline-none transition-all" />
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all" />
                   </div>
                   <div className="flex gap-3 pt-3">
-                    <button type="submit" className="bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all shadow-md hover:shadow-lg">
+                    <button type="submit" className="bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all shadow-md hover:shadow-lg">
                       Save Changes
                     </button>
                     <button type="button" onClick={() => { setIsEditing(false); setUpdateError(''); }}
@@ -321,13 +321,13 @@ const AccountSettingsPage = () => {
                 <p className="text-xs text-gray-400 mt-0.5">{addresses.length} saved address{addresses.length !== 1 ? 'es' : ''}</p>
               </div>
               <button onClick={openAddAddr}
-                className="bg-[#2f5a87] text-white px-4 py-2 rounded-lg font-bold text-xs hover:from-[#4d7c0f] hover:to-[#3f6212] transition-all">
+                className="bg-[#2f5a87] text-white px-4 py-2 rounded-lg font-bold text-xs hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all">
                 + Add Address
               </button>
             </div>
 
             {addrMsg && (
-              <div className="mx-6 mt-4 bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg text-xs font-medium">
+              <div className="mx-6 mt-4 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-xs font-medium">
                 {addrMsg}
               </div>
             )}
@@ -386,7 +386,7 @@ const AccountSettingsPage = () => {
               <div className="flex gap-3">
                 {['home', 'office'].map(t => (
                   <button key={t} type="button" onClick={() => setAddrForm({ ...addrForm, addressType: t })}
-                    className={`flex-1 py-2 rounded-lg text-xs font-bold border-2 transition-all ${addrForm.addressType === t ? 'bg-[#65a30d] border-[#65a30d] text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+                    className={`flex-1 py-2 rounded-lg text-xs font-bold border-2 transition-all ${addrForm.addressType === t ? 'bg-[#205EA9] border-[#205EA9] text-white' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'}`}>
                     {t === 'home' ? '🏠 Home' : '🏢 Office'}
                   </button>
                 ))}
@@ -395,43 +395,43 @@ const AccountSettingsPage = () => {
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1">First Name</label>
                   <input type="text" required value={addrForm.firstName} onChange={(e) => setAddrForm({ ...addrForm, firstName: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#65a30d]" />
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1">Last Name</label>
                   <input type="text" required value={addrForm.lastName} onChange={(e) => setAddrForm({ ...addrForm, lastName: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#65a30d]" />
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1">Phone</label>
                 <input type="tel" required value={addrForm.phone} onChange={(e) => setAddrForm({ ...addrForm, phone: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#65a30d]" />
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-500 mb-1">Street Address</label>
                 <input type="text" required value={addrForm.streetAddress} onChange={(e) => setAddrForm({ ...addrForm, streetAddress: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#65a30d]" />
+                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1">City</label>
                   <input type="text" required value={addrForm.city} onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#65a30d]" />
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1">State</label>
                   <input type="text" required value={addrForm.state} onChange={(e) => setAddrForm({ ...addrForm, state: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#65a30d]" />
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-1">Pincode</label>
                   <input type="text" required value={addrForm.pincode} onChange={(e) => setAddrForm({ ...addrForm, pincode: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#65a30d]" />
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" className="flex-1 bg-gradient-to-r from-[#65a30d] to-[#4d7c0f] text-white py-2.5 rounded-lg font-bold text-sm">
+                <button type="submit" className="flex-1 bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white py-2.5 rounded-lg font-bold text-sm">
                   {editingAddrId ? 'Update Address' : 'Save Address'}
                 </button>
                 <button type="button" onClick={() => setShowAddrForm(false)} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold text-sm">

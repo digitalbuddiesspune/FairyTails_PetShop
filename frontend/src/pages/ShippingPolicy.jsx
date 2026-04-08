@@ -18,7 +18,7 @@ const ShippingPolicy = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#65a30d] to-[#84cc16] py-10 md:py-14">
+      <div className="bg-gradient-to-r from-[#205EA9] to-[#205EA9] py-10 md:py-14">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-6">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,7 +42,7 @@ const ShippingPolicy = () => {
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">On this page</h3>
               <nav className="space-y-1">
                 {sections.map((s) => (
-                  <a key={s.id} href={`#${s.id}`} className="block text-sm text-gray-600 hover:text-[#65a30d] hover:bg-[#65a30d]/5 px-3 py-2 rounded-lg transition-colors">
+                  <a key={s.id} href={`#${s.id}`} className="block text-sm text-gray-600 hover:text-[#205EA9] hover:bg-[#205EA9]/5 px-3 py-2 rounded-lg transition-colors">
                     {s.title}
                   </a>
                 ))}
@@ -88,9 +88,9 @@ const ShippingPolicy = () => {
                   Once your order is confirmed:
                 </p>
                 <ul className="space-y-2 text-gray-600">
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span><strong>Processing:</strong> 1–2 business days to pack and dispatch your order.</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span><strong>Transit:</strong> 2–9 business days depending on your location (see delivery areas above).</li>
-                  <li className="flex gap-3"><span className="text-[#65a30d] font-bold mt-0.5">•</span><strong>Sundays & Holidays:</strong> Orders placed on weekends or public holidays are processed the next business day.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span><strong>Processing:</strong> 1–2 business days to pack and dispatch your order.</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span><strong>Transit:</strong> 2–9 business days depending on your location (see delivery areas above).</li>
+                  <li className="flex gap-3"><span className="text-[#205EA9] font-bold mt-0.5">•</span><strong>Sundays & Holidays:</strong> Orders placed on weekends or public holidays are processed the next business day.</li>
                 </ul>
                 <div className="mt-4 bg-yellow-50 border border-yellow-100 rounded-xl p-4">
                   <p className="text-sm text-yellow-800"><strong>Note:</strong> Delivery times may vary during festive seasons or extreme weather conditions.</p>
@@ -108,7 +108,7 @@ const ShippingPolicy = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      <tr><td className="px-5 py-3 text-gray-600">Above ₹499</td><td className="px-5 py-3 text-green-600 font-semibold">FREE</td></tr>
+                      <tr><td className="px-5 py-3 text-gray-600">Above ₹499</td><td className="px-5 py-3 text-blue-600 font-semibold">FREE</td></tr>
                       <tr><td className="px-5 py-3 text-gray-600">Below ₹499</td><td className="px-5 py-3 text-gray-600">₹50</td></tr>
                     </tbody>
                   </table>
@@ -151,9 +151,9 @@ const ShippingPolicy = () => {
                 <p className="text-gray-600 leading-relaxed mb-4">
                   For any shipping-related queries, reach out to our team:
                 </p>
-                <div className="bg-[#65a30d]/5 border border-[#65a30d]/20 rounded-xl p-5 space-y-2">
+                <div className="bg-[#205EA9]/5 border border-[#205EA9]/20 rounded-xl p-5 space-y-2">
                   <p className="text-gray-700"><strong>Email:</strong> support@fairytails.com</p>
-                  <p className="text-gray-700"><strong>Phone:</strong> +91 98765 43210</p>
+                  <p className="text-gray-700"><strong>Phone:</strong> +91 90217 85257</p>
                   <p className="text-gray-700"><strong>Hours:</strong> Mon–Sat, 9:00 AM – 7:00 PM IST</p>
                 </div>
               </section>
@@ -161,7 +161,7 @@ const ShippingPolicy = () => {
             </div>
 
             <div className="mt-8 text-center">
-              <Link to="/" className="text-[#65a30d] hover:underline font-medium text-sm">← Back to Home</Link>
+              <Link to="/" className="text-[#205EA9] hover:underline font-medium text-sm">← Back to Home</Link>
             </div>
           </main>
         </div>
