@@ -158,7 +158,7 @@ const InvoicePage = () => {
                 />
               </div>
               <h1 className="text-xl font-bold leading-tight">FairyTails Pet Shop</h1>
-              <p className="text-sm text-gray-300">Your Trusted Pet Care Partner | support@fairytails.com | GST: 09AHCPC5752E1ZM</p>
+              <p className="text-sm text-gray-300">Your Trusted Pet Care Partner | support@fairytails.com | GST: 27DNIPM1264G1ZX | +91 90217 85257</p>
             </div>
           </div>
 
