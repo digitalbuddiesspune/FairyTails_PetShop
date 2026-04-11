@@ -1,16 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
+const USERS_PAGE_SIZE = 100;
 
 const AdminUsers = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [sortOrder, setSortOrder] = useState('default'); // 'default', 'asc', 'desc'
+    const [listPage, setListPage] = useState(1);
 
     useEffect(() => {
         fetchUsers();
     }, []);
+
+    useEffect(() => {
+        setListPage(1);
+    }, [sortOrder]);
 
     const fetchUsers = async () => {
         const token = localStorage.getItem('adminToken');
@@ -58,21 +65,35 @@ const AdminUsers = () => {
     };
 
     // ─── Sort Users by Total Ordered ───
-    const getSortedUsers = () => {
+    const sortedUsers = useMemo(() => {
         if (sortOrder === 'default') {
             return users;
         }
-        const sorted = [...users].sort((a, b) => {
+        return [...users].sort((a, b) => {
             const aTotal = a.totalOrderedQuantity || 0;
             const bTotal = b.totalOrderedQuantity || 0;
             if (sortOrder === 'asc') {
                 return aTotal - bTotal;
-            } else {
-                return bTotal - aTotal;
             }
+            return bTotal - aTotal;
         });
-        return sorted;
-    };
+    }, [users, sortOrder]);
+
+    const totalListPages = Math.max(1, Math.ceil(sortedUsers.length / USERS_PAGE_SIZE));
+    const effectiveListPage = Math.min(listPage, totalListPages);
+
+    useEffect(() => {
+        const tp = Math.max(1, Math.ceil(sortedUsers.length / USERS_PAGE_SIZE));
+        setListPage((p) => Math.min(p, tp));
+    }, [sortedUsers.length]);
+
+    const paginatedUsers = useMemo(() => {
+        const start = (effectiveListPage - 1) * USERS_PAGE_SIZE;
+        return sortedUsers.slice(start, start + USERS_PAGE_SIZE);
+    }, [sortedUsers, effectiveListPage]);
+
+    const listRangeStart = sortedUsers.length === 0 ? 0 : (effectiveListPage - 1) * USERS_PAGE_SIZE + 1;
+    const listRangeEnd = sortedUsers.length === 0 ? 0 : Math.min(effectiveListPage * USERS_PAGE_SIZE, sortedUsers.length);
 
     // ─── Delete Confirmation Modal ───
     const renderDeleteConfirm = () => (
@@ -116,6 +137,60 @@ const AdminUsers = () => {
                 </div>
             </div>
 
+            {!loading && sortedUsers.length > 0 && (
+                <div className="mb-4 space-y-2">
+                    <p className="text-xs text-gray-500">
+                        Showing <span className="font-semibold text-gray-800">{listRangeStart}</span>–
+                        <span className="font-semibold text-gray-800">{listRangeEnd}</span> of{' '}
+                        <span className="font-semibold text-gray-800">{sortedUsers.length}</span>
+                        {' '}(page {effectiveListPage} of {totalListPages}, {USERS_PAGE_SIZE} per page)
+                    </p>
+                    {sortedUsers.length > USERS_PAGE_SIZE && (
+                        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm">
+                            <span className="text-[11px] text-gray-500">
+                                Page <span className="font-semibold text-gray-800">{effectiveListPage}</span> / {totalListPages}
+                            </span>
+                            <div className="flex items-center gap-1.5">
+                                <button
+                                    type="button"
+                                    disabled={effectiveListPage <= 1}
+                                    onClick={() => setListPage(1)}
+                                    className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    First
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={effectiveListPage <= 1}
+                                    onClick={() => setListPage((p) => Math.max(1, p - 1))}
+                                    className="p-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    aria-label="Previous page"
+                                >
+                                    <ChevronLeft size={18} />
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={effectiveListPage >= totalListPages}
+                                    onClick={() => setListPage((p) => Math.min(totalListPages, p + 1))}
+                                    className="p-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    aria-label="Next page"
+                                >
+                                    <ChevronRight size={18} />
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={effectiveListPage >= totalListPages}
+                                    onClick={() => setListPage(totalListPages)}
+                                    className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    Last
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {loading ? (
                 <div className="flex items-center justify-center py-20">
                     <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
@@ -139,7 +214,7 @@ const AdminUsers = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
-                                {getSortedUsers().map((user) => (
+                                {paginatedUsers.map((user) => (
                                     <tr key={user._id} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">

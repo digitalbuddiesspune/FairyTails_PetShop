@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -184,17 +184,23 @@ const searchRelevanceScore = (p, rawQuery) => {
   return score;
 };
 
-/** Same Mongo _id can appear twice when merging pages or categories; breaks React keys and search UX. */
-const dedupeProductsById = (items) => {
+/** Drop only true duplicates (same admin category + same _id). Never merge across categories — different collections can reuse the same _id string. */
+const dedupeProductsByCategoryAndId = (items) => {
   const seen = new Set();
   return items.filter((p) => {
     const id = p?._id != null ? String(p._id) : '';
+    const ck = p._catKey || 'unknown';
     if (!id) return true;
-    if (seen.has(id)) return false;
-    seen.add(id);
+    const key = `${ck}:${id}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 };
+
+const ADMIN_LIST_PAGE_SIZE = 1000;
+/** Rows per page in the admin product table (after category / search filters). */
+const PRODUCTS_TABLE_PAGE_SIZE = 70;
 
 const getPrice = (p) => {
   if (p.prices?.length) return { sale: p.prices[0].discountedPrice, mrp: p.prices[0].mrp };
@@ -228,10 +234,15 @@ const AdminMyProducts = () => {
   const [categoryCounts, setCategoryCounts] = useState({});
   const [selectedPetCategory, setSelectedPetCategory] = useState('all');
   const [selectedSubCategory, setSelectedSubCategory] = useState('all');
+  const [listPage, setListPage] = useState(1);
 
   // Fetch category counts on mount
   useEffect(() => { fetchCategoryCounts(); }, []);
   useEffect(() => { fetchProducts(); }, [selectedKey]);
+
+  useEffect(() => {
+    setListPage(1);
+  }, [selectedKey, searchQuery, selectedPetCategory, selectedSubCategory]);
 
   const fetchCategoryCounts = async () => {
     try {
@@ -265,7 +276,9 @@ const AdminMyProducts = () => {
         let totalPages = 1;
 
         for (let i = 0; i < 400; i += 1) {
-          const res = await fetch(`${API_BASE}/${endpoint}?page=${page}`);
+          const res = await fetch(
+            `${API_BASE}/${endpoint}?page=${page}&limit=${ADMIN_LIST_PAGE_SIZE}`
+          );
           const data = await res.json();
           const batch = Array.isArray(data.data) ? data.data : [];
           allItems.push(...batch);
@@ -295,12 +308,18 @@ const AdminMyProducts = () => {
             return items.map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label }));
           })
         );
-        const all = dedupeProductsById(results.filter(r => r.status === 'fulfilled').flatMap(r => r.value));
+        const all = dedupeProductsByCategoryAndId(
+          results.filter((r) => r.status === 'fulfilled').flatMap((r) => r.value)
+        );
         setProducts(all);
       } else {
         const cat = CATEGORIES.find(c => c.key === selectedKey);
         const items = await fetchAllProductsByEndpoint(cat.endpoint);
-        setProducts(dedupeProductsById(items.map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label }))));
+        setProducts(
+          dedupeProductsByCategoryAndId(
+            items.map((p) => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label }))
+          )
+        );
       }
     } catch { setProducts([]); }
     finally { setLoading(false); }
@@ -362,6 +381,22 @@ const AdminMyProducts = () => {
       (a, b) => searchRelevanceScore(b, qTrim) - searchRelevanceScore(a, qTrim)
     );
   }, [products, searchQuery, selectedPetCategory, selectedSubCategory]);
+
+  const totalListPages = Math.max(1, Math.ceil(filtered.length / PRODUCTS_TABLE_PAGE_SIZE));
+  const effectiveListPage = Math.min(listPage, totalListPages);
+
+  useEffect(() => {
+    const tp = Math.max(1, Math.ceil(filtered.length / PRODUCTS_TABLE_PAGE_SIZE));
+    setListPage((p) => Math.min(p, tp));
+  }, [filtered.length]);
+
+  const paginatedFiltered = useMemo(() => {
+    const start = (effectiveListPage - 1) * PRODUCTS_TABLE_PAGE_SIZE;
+    return filtered.slice(start, start + PRODUCTS_TABLE_PAGE_SIZE);
+  }, [filtered, effectiveListPage]);
+
+  const listRangeStart = filtered.length === 0 ? 0 : (effectiveListPage - 1) * PRODUCTS_TABLE_PAGE_SIZE + 1;
+  const listRangeEnd = filtered.length === 0 ? 0 : Math.min(effectiveListPage * PRODUCTS_TABLE_PAGE_SIZE, filtered.length);
 
   const handleDelete = async (product) => {
     const ep = product._endpoint || getEndpoint(detectCategoryType(product));
@@ -490,11 +525,66 @@ const AdminMyProducts = () => {
           </div>
         )}
 
-        {/* Count */}
-        <p className="text-xs text-gray-500 mb-2">
-          Showing <span className="font-semibold text-gray-800">{filtered.length}</span> products
-          {searchQuery && <span className="text-purple-600"> matching &ldquo;{searchQuery}&rdquo;</span>}
-        </p>
+        {/* Count + pagination (70 per page) */}
+        <div className="mb-2 space-y-2">
+          <p className="text-xs text-gray-500">
+            {filtered.length === 0 ? (
+              <>No products in this view</>
+            ) : (
+              <>
+                Showing <span className="font-semibold text-gray-800">{listRangeStart}</span>
+                –
+                <span className="font-semibold text-gray-800">{listRangeEnd}</span>
+                {' '}of <span className="font-semibold text-gray-800">{filtered.length}</span>
+                {' '}(page {effectiveListPage} of {totalListPages}, {PRODUCTS_TABLE_PAGE_SIZE} per page)
+                {searchQuery && <span className="text-purple-600"> matching &ldquo;{searchQuery}&rdquo;</span>}
+              </>
+            )}
+          </p>
+          {filtered.length > PRODUCTS_TABLE_PAGE_SIZE && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm">
+              <span className="text-[11px] text-gray-500">
+                Page <span className="font-semibold text-gray-800">{effectiveListPage}</span> / {totalListPages}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={effectiveListPage <= 1}
+                  onClick={() => setListPage(1)}
+                  className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  First
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage <= 1}
+                  onClick={() => setListPage((p) => Math.max(1, p - 1))}
+                  className="p-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage >= totalListPages}
+                  onClick={() => setListPage((p) => Math.min(totalListPages, p + 1))}
+                  className="p-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Next page"
+                >
+                  <ChevronRight size={18} />
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage >= totalListPages}
+                  onClick={() => setListPage(totalListPages)}
+                  className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ═══ SCROLLABLE PRODUCT LIST ═══ */}
@@ -511,11 +601,12 @@ const AdminMyProducts = () => {
           <>
             {/* ─── MOBILE: Card Layout (visible below lg) ─── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:hidden pb-4">
-            {filtered.map((product, rowIdx) => {
+            {paginatedFiltered.map((product, rowIdx) => {
               const price = getPrice(product);
               const stock = getStock(product);
+              const globalRow = (effectiveListPage - 1) * PRODUCTS_TABLE_PAGE_SIZE + rowIdx;
               return (
-                <div key={`m-${rowIdx}-${product._catKey}-${String(product._id)}`} className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+                <div key={`m-${globalRow}-${product._catKey}-${String(product._id)}`} className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
                   <div className="flex gap-3">
                     {/* Image */}
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gray-50 border border-gray-100 shrink-0 overflow-hidden p-1">
@@ -580,11 +671,12 @@ const AdminMyProducts = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filtered.map((product, rowIdx) => {
+                  {paginatedFiltered.map((product, rowIdx) => {
                     const price = getPrice(product);
                     const stock = getStock(product);
+                    const globalRow = (effectiveListPage - 1) * PRODUCTS_TABLE_PAGE_SIZE + rowIdx;
                     return (
-                      <tr key={`d-${rowIdx}-${product._catKey}-${String(product._id)}`} className="hover:bg-gray-50/70 transition-colors group">
+                      <tr key={`d-${globalRow}-${product._catKey}-${String(product._id)}`} className="hover:bg-gray-50/70 transition-colors group">
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-2">
                             <div className="w-10 h-10 rounded-lg bg-gray-100 p-0.5 border border-gray-200 shrink-0 overflow-hidden">

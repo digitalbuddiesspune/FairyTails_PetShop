@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
+const PAYMENTS_PAGE_SIZE = 100;
 
 const AdminPayments = () => {
   const navigate = useNavigate();
@@ -13,10 +14,15 @@ const AdminPayments = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('All');
   const [methodFilter, setMethodFilter] = useState('All Methods');
+  const [listPage, setListPage] = useState(1);
 
   useEffect(() => {
     fetchOrders();
   }, []);
+
+  useEffect(() => {
+    setListPage(1);
+  }, [searchTerm, paymentStatusFilter, methodFilter]);
 
   const fetchOrders = async () => {
     try {
@@ -41,17 +47,17 @@ const AdminPayments = () => {
     .reduce((sum, o) => sum + (o.total || 0), 0);
 
   // Filter orders
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
+  const filteredOrders = useMemo(() => orders.filter((order) => {
+    const matchesSearch =
       order.orderNumber?.toString().includes(searchTerm) ||
       order._id?.includes(searchTerm) ||
       order.razorpayOrderId?.includes(searchTerm) ||
       order.razorpayPaymentId?.includes(searchTerm);
-    
+
     // Payment status filter
     if (paymentStatusFilter !== 'All') {
       const isPaymentFailed = order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId;
-      
+
       if (paymentStatusFilter === 'Failed') {
         if (!isPaymentFailed && order.paymentStatus !== 'failed') return false;
       } else {
@@ -59,14 +65,30 @@ const AdminPayments = () => {
         if (order.paymentStatus !== paymentStatusFilter.toLowerCase()) return false;
       }
     }
-    
-    const matchesMethod = 
-      methodFilter === 'All Methods' || 
+
+    const matchesMethod =
+      methodFilter === 'All Methods' ||
       (methodFilter === 'Online' && order.paymentMethod !== 'cash_on_delivery') ||
       (methodFilter === 'COD' && order.paymentMethod === 'cash_on_delivery');
-    
+
     return matchesSearch && matchesMethod;
-  });
+  }), [orders, searchTerm, paymentStatusFilter, methodFilter]);
+
+  const totalListPages = Math.max(1, Math.ceil(filteredOrders.length / PAYMENTS_PAGE_SIZE));
+  const effectiveListPage = Math.min(listPage, totalListPages);
+
+  useEffect(() => {
+    const tp = Math.max(1, Math.ceil(filteredOrders.length / PAYMENTS_PAGE_SIZE));
+    setListPage((p) => Math.min(p, tp));
+  }, [filteredOrders.length]);
+
+  const paginatedOrders = useMemo(() => {
+    const start = (effectiveListPage - 1) * PAYMENTS_PAGE_SIZE;
+    return filteredOrders.slice(start, start + PAYMENTS_PAGE_SIZE);
+  }, [filteredOrders, effectiveListPage]);
+
+  const listRangeStart = filteredOrders.length === 0 ? 0 : (effectiveListPage - 1) * PAYMENTS_PAGE_SIZE + 1;
+  const listRangeEnd = filteredOrders.length === 0 ? 0 : Math.min(effectiveListPage * PAYMENTS_PAGE_SIZE, filteredOrders.length);
 
   // Download XLS
   const downloadXLS = () => {
@@ -220,6 +242,60 @@ const AdminPayments = () => {
         )}
       </div>
 
+      {filteredOrders.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500">
+            Showing <span className="font-semibold text-gray-800">{listRangeStart}</span>–
+            <span className="font-semibold text-gray-800">{listRangeEnd}</span> of{' '}
+            <span className="font-semibold text-gray-800">{filteredOrders.length}</span>
+            {' '}(page {effectiveListPage} of {totalListPages}, {PAYMENTS_PAGE_SIZE} per page)
+          </p>
+          {filteredOrders.length > PAYMENTS_PAGE_SIZE && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm">
+              <span className="text-[11px] text-gray-500">
+                Page <span className="font-semibold text-gray-800">{effectiveListPage}</span> / {totalListPages}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={effectiveListPage <= 1}
+                  onClick={() => setListPage(1)}
+                  className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  First
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage <= 1}
+                  onClick={() => setListPage((p) => Math.max(1, p - 1))}
+                  className="p-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage >= totalListPages}
+                  onClick={() => setListPage((p) => Math.min(totalListPages, p + 1))}
+                  className="p-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Next page"
+                >
+                  <ChevronRight size={18} />
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage >= totalListPages}
+                  onClick={() => setListPage(totalListPages)}
+                  className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Table */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -244,7 +320,7 @@ const AdminPayments = () => {
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => (
+                paginatedOrders.map((order) => (
                   <tr key={order._id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">
                       #{order.orderNumber || parseInt(order._id.slice(-8), 16)}

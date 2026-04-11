@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
+const ORDERS_PAGE_SIZE = 100;
 
 const STATUS_CONFIG = {
   placed:     { label: 'Confirm',    bg: 'bg-blue-50 text-blue-600 border-blue-200' },
@@ -30,6 +32,7 @@ const AdminOrders = () => {
   const [endDate, setEndDate] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
+  const [listPage, setListPage] = useState(1);
 
   const token = localStorage.getItem('adminToken');
 
@@ -63,8 +66,12 @@ const AdminOrders = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    setListPage(1);
+  }, [startDate, endDate, statusFilter, paymentFilter]);
+
   // Apply all filters
-  const filteredOrders = orders.filter(order => {
+  const filteredOrders = useMemo(() => orders.filter((order) => {
     // Check if payment failed
     const isPaymentFailed = order.paymentStatus === 'failed' ||
       (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
@@ -108,7 +115,23 @@ const AdminOrders = () => {
     }
 
     return true;
-  });
+  }), [orders, startDate, endDate, statusFilter, paymentFilter]);
+
+  const totalListPages = Math.max(1, Math.ceil(filteredOrders.length / ORDERS_PAGE_SIZE));
+  const effectiveListPage = Math.min(listPage, totalListPages);
+
+  useEffect(() => {
+    const tp = Math.max(1, Math.ceil(filteredOrders.length / ORDERS_PAGE_SIZE));
+    setListPage((p) => Math.min(p, tp));
+  }, [filteredOrders.length]);
+
+  const paginatedOrders = useMemo(() => {
+    const start = (effectiveListPage - 1) * ORDERS_PAGE_SIZE;
+    return filteredOrders.slice(start, start + ORDERS_PAGE_SIZE);
+  }, [filteredOrders, effectiveListPage]);
+
+  const listRangeStart = filteredOrders.length === 0 ? 0 : (effectiveListPage - 1) * ORDERS_PAGE_SIZE + 1;
+  const listRangeEnd = filteredOrders.length === 0 ? 0 : Math.min(effectiveListPage * ORDERS_PAGE_SIZE, filteredOrders.length);
 
   // Clear all filters
   const clearFilters = () => {
@@ -288,6 +311,60 @@ const AdminOrders = () => {
         )}
       </div>
 
+      {filteredOrders.length > 0 && (
+        <div className="mb-4 space-y-2">
+          <p className="text-xs text-gray-500">
+            Showing <span className="font-semibold text-gray-800">{listRangeStart}</span>–
+            <span className="font-semibold text-gray-800">{listRangeEnd}</span> of{' '}
+            <span className="font-semibold text-gray-800">{filteredOrders.length}</span>
+            {' '}(page {effectiveListPage} of {totalListPages}, {ORDERS_PAGE_SIZE} per page)
+          </p>
+          {filteredOrders.length > ORDERS_PAGE_SIZE && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm">
+              <span className="text-[11px] text-gray-500">
+                Page <span className="font-semibold text-gray-800">{effectiveListPage}</span> / {totalListPages}
+              </span>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={effectiveListPage <= 1}
+                  onClick={() => setListPage(1)}
+                  className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  First
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage <= 1}
+                  onClick={() => setListPage((p) => Math.max(1, p - 1))}
+                  className="p-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage >= totalListPages}
+                  onClick={() => setListPage((p) => Math.min(totalListPages, p + 1))}
+                  className="p-1.5 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                  aria-label="Next page"
+                >
+                  <ChevronRight size={18} />
+                </button>
+                <button
+                  type="button"
+                  disabled={effectiveListPage >= totalListPages}
+                  onClick={() => setListPage(totalListPages)}
+                  className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Last
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Orders Table / Cards */}
       {filteredOrders.length === 0 ? (
         <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-8 sm:p-12 text-center">
@@ -298,7 +375,7 @@ const AdminOrders = () => {
         <>
           {/* Mobile Card View */}
           <div className="lg:hidden space-y-3">
-            {filteredOrders.map(order => {
+            {paginatedOrders.map(order => {
               const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.placed;
               const pay = PAYMENT_CONFIG[order.paymentStatus] || PAYMENT_CONFIG.unpaid;
               const isPaymentFailed = order.paymentStatus === 'failed' || 
@@ -360,7 +437,7 @@ const AdminOrders = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredOrders.map(order => {
+                  {paginatedOrders.map(order => {
                     const st = STATUS_CONFIG[order.status] || STATUS_CONFIG.placed;
                     const pay = PAYMENT_CONFIG[order.paymentStatus] || PAYMENT_CONFIG.unpaid;
                     const isPaymentFailed = order.paymentStatus === 'failed' || 

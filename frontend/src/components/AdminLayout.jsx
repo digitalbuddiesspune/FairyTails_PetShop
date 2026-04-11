@@ -25,6 +25,16 @@ import {
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
+const isMinimalAdminHeaderPath = (pathname) =>
+    pathname === '/admin/my-products' ||
+    pathname === '/admin/products' ||
+    pathname === '/admin/categories' ||
+    pathname === '/admin/banner' ||
+    pathname === '/admin/testimonials' ||
+    pathname === '/admin/orders' ||
+    pathname === '/admin/payments' ||
+    pathname === '/admin/users';
+
 const AdminLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
@@ -71,6 +81,10 @@ const AdminLayout = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    useEffect(() => {
+        if (isMinimalAdminHeaderPath(location.pathname)) setProfileDropdownOpen(false);
+    }, [location.pathname]);
 
     const handleLogout = () => {
         localStorage.removeItem('adminToken');
@@ -122,6 +136,9 @@ const AdminLayout = () => {
     };
 
     const isProductPage = location.pathname.includes('/admin/my-products') || location.pathname.includes('/admin/products');
+
+    /** No top title / profile on these routes (sidebar still has nav + logout). */
+    const hideTopTitleAndProfile = isMinimalAdminHeaderPath(location.pathname);
 
     const getPageTitle = () => {
         if (location.pathname.includes('/admin/my-products')) return 'My Products';
@@ -334,57 +351,68 @@ const AdminLayout = () => {
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col h-full overflow-hidden">
-                {/* Top Bar */}
-                <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0 z-30">
-                    <div className="flex items-center gap-3">
-                        <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
+                {/* Top Bar — full title + profile on dashboard & other admin pages; stripped on catalog/content pages */}
+                <header
+                    className={`bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center shrink-0 z-30 ${
+                        hideTopTitleAndProfile ? 'justify-start lg:hidden' : 'justify-between'
+                    }`}
+                >
+                    <div className="flex items-center gap-3 min-w-0">
+                        <button type="button" onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100 shrink-0">
                             <Menu size={20} className="text-gray-600" />
                         </button>
-                        <h1 className="text-lg font-bold text-gray-900">
-                            {getPageTitle()}
-                        </h1>
-                    </div>
-                    <div className="relative" ref={profileRef}>
-                        <button
-                            onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                            className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer"
-                        >
-                            {admin.email?.charAt(0).toUpperCase()}
-                        </button>
-
-                        {/* Profile Dropdown */}
-                        {profileDropdownOpen && (
-                            <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-fadeIn">
-                                <div className="px-4 py-3 border-b border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-lg">
-                                            {admin.email?.charAt(0).toUpperCase()}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <p className="text-sm font-semibold text-gray-800">Admin</p>
-                                            <p className="text-xs text-gray-500 truncate">{admin.email}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={() => { setProfileDropdownOpen(false); setShowPasswordModal(true); setPwError(''); setPwSuccess(''); }}
-                                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                >
-                                    <Lock size={16} className="text-gray-400" />
-                                    Change Password
-                                </button>
-                                <div className="border-t border-gray-100 mt-1 pt-1">
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                                    >
-                                        <LogOut size={16} />
-                                        Log Out
-                                    </button>
-                                </div>
-                            </div>
+                        {!hideTopTitleAndProfile && (
+                            <h1 className="text-lg font-bold text-gray-900 truncate">
+                                {getPageTitle()}
+                            </h1>
                         )}
                     </div>
+                    {!hideTopTitleAndProfile && (
+                        <div className="relative shrink-0" ref={profileRef}>
+                            <button
+                                type="button"
+                                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                                className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer"
+                            >
+                                {admin.email?.charAt(0).toUpperCase()}
+                            </button>
+
+                            {/* Profile Dropdown */}
+                            {profileDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-fadeIn">
+                                    <div className="px-4 py-3 border-b border-gray-100">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-lg">
+                                                {admin.email?.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-sm font-semibold text-gray-800">Admin</p>
+                                                <p className="text-xs text-gray-500 truncate">{admin.email}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setProfileDropdownOpen(false); setShowPasswordModal(true); setPwError(''); setPwSuccess(''); }}
+                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                    >
+                                        <Lock size={16} className="text-gray-400" />
+                                        Change Password
+                                    </button>
+                                    <div className="border-t border-gray-100 mt-1 pt-1">
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                        >
+                                            <LogOut size={16} />
+                                            Log Out
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </header>
 
                 {/* Change Password Modal */}
