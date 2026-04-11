@@ -65,16 +65,135 @@ const normalizePetLabel = (value = '') => {
   return clean.charAt(0).toUpperCase() + clean.slice(1);
 };
 const isPetValue = (value = '') => PET_VALUES.has(normalizeFilterValue(value));
+/** All pet labels that apply to this product (Dog, Cat, …) — used for filters and chips. */
+const getPetLabelSet = (p) => {
+  const out = new Set();
+  const add = (raw) => {
+    if (!isPetValue(raw)) return;
+    out.add(normalizePetLabel(raw));
+  };
+  add(p.category);
+  add(p.subCategory);
+  const sf = normalizeFilterValue(p.suitableFor || '');
+  if (sf === 'dogs') out.add('Dog');
+  if (sf === 'cats') out.add('Cat');
+  if (sf === 'both') {
+    out.add('Dog');
+    out.add('Cat');
+  }
+  return out;
+};
+
 const getPetCategory = (p) => {
-  if (isPetValue(p.category)) return normalizePetLabel(p.category);
-  if (isPetValue(p.subCategory)) return normalizePetLabel(p.subCategory);
-  return '';
+  const labels = [...getPetLabelSet(p)].sort();
+  if (!labels.length) return '';
+  if (labels.length === 1) return labels[0];
+  if (labels.length === 2 && labels.includes('Dog') && labels.includes('Cat')) return 'Dog / Cat';
+  return labels.join(' · ');
 };
 const getProductSubcategory = (p) => {
   // Food uses category (pet) + subCategory (Dry/Wet/Treats)
   if (isPetValue(p.category) && p.subCategory) return formatFilterLabel(p.subCategory);
   // Other models usually use subCategory for pet; fall back to product type
   return formatFilterLabel(p.productType || p.subSubCategory || p._catLabel || p.category || '');
+};
+
+const SEARCH_STOPWORDS = new Set([
+  'a', 'an', 'the', 'and', 'or', 'with', 'for', 'of', 'to', 'in', 'on', 'at', 'by', 'from', 'as', 'is', 'are',
+]);
+
+const normalizeSearchInput = (raw) =>
+  String(raw)
+    .trim()
+    .toLowerCase()
+    .replace(/[\u201c\u201d\u2018\u2019`"'’]/g, '')
+    .replace(/\s+/g, ' ');
+
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Tokens used for AND search (drops noise words so rows don’t “match” random products). */
+const searchTokensFromQuery = (rawQuery) => {
+  const q = normalizeSearchInput(rawQuery);
+  if (!q) return [];
+  return q.split(/\s+/).map((t) => t.trim()).filter((t) => t && !SEARCH_STOPWORDS.has(t));
+};
+
+const tokenMatchesHaystack = (haystack, tok) => {
+  if (!tok) return true;
+  // Avoid "70" matching inside "170" or hex ids
+  if (/^\d+(\.\d+)?$/.test(tok)) {
+    return new RegExp(`(?:^|[^0-9])${escapeRegExp(tok)}(?:[^0-9]|$)`).test(haystack);
+  }
+  return haystack.includes(tok);
+};
+
+/** Single lowercase string for admin search (token AND across words). */
+const buildSearchHaystack = (p) => {
+  const parts = [
+    getName(p),
+    getBrand(p),
+    getSubCat(p),
+    p._catLabel,
+    p.category,
+    p.subCategory,
+    p.capacity,
+    p.productType,
+    p.subSubCategory,
+    p.itemCode,
+    p.hsn,
+    p.size,
+    p.material,
+    typeof p.description === 'string' ? p.description : '',
+  ];
+  if (Array.isArray(p.flavours)) parts.push(...p.flavours);
+  if (Array.isArray(p.details)) parts.push(...p.details);
+  if (Array.isArray(p.keyFeatures)) parts.push(...p.keyFeatures);
+  if (Array.isArray(p.nutrients)) parts.push(...p.nutrients);
+  if (Array.isArray(p.healthBenefits)) parts.push(...p.healthBenefits);
+  if (Array.isArray(p.prices)) {
+    p.prices.forEach((x) => {
+      if (x?.capacity != null) parts.push(String(x.capacity));
+    });
+  }
+  return normalizeFilterValue(parts.filter(Boolean).join(' ')).toLowerCase();
+};
+
+const matchesSearchQuery = (p, rawQuery) => {
+  const trimmed = String(rawQuery).trim();
+  if (!trimmed) return true;
+  const tokens = searchTokensFromQuery(rawQuery);
+  if (!tokens.length) return false;
+  const haystack = buildSearchHaystack(p);
+  return tokens.every((tok) => tokenMatchesHaystack(haystack, tok));
+};
+
+const searchRelevanceScore = (p, rawQuery) => {
+  const q = normalizeSearchInput(rawQuery);
+  if (!q) return 0;
+  const name = getName(p).toLowerCase();
+  let score = 0;
+  if (name === q) score += 5000;
+  else if (name.startsWith(q)) score += 2000;
+  else if (name.includes(q)) score += 1000;
+  const tokens = searchTokensFromQuery(rawQuery);
+  const haystack = buildSearchHaystack(p);
+  tokens.forEach((tok) => {
+    if (name.includes(tok)) score += 40;
+    else if (tokenMatchesHaystack(haystack, tok)) score += 15;
+  });
+  return score;
+};
+
+/** Same Mongo _id can appear twice when merging pages or categories; breaks React keys and search UX. */
+const dedupeProductsById = (items) => {
+  const seen = new Set();
+  return items.filter((p) => {
+    const id = p?._id != null ? String(p._id) : '';
+    if (!id) return true;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 };
 
 const getPrice = (p) => {
@@ -141,22 +260,29 @@ const AdminMyProducts = () => {
     setLoading(true);
     try {
       const fetchAllProductsByEndpoint = async (endpoint) => {
+        const allItems = [];
         let page = 1;
-        let allItems = [];
-        let hasNextPage = true;
-        let safety = 0;
+        let totalPages = 1;
 
-        while (hasNextPage && safety < 30) {
+        for (let i = 0; i < 400; i += 1) {
           const res = await fetch(`${API_BASE}/${endpoint}?page=${page}`);
           const data = await res.json();
           const batch = Array.isArray(data.data) ? data.data : [];
-          allItems = [...allItems, ...batch];
+          allItems.push(...batch);
 
-          const totalPages = Number(data.totalPages);
-          const currentPage = Number(data.currentPage || page);
-          hasNextPage = Number.isFinite(totalPages) && totalPages > currentPage;
-          page = currentPage + 1;
-          safety += 1;
+          const tp = Number(data.totalPages);
+          const cp = Number(data.currentPage);
+          if (Number.isFinite(tp) && tp >= 1) totalPages = tp;
+
+          if (!Number.isFinite(tp) || tp < 1) {
+            if (batch.length === 0) break;
+            page += 1;
+            continue;
+          }
+
+          const cur = Number.isFinite(cp) ? cp : page;
+          if (cur >= totalPages) break;
+          page = cur + 1;
         }
 
         return allItems;
@@ -169,12 +295,12 @@ const AdminMyProducts = () => {
             return items.map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label }));
           })
         );
-        const all = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value);
+        const all = dedupeProductsById(results.filter(r => r.status === 'fulfilled').flatMap(r => r.value));
         setProducts(all);
       } else {
         const cat = CATEGORIES.find(c => c.key === selectedKey);
         const items = await fetchAllProductsByEndpoint(cat.endpoint);
-        setProducts(items.map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label })));
+        setProducts(dedupeProductsById(items.map(p => ({ ...p, _catKey: cat.key, _endpoint: cat.endpoint, _catLabel: cat.label }))));
       }
     } catch { setProducts([]); }
     finally { setLoading(false); }
@@ -183,9 +309,10 @@ const AdminMyProducts = () => {
   const petCategoryOptions = useMemo(() => {
     const optionMap = new Map();
     products.forEach((p) => {
-      const pet = getPetCategory(p);
-      const normalized = normalizeFilterValue(pet);
-      if (normalized && !optionMap.has(normalized)) optionMap.set(normalized, pet);
+      getPetLabelSet(p).forEach((label) => {
+        const normalized = normalizeFilterValue(label);
+        if (normalized && !optionMap.has(normalized)) optionMap.set(normalized, label);
+      });
     });
     return Array.from(optionMap.values()).sort((a, b) => a.localeCompare(b));
   }, [products]);
@@ -194,7 +321,7 @@ const AdminMyProducts = () => {
     if (selectedPetCategory === 'all') return [];
     const optionMap = new Map();
     products
-      .filter((p) => normalizeFilterValue(getPetCategory(p)) === normalizeFilterValue(selectedPetCategory))
+      .filter((p) => getPetLabelSet(p).has(selectedPetCategory))
       .forEach((p) => {
         const subCategory = getProductSubcategory(p);
         const normalized = normalizeFilterValue(subCategory);
@@ -207,7 +334,7 @@ const AdminMyProducts = () => {
     if (selectedKey !== 'food') return [];
     const foodProducts = selectedPetCategory === 'all'
       ? products
-      : products.filter((p) => normalizeFilterValue(getPetCategory(p)) === normalizeFilterValue(selectedPetCategory));
+      : products.filter((p) => getPetLabelSet(p).has(selectedPetCategory));
     const optionMap = new Map();
     foodProducts.forEach((p) => {
       const subCategory = getProductSubcategory(p);
@@ -218,25 +345,22 @@ const AdminMyProducts = () => {
   }, [products, selectedKey, selectedPetCategory]);
 
   const filtered = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    return products.filter((p) => {
-      const petCategory = getPetCategory(p);
+    const qTrim = searchQuery.trim();
+    const list = products.filter((p) => {
       const subCategory = getProductSubcategory(p);
       const petCategoryMatch =
-        selectedPetCategory === 'all' || normalizeFilterValue(petCategory) === normalizeFilterValue(selectedPetCategory);
+        selectedPetCategory === 'all' || getPetLabelSet(p).has(selectedPetCategory);
       const subCategoryMatch =
         selectedSubCategory === 'all' || normalizeFilterValue(subCategory) === normalizeFilterValue(selectedSubCategory);
 
-      const searchMatch =
-        !q ||
-        getName(p).toLowerCase().includes(q) ||
-        getBrand(p).toLowerCase().includes(q) ||
-        getSubCat(p).toLowerCase().includes(q) ||
-        petCategory.toLowerCase().includes(q) ||
-        (p._catLabel || '').toLowerCase().includes(q);
+      const searchMatch = matchesSearchQuery(p, qTrim);
 
       return petCategoryMatch && subCategoryMatch && searchMatch;
     });
+    if (!qTrim) return list;
+    return [...list].sort(
+      (a, b) => searchRelevanceScore(b, qTrim) - searchRelevanceScore(a, qTrim)
+    );
   }, [products, searchQuery, selectedPetCategory, selectedSubCategory]);
 
   const handleDelete = async (product) => {
@@ -387,11 +511,11 @@ const AdminMyProducts = () => {
           <>
             {/* ─── MOBILE: Card Layout (visible below lg) ─── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 lg:hidden pb-4">
-            {filtered.map(product => {
+            {filtered.map((product, rowIdx) => {
               const price = getPrice(product);
               const stock = getStock(product);
               return (
-                <div key={`m-${product._catKey}-${product._id}`} className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
+                <div key={`m-${rowIdx}-${product._catKey}-${String(product._id)}`} className="bg-white rounded-xl border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-shadow">
                   <div className="flex gap-3">
                     {/* Image */}
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gray-50 border border-gray-100 shrink-0 overflow-hidden p-1">
@@ -456,11 +580,11 @@ const AdminMyProducts = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filtered.map(product => {
+                  {filtered.map((product, rowIdx) => {
                     const price = getPrice(product);
                     const stock = getStock(product);
                     return (
-                      <tr key={`d-${product._catKey}-${product._id}`} className="hover:bg-gray-50/70 transition-colors group">
+                      <tr key={`d-${rowIdx}-${product._catKey}-${String(product._id)}`} className="hover:bg-gray-50/70 transition-colors group">
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-2">
                             <div className="w-10 h-10 rounded-lg bg-gray-100 p-0.5 border border-gray-200 shrink-0 overflow-hidden">
