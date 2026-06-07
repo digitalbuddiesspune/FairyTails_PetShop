@@ -36,7 +36,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminBanner from './pages/admin/AdminBanner';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import './App.css';
-import { isAdminAuthenticated, persistCognitoSession } from './auth/session';
+import { isAdminAuthenticated, persistCognitoSession, syncCognitoProfileToBackend } from './auth/session';
 import { syncGuestCartToBackend, syncGuestWishlistToBackend } from './utils/guestCart';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -92,14 +92,17 @@ const AuthSessionBridge = () => {
       const token = persistCognitoSession(auth.user);
       if (!token) return;
 
+      await syncCognitoProfileToBackend(auth.user, API_BASE);
       await syncGuestCartToBackend(token, API_BASE);
       await syncGuestWishlistToBackend(token, API_BASE);
       window.dispatchEvent(new Event('cart-wishlist-update'));
     };
 
     // Keep local session in sync whenever oidc-client renews tokens.
-    const onUserLoaded = (user) => {
-      if (user) persistCognitoSession(user);
+    const onUserLoaded = async (user) => {
+      if (!user) return;
+      persistCognitoSession(user);
+      await syncCognitoProfileToBackend(user, API_BASE);
     };
     const onAccessTokenExpiring = () => {
       renewSession().catch(() => {});

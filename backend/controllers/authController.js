@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import { extractCognitoProfile, syncUserFromCognitoProfile } from '../middleware/cognitoAuth.js';
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -148,6 +149,56 @@ export const getMe = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error'
+    });
+  }
+};
+
+// @desc    Sync Cognito profile (name/email/phone) into Mongo user
+// @route   POST /api/auth/cognito-sync
+// @access  Private
+export const syncCognitoProfile = async (req, res) => {
+  try {
+    const tokenProfile = extractCognitoProfile(req.auth || {});
+    const bodyProfile = extractCognitoProfile({
+      sub: req.body?.sub,
+      email: req.body?.email,
+      name: req.body?.name,
+      phone_number: req.body?.phone,
+      given_name: req.body?.given_name,
+      family_name: req.body?.family_name,
+    });
+
+    const profile = {
+      sub: tokenProfile.sub || bodyProfile.sub,
+      email: bodyProfile.email || tokenProfile.email,
+      name: bodyProfile.name || tokenProfile.name,
+      phone: bodyProfile.phone || tokenProfile.phone,
+    };
+
+    if (profile.sub && req.user?.cognitoSub && profile.sub !== req.user.cognitoSub) {
+      return res.status(403).json({
+        success: false,
+        message: 'Cognito profile does not match authenticated user',
+      });
+    }
+
+    const user = await syncUserFromCognitoProfile(req.user, profile);
+
+    res.status(200).json({
+      success: true,
+      message: 'Cognito profile synced',
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Cognito profile sync error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Server error during Cognito profile sync',
     });
   }
 };

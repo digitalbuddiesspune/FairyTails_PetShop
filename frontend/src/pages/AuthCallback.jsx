@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import { persistCognitoSession } from '../auth/session';
+import { persistCognitoSession, syncCognitoProfileToBackend } from '../auth/session';
+
+const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const AuthCallback = () => {
   const auth = useAuth();
@@ -22,6 +24,7 @@ const AuthCallback = () => {
       if (!auth.isAuthenticated || !auth.user) return;
 
       persistCognitoSession(auth.user);
+      await syncCognitoProfileToBackend(auth.user, API_BASE);
       navigate('/', { replace: true });
     };
 

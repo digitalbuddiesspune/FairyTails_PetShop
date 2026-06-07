@@ -19,7 +19,7 @@ export const getApiBearerToken = () => {
   if (key) {
     const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
     const oidcUser = safeJsonParse(raw);
-    const t = oidcUser?.access_token || oidcUser?.id_token;
+    const t = oidcUser?.id_token || oidcUser?.access_token;
     if (t) return t;
   }
   return localStorage.getItem(USER_TOKEN_KEY);
@@ -75,9 +75,45 @@ export const isUserAuthenticated = () => Boolean(getAuthToken());
 
 export const getStoredUser = () => safeJsonParse(localStorage.getItem(USER_DATA_KEY));
 
+export const syncCognitoProfileToBackend = async (oidcUser, apiBase) => {
+  const token = getApiBearerToken();
+  const profile = oidcUser?.profile || {};
+  if (!token || !apiBase) return;
+
+  const payload = {
+    sub: profile.sub,
+    email: profile.email,
+    name:
+      profile.name ||
+      [profile.given_name, profile.family_name].filter(Boolean).join(' ') ||
+      undefined,
+    given_name: profile.given_name,
+    family_name: profile.family_name,
+    phone: profile.phone_number,
+  };
+
+  try {
+    const response = await fetch(`${apiBase}/auth/cognito-sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (response.ok && data.success && data.data) {
+      localStorage.setItem(USER_DATA_KEY, JSON.stringify(data.data));
+      window.dispatchEvent(new Event('auth-changed'));
+    }
+  } catch (error) {
+    console.error('Failed to sync Cognito profile to backend:', error);
+  }
+};
+
 export const persistCognitoSession = (oidcUser) => {
   if (!oidcUser) return null;
-  const token = oidcUser.access_token || oidcUser.id_token;
+  const token = oidcUser.id_token || oidcUser.access_token;
   const idToken = oidcUser.id_token;
   if (!token) return null;
 

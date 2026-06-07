@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  cognitoSub: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now

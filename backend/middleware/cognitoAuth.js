@@ -30,21 +30,110 @@ const getBearerToken = (authorizationHeader = '') => {
 
 const randomPassword = () => crypto.randomBytes(24).toString('hex');
 
-const normalizeEmail = (payload) => {
-  const raw = payload?.email || payload?.username || payload?.['cognito:username'];
-  const email = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
-  const isValidEmail = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email);
-  if (isValidEmail) return email;
-
-  const stableId = payload?.sub || payload?.username || payload?.['cognito:username'];
-  if (!stableId) return '';
-  const normalizedId = String(stableId).trim().toLowerCase().replace(/[^a-z0-9._-]/g, '-');
-  return `${normalizedId}@cognito.com`;
+const isRealEmail = (value) => {
+  if (!value || typeof value !== 'string') return false;
+  const email = value.trim().toLowerCase();
+  if (email.endsWith('@cognito.com')) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
-const normalizeName = (payload) => {
-  const name = payload?.name || payload?.given_name || payload?.['cognito:username'] || 'Cognito User';
-  return String(name).trim();
+const syntheticEmailFromSub = (sub) => {
+  const normalizedId = String(sub || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '-');
+  return normalizedId ? `${normalizedId}@cognito.com` : '';
+};
+
+export const extractCognitoProfile = (payload = {}) => {
+  const sub = payload?.sub || '';
+  const rawEmail = payload?.email || payload?.username || payload?.['cognito:username'] || '';
+  const email = isRealEmail(rawEmail) ? rawEmail.trim().toLowerCase() : null;
+  const name =
+    payload?.name ||
+    [payload?.given_name, payload?.family_name].filter(Boolean).join(' ') ||
+    (isRealEmail(rawEmail) ? rawEmail.split('@')[0] : '') ||
+    '';
+  const phone = payload?.phone_number || '';
+
+  return {
+    sub,
+    email,
+    name: String(name).trim() || 'User',
+    phone: String(phone).trim(),
+  };
+};
+
+const shouldReplacePlaceholderName = (name) =>
+  !name || name === 'Cognito User' || name === 'User';
+
+const shouldReplaceSyntheticEmail = (email) =>
+  !email || String(email).toLowerCase().endsWith('@cognito.com');
+
+export const syncUserFromCognitoProfile = async (user, profile) => {
+  if (!user || !profile) return user;
+
+  let dirty = false;
+
+  if (profile.sub && user.cognitoSub !== profile.sub) {
+    user.cognitoSub = profile.sub;
+    dirty = true;
+  }
+
+  if (profile.email && shouldReplaceSyntheticEmail(user.email)) {
+    const conflict = await User.findOne({ email: profile.email, _id: { $ne: user._id } });
+    if (!conflict) {
+      user.email = profile.email;
+      dirty = true;
+    }
+  }
+
+  if (profile.name && shouldReplacePlaceholderName(user.name)) {
+    user.name = profile.name;
+    dirty = true;
+  }
+
+  if (profile.phone && !user.phone) {
+    user.phone = profile.phone;
+    dirty = true;
+  }
+
+  if (dirty) await user.save();
+  return user;
+};
+
+export const findOrProvisionUser = async (payload) => {
+  const profile = extractCognitoProfile(payload);
+  if (!profile.sub && !profile.email) {
+    throw new Error('Invalid Cognito token profile');
+  }
+
+  let user = null;
+
+  if (profile.sub) {
+    user = await User.findOne({ cognitoSub: profile.sub }).select('-password');
+  }
+
+  if (!user && profile.email) {
+    user = await User.findOne({ email: profile.email }).select('-password');
+  }
+
+  if (!user && profile.sub) {
+    user = await User.findOne({ email: syntheticEmailFromSub(profile.sub) }).select('-password');
+  }
+
+  if (!user) {
+    const emailToSave = profile.email || syntheticEmailFromSub(profile.sub);
+    if (!emailToSave) throw new Error('Unable to derive user email from Cognito token');
+
+    const created = await User.create({
+      cognitoSub: profile.sub || undefined,
+      name: profile.name,
+      email: emailToSave,
+      password: randomPassword(),
+      phone: profile.phone || undefined,
+    });
+    return User.findById(created._id).select('-password');
+  }
+
+  return syncUserFromCognitoProfile(user, profile);
 };
 
 const parseJwtPayload = (token) => {
@@ -70,7 +159,6 @@ const verifyCognitoToken = async (token) => {
     return idTokenVerifier.verify(token);
   }
 
-  // Unknown token type: try access first, then id as fallback.
   try {
     return await accessTokenVerifier.verify(token);
   } catch (accessError) {
@@ -90,20 +178,7 @@ export const protectWithCognito = async (req, res, next) => {
     }
 
     const payload = await verifyCognitoToken(token);
-    const email = normalizeEmail(payload);
-    if (!email) {
-      return res.status(401).json({ success: false, message: 'Not authorized, invalid Cognito token' });
-    }
-
-    let user = await User.findOne({ email }).select('-password');
-    if (!user) {
-      const created = await User.create({
-        name: normalizeName(payload),
-        email,
-        password: randomPassword(),
-      });
-      user = await User.findById(created._id).select('-password');
-    }
+    const user = await findOrProvisionUser(payload);
 
     req.user = user;
     req.auth = payload;
@@ -127,7 +202,7 @@ export const protectAdminWithCognito = async (req, res, next) => {
     }
 
     const payload = await verifyCognitoToken(token);
-    const email = normalizeEmail(payload);
+    const email = extractCognitoProfile(payload).email || syntheticEmailFromSub(payload?.sub);
     if (!email) {
       return res.status(401).json({ success: false, message: 'Not authorized, invalid Cognito token' });
     }
@@ -168,4 +243,3 @@ export const protectAdminWithCognito = async (req, res, next) => {
     });
   }
 };
-
