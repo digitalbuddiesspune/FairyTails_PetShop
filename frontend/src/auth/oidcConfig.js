@@ -11,7 +11,8 @@ const redirectUri =
   import.meta.env.VITE_COGNITO_REDIRECT_URI || `${window.location.origin}/callback`;
 const postLogoutRedirectUri =
   import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI || `${window.location.origin}/`;
-const scope = import.meta.env.VITE_COGNITO_SCOPE || 'openid email phone profile';
+// Must match "Allowed OAuth Scopes" on the Cognito app client (profile is optional).
+const scope = import.meta.env.VITE_COGNITO_SCOPE || 'openid email phone';
 
 export const oidcConfig = {
   authority,
