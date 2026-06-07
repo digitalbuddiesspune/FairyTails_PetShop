@@ -11,7 +11,7 @@ const redirectUri =
   import.meta.env.VITE_COGNITO_REDIRECT_URI || `${window.location.origin}/callback`;
 const postLogoutRedirectUri =
   import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI || `${window.location.origin}/`;
-const scope = import.meta.env.VITE_COGNITO_SCOPE || 'openid email phone';
+const scope = import.meta.env.VITE_COGNITO_SCOPE || 'openid email phone profile';
 
 export const oidcConfig = {
   authority,

@@ -30,6 +30,12 @@ const getBearerToken = (authorizationHeader = '') => {
 
 const randomPassword = () => crypto.randomBytes(24).toString('hex');
 
+const COGNITO_DEBUG =
+  process.env.COGNITO_DEBUG === 'true' || process.env.NODE_ENV === 'development';
+
+const looksLikeUuid = (value) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(value || '').trim());
+
 const isRealEmail = (value) => {
   if (!value || typeof value !== 'string') return false;
   const email = value.trim().toLowerCase();
@@ -42,15 +48,60 @@ const syntheticEmailFromSub = (sub) => {
   return normalizedId ? `${normalizedId}@cognito.com` : '';
 };
 
+const pickFirstRealEmail = (...candidates) => {
+  for (const candidate of candidates) {
+    if (isRealEmail(candidate)) return candidate.trim().toLowerCase();
+  }
+  return null;
+};
+
+const resolveDisplayName = (payload, email) => {
+  const fromParts = [payload?.given_name, payload?.family_name].filter(Boolean).join(' ').trim();
+  const preferred = payload?.preferred_username?.trim();
+  const cognitoUsername = payload?.['cognito:username']?.trim();
+  const username = payload?.username?.trim();
+
+  if (payload?.name?.trim()) return payload.name.trim();
+  if (fromParts) return fromParts;
+  if (preferred && !looksLikeUuid(preferred)) return preferred;
+  if (email) return email.split('@')[0];
+  if (cognitoUsername && isRealEmail(cognitoUsername)) return cognitoUsername.split('@')[0];
+  if (username && isRealEmail(username)) return username.split('@')[0];
+  if (cognitoUsername && !looksLikeUuid(cognitoUsername)) return cognitoUsername;
+  if (username && !looksLikeUuid(username)) return username;
+  return '';
+};
+
+export const logCognitoPayload = (label, payload = {}) => {
+  if (!COGNITO_DEBUG || !payload) return;
+
+  const profile = extractCognitoProfile(payload);
+  console.info(`[Cognito:${label}]`, {
+    token_use: payload.token_use,
+    sub: payload.sub,
+    claims: {
+      email: payload.email ?? null,
+      name: payload.name ?? null,
+      given_name: payload.given_name ?? null,
+      family_name: payload.family_name ?? null,
+      preferred_username: payload.preferred_username ?? null,
+      username: payload.username ?? null,
+      'cognito:username': payload['cognito:username'] ?? null,
+      phone_number: payload.phone_number ?? null,
+    },
+    resolved: profile,
+  });
+};
+
 export const extractCognitoProfile = (payload = {}) => {
   const sub = payload?.sub || '';
-  const rawEmail = payload?.email || payload?.username || payload?.['cognito:username'] || '';
-  const email = isRealEmail(rawEmail) ? rawEmail.trim().toLowerCase() : null;
-  const name =
-    payload?.name ||
-    [payload?.given_name, payload?.family_name].filter(Boolean).join(' ') ||
-    (isRealEmail(rawEmail) ? rawEmail.split('@')[0] : '') ||
-    '';
+  const email = pickFirstRealEmail(
+    payload?.email,
+    payload?.preferred_username,
+    payload?.username,
+    payload?.['cognito:username']
+  );
+  const name = resolveDisplayName(payload, email);
   const phone = payload?.phone_number || '';
 
   return {
@@ -100,6 +151,7 @@ export const syncUserFromCognitoProfile = async (user, profile) => {
 };
 
 export const findOrProvisionUser = async (payload) => {
+  logCognitoPayload('findOrProvisionUser', payload);
   const profile = extractCognitoProfile(payload);
   if (!profile.sub && !profile.email) {
     throw new Error('Invalid Cognito token profile');
@@ -178,6 +230,7 @@ export const protectWithCognito = async (req, res, next) => {
     }
 
     const payload = await verifyCognitoToken(token);
+    logCognitoPayload('protectWithCognito', payload);
     const user = await findOrProvisionUser(payload);
 
     req.user = user;

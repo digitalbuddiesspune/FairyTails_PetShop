@@ -33,18 +33,44 @@ const safeJsonParse = (value) => {
   }
 };
 
+const looksLikeUuid = (value) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(value || '').trim());
+
+const isRealEmail = (value) =>
+  typeof value === 'string' &&
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) &&
+  !value.trim().toLowerCase().endsWith('@cognito.com');
+
+const resolveOidcDisplayName = (profile) => {
+  const fromParts = [profile.given_name, profile.family_name].filter(Boolean).join(' ').trim();
+  const email = isRealEmail(profile.email) ? profile.email : null;
+
+  if (profile.name?.trim()) return profile.name.trim();
+  if (fromParts) return fromParts;
+  if (profile.preferred_username?.trim() && !looksLikeUuid(profile.preferred_username)) {
+    return profile.preferred_username.trim();
+  }
+  if (email) return email.split('@')[0];
+  return 'User';
+};
+
+const resolveOidcEmail = (profile) => {
+  const candidates = [
+    profile.email,
+    profile.preferred_username,
+    profile.username,
+    profile['cognito:username'],
+  ];
+  return candidates.find((value) => isRealEmail(value))?.trim().toLowerCase() || '';
+};
+
 const buildUserFromOidc = (oidcUser) => {
   const profile = oidcUser?.profile || {};
-  const fullName =
-    profile.name ||
-    [profile.given_name, profile.family_name].filter(Boolean).join(' ') ||
-    profile.email ||
-    'Cognito User';
 
   return {
     _id: profile.sub || profile.username || profile['cognito:username'],
-    name: fullName,
-    email: profile.email || profile.username || '',
+    name: resolveOidcDisplayName(profile),
+    email: resolveOidcEmail(profile),
     phone: profile.phone_number || '',
   };
 };
@@ -87,10 +113,28 @@ export const syncCognitoProfileToBackend = async (oidcUser, apiBase) => {
       profile.name ||
       [profile.given_name, profile.family_name].filter(Boolean).join(' ') ||
       undefined,
+    preferred_username: profile.preferred_username,
+    username: profile.username,
+    'cognito:username': profile['cognito:username'],
     given_name: profile.given_name,
     family_name: profile.family_name,
     phone: profile.phone_number,
   };
+
+  if (import.meta.env.DEV) {
+    console.info('[Cognito:frontend-sync]', {
+      profile: {
+        sub: profile.sub,
+        email: profile.email,
+        name: profile.name,
+        preferred_username: profile.preferred_username,
+        username: profile.username,
+        'cognito:username': profile['cognito:username'],
+        phone_number: profile.phone_number,
+      },
+      payload,
+    });
+  }
 
   try {
     const response = await fetch(`${apiBase}/auth/cognito-sync`, {
