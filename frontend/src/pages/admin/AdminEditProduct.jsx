@@ -2,19 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import ProductForm from './ProductForm';
-import { categories } from './AdminCategorySelection';
+import { getCategoryDataByKey } from './adminProductConfig';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
-
-const CATEGORY_KEY_TO_TYPE = {
-  food: 'food',
-  clothes: 'clothes',
-  grooming: 'grooming',
-  health: 'health',
-  houses: 'house',
-  toys: 'toy',
-  accessories: 'accessory',
-};
 
 const AdminEditProduct = () => {
   const { categoryKey, id } = useParams();
@@ -23,10 +13,7 @@ const AdminEditProduct = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const categoryData = useMemo(() => {
-    const type = CATEGORY_KEY_TO_TYPE[categoryKey];
-    return categories.find((cat) => cat.type === type) || null;
-  }, [categoryKey]);
+  const categoryData = useMemo(() => getCategoryDataByKey(categoryKey), [categoryKey]);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -101,7 +88,6 @@ const AdminEditProduct = () => {
       </button>
 
       <ProductForm
-        mode="page"
         categoryData={categoryData}
         existingProduct={product}
         onClose={() => navigate('/admin/my-products')}

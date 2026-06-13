@@ -8,9 +8,11 @@ import { uploadAdminImage } from '../controllers/uploadController.js';
 import { protectAdmin } from '../middleware/adminMiddleware.js';
 
 const router = express.Router();
+const MAX_IMAGE_UPLOAD_BYTES = 4 * 1024 * 1024;
+
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: MAX_IMAGE_UPLOAD_BYTES },
 });
 
 // Public routes
@@ -42,6 +44,22 @@ router.put('/testimonials/:id', protectAdmin, updateTestimonial);
 router.delete('/testimonials/:id', protectAdmin, deleteTestimonial);
 
 // Admin image upload (S3)
-router.post('/upload/image', protectAdmin, upload.single('image'), uploadAdminImage);
+router.post('/upload/image', protectAdmin, (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({
+          success: false,
+          message: 'Image must be 4 MB or smaller.',
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: err.message || 'Image upload failed',
+      });
+    }
+    next();
+  });
+}, uploadAdminImage);
 
 export default router;

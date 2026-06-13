@@ -1,6 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
+const MAX_IMAGE_UPLOAD_MB = 4;
+const MAX_IMAGE_UPLOAD_BYTES = MAX_IMAGE_UPLOAD_MB * 1024 * 1024;
+
+const isImageUrl = (value) =>
+  typeof value === 'string' && /^https?:\/\//i.test(value.trim());
 
 /* ─── Schema-aware initial states ─────────────────────────────────────────── */
 
@@ -167,7 +172,7 @@ const normalizePetName = (value, mode = 'title') => {
 
 /* ─── Component ───────────────────────────────────────────────────────────── */
 
-const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess, mode = 'modal' }) => {
+const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
   const type = categoryData.type;
   const [formData, setFormData] = useState({ ...INITIAL[type] });
   const [categoryTree, setCategoryTree] = useState([]);
@@ -339,6 +344,12 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess, mode =
 
   const handleImageUpload = async (field, idx, file) => {
     if (!file) return;
+
+    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+      setError(`Image must be ${MAX_IMAGE_UPLOAD_MB} MB or smaller. Selected file is ${(file.size / (1024 * 1024)).toFixed(1)} MB.`);
+      return;
+    }
+
     const token = localStorage.getItem('adminToken');
     if (!token) {
       setError('Admin token missing. Please sign in again.');
@@ -631,35 +642,50 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess, mode =
       <Label required={required}>{label}</Label>
       {field === 'images' && (
         <p className="text-xs text-gray-500 mb-2">
-          You can either paste an image URL or upload from your device.
+          Paste an image URL or upload from your device. Max file size: {MAX_IMAGE_UPLOAD_MB} MB (JPG, PNG, WEBP, GIF).
         </p>
       )}
       {(formData[field] || ['']).map((val, i) => (
-        <div key={i} className="flex gap-2 mb-2">
-          <input
-            value={val}
-            onChange={(e) => arrSet(field, i, e.target.value)}
-            placeholder={placeholder}
-            className="input-field"
-          />
-          {field === 'images' && (
-            <label className="px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer whitespace-nowrap flex items-center">
-              {uploadingImageIndex === `${field}-${i}` ? 'Uploading...' : 'Upload'}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                disabled={uploadingImageIndex === `${field}-${i}`}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  handleImageUpload(field, i, file);
-                  e.target.value = '';
+        <div key={i} className={`mb-3 ${field === 'images' ? 'p-3 rounded-xl border border-gray-200 bg-gray-50/50' : ''}`}>
+          <div className="flex gap-2">
+            <input
+              value={val}
+              onChange={(e) => arrSet(field, i, e.target.value)}
+              placeholder={placeholder}
+              className="input-field"
+            />
+            {field === 'images' && (
+              <label className="px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer whitespace-nowrap flex items-center shrink-0">
+                {uploadingImageIndex === `${field}-${i}` ? 'Uploading...' : 'Upload'}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  disabled={uploadingImageIndex === `${field}-${i}`}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    handleImageUpload(field, i, file);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+            )}
+            {i > 0 && (
+              <button type="button" onClick={() => arrRemove(field, i)} className="text-red-400 hover:text-red-600 text-lg px-1 shrink-0">×</button>
+            )}
+          </div>
+          {field === 'images' && isImageUrl(val) && (
+            <div className="mt-3 flex items-start gap-3">
+              <img
+                src={val}
+                alt={`Preview ${i + 1}`}
+                className="w-28 h-28 rounded-lg border border-gray-200 object-cover bg-white"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
                 }}
               />
-            </label>
-          )}
-          {i > 0 && (
-            <button type="button" onClick={() => arrRemove(field, i)} className="text-red-400 hover:text-red-600 text-lg px-1">×</button>
+              <p className="text-xs text-gray-500 pt-1 break-all">{val}</p>
+            </div>
           )}
         </div>
       ))}
@@ -1513,8 +1539,6 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess, mode =
 
   /* ─── Render ──────────────────────────────────────────────────────────── */
 
-  const isPageMode = mode === 'page';
-
   const formBody = (
     <>
       {error && (
@@ -1576,43 +1600,20 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess, mode =
       `}</style>
   );
 
-  if (isPageMode) {
-    return (
-      <div className="w-full">
-        <div className="mb-6 pb-4 border-b border-gray-200">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {existingProduct ? 'Edit' : 'Add'} {categoryData.label.replace(/s$/, '')}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {existingProduct ? 'Update product details and capacity pricing' : 'Fill in the details below'}
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5 w-full">
-          {formBody}
-        </form>
-        {formStyles}
-      </div>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              {existingProduct ? 'Edit' : 'Add'} {categoryData.label.replace(/s$/, '')}
-            </h2>
-            <p className="text-xs text-gray-500 mt-0.5">Fill in the details below</p>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors text-xl">✕</button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {formBody}
-        </form>
+    <div className="w-full mx-auto my-2 sm:my-4 p-4 sm:p-6 lg:p-8 bg-white border border-gray-200 rounded-xl shadow-sm">
+      <div className="mb-6 pb-4 border-b border-gray-200">
+        <h1 className="text-2xl font-bold text-gray-900">
+          {existingProduct ? 'Edit' : 'Add'} {categoryData.label.replace(/s$/, '')}
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          {existingProduct ? 'Update product details and capacity pricing' : 'Fill in the details below'}
+        </p>
       </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5 w-full">
+        {formBody}
+      </form>
       {formStyles}
     </div>
   );

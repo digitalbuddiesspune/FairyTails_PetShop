@@ -35,6 +35,14 @@ export const uploadAdminImage = async (req, res) => {
       });
     }
 
+    const maxBytes = 4 * 1024 * 1024;
+    if (req.file.size > maxBytes) {
+      return res.status(400).json({
+        success: false,
+        message: 'Image must be 4 MB or smaller.',
+      });
+    }
+
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedMimeTypes.includes(req.file.mimetype)) {
       return res.status(400).json({
