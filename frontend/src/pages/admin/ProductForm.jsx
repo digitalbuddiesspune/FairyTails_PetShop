@@ -361,20 +361,48 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
     setError('');
     setUploadSuccess('');
     try {
-      const form = new FormData();
-      form.append('image', file);
-
-      const response = await fetch(`${API_BASE}/admin/upload/image`, {
+      const presignResponse = await fetch(`${API_BASE}/admin/upload/presign`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fileName: file.name,
+          contentType: file.type,
+          fileSize: file.size,
+        }),
       });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Image upload failed');
+
+      let presignData = null;
+      try {
+        presignData = await presignResponse.json();
+      } catch {
+        throw new Error(`Failed to prepare upload (${presignResponse.status})`);
       }
-      arrSet(field, idx, data.data.url);
-      setUploadSuccess('Image uploaded successfully from device.');
+
+      if (!presignResponse.ok || !presignData?.success) {
+        throw new Error(presignData?.message || 'Failed to prepare upload');
+      }
+
+      const { uploadUrl, url, contentType } = presignData.data;
+
+      const s3Response = await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': contentType || file.type },
+        body: file,
+      });
+
+      if (!s3Response.ok) {
+        throw new Error(
+          s3Response.status === 403
+            ? 'S3 rejected upload. Ensure bucket CORS allows PUT from this site (see deploy/s3-cors.json).'
+            : `S3 upload failed (${s3Response.status})`
+        );
+      }
+
+      arrSet(field, idx, url);
+      setUploadSuccess('Image uploaded directly to storage.');
       setTimeout(() => setUploadSuccess(''), 2500);
     } catch (uploadError) {
       setError(uploadError.message || 'Image upload failed');
@@ -642,7 +670,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
       <Label required={required}>{label}</Label>
       {field === 'images' && (
         <p className="text-xs text-gray-500 mb-2">
-          Paste an image URL or upload from your device. Max file size: {MAX_IMAGE_UPLOAD_MB} MB (JPG, PNG, WEBP, GIF).
+          Paste a URL or upload directly to storage (max {MAX_IMAGE_UPLOAD_MB} MB). Uploaded images are served via CloudFront.
         </p>
       )}
       {(formData[field] || ['']).map((val, i) => (

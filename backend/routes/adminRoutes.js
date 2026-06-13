@@ -4,7 +4,7 @@ import { adminSignup, adminSignin, getAdminMe, getAllUsers, deleteUser, changeAd
 import { getAllOrders, getOrderByIdAdmin, updateOrderStatus, updatePaymentStatus } from '../controllers/orderController.js';
 import { getAllBanners, createBanner, updateBanner, deleteBanner } from '../controllers/bannerController.js';
 import { getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from '../controllers/testimonialController.js';
-import { uploadAdminImage } from '../controllers/uploadController.js';
+import { createAdminImagePresign, uploadAdminImage } from '../controllers/uploadController.js';
 import { protectAdmin } from '../middleware/adminMiddleware.js';
 
 const router = express.Router();
@@ -43,7 +43,10 @@ router.post('/testimonials', protectAdmin, createTestimonial);
 router.put('/testimonials/:id', protectAdmin, updateTestimonial);
 router.delete('/testimonials/:id', protectAdmin, deleteTestimonial);
 
-// Admin image upload (S3)
+// Admin image upload — presigned direct-to-S3 (preferred)
+router.post('/upload/presign', protectAdmin, createAdminImagePresign);
+
+// Legacy proxy upload through API
 router.post('/upload/image', protectAdmin, (req, res, next) => {
   upload.single('image')(req, res, (err) => {
     if (err) {
