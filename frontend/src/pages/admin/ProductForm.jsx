@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
+import {
+  isImageUrl,
+  MAX_IMAGE_UPLOAD_MB,
+  MAX_IMAGE_UPLOAD_BYTES,
+  uploadAdminImageFile,
+} from '../../utils/adminImageUpload';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
-const MAX_IMAGE_UPLOAD_MB = 4;
-const MAX_IMAGE_UPLOAD_BYTES = MAX_IMAGE_UPLOAD_MB * 1024 * 1024;
-
-const isImageUrl = (value) =>
-  typeof value === 'string' && /^https?:\/\//i.test(value.trim());
 
 /* ─── Schema-aware initial states ─────────────────────────────────────────── */
 
@@ -361,46 +362,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
     setError('');
     setUploadSuccess('');
     try {
-      const presignResponse = await fetch(`${API_BASE}/admin/upload/presign`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fileName: file.name,
-          contentType: file.type,
-          fileSize: file.size,
-        }),
-      });
-
-      let presignData = null;
-      try {
-        presignData = await presignResponse.json();
-      } catch {
-        throw new Error(`Failed to prepare upload (${presignResponse.status})`);
-      }
-
-      if (!presignResponse.ok || !presignData?.success) {
-        throw new Error(presignData?.message || 'Failed to prepare upload');
-      }
-
-      const { uploadUrl, url, contentType } = presignData.data;
-
-      const s3Response = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': contentType || file.type },
-        body: file,
-      });
-
-      if (!s3Response.ok) {
-        throw new Error(
-          s3Response.status === 403
-            ? 'S3 rejected upload. Ensure bucket CORS allows PUT from this site (see deploy/s3-cors.json).'
-            : `S3 upload failed (${s3Response.status})`
-        );
-      }
-
+      const url = await uploadAdminImageFile(file, API_BASE);
       arrSet(field, idx, url);
       setUploadSuccess('Image uploaded directly to storage.');
       setTimeout(() => setUploadSuccess(''), 2500);

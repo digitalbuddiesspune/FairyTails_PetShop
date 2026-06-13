@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Plus, Edit2, X, Check } from 'lucide-react';
+import AdminImageUrlField from '../../components/admin/AdminImageUrlField';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -9,6 +10,7 @@ const AdminBanner = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingBanner, setEditingBanner] = useState(null);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+    const [formError, setFormError] = useState('');
     
     const [formData, setFormData] = useState({
         image: '',
@@ -112,6 +114,7 @@ const AdminBanner = () => {
             deviceType: 'desktop'
         });
         setEditingBanner(null);
+        setFormError('');
     };
 
     const openAddModal = () => {
@@ -264,19 +267,22 @@ const AdminBanner = () => {
                             </button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Banner Image URL *
-                                </label>
-                                <input
-                                    type="url"
-                                    value={formData.image}
-                                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none"
-                                    placeholder="https://example.com/banner.jpg"
-                                    required
-                                />
-                            </div>
+                            {formError && (
+                                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100">{formError}</p>
+                            )}
+                            <AdminImageUrlField
+                                label="Banner Image URL"
+                                value={formData.image}
+                                onChange={(image) => setFormData({ ...formData, image })}
+                                onError={setFormError}
+                                required
+                                placeholder="https://cdn.fairytailspetshop.com/..."
+                                previewWrapperClassName={
+                                    formData.deviceType === 'mobile'
+                                        ? 'w-40 h-40'
+                                        : 'w-full max-w-md aspect-[1920/600]'
+                                }
+                            />
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Category *
@@ -291,25 +297,6 @@ const AdminBanner = () => {
                                     <option value="mobile">Mobile</option>
                                 </select>
                             </div>
-                            {formData.image && (
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                        Preview
-                                    </label>
-                                    <div className={`border border-gray-200 rounded-lg overflow-hidden ${
-                                        formData.deviceType === 'mobile' ? 'aspect-square' : 'aspect-[1920/600]'
-                                    }`}>
-                                        <img
-                                            src={formData.image}
-                                            alt="Preview"
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                e.target.src = 'https://via.placeholder.com/400x200?text=Invalid+Image+URL';
-                                            }}
-                                        />
-                                    </div>
-                                </div>
-                            )}
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="button"

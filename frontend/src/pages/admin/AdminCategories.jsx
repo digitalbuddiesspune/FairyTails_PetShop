@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Edit2, Plus, Trash2, X } from "lucide-react";
+import AdminImageUrlField from "../../components/admin/AdminImageUrlField";
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -57,6 +58,7 @@ const AdminCategories = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [error, setError] = useState("");
+  const [imageError, setImageError] = useState("");
   const [formData, setFormData] = useState(EMPTY_FORM);
 
   const token = localStorage.getItem("adminToken");
@@ -94,6 +96,7 @@ const AdminCategories = () => {
     setFormData(EMPTY_FORM);
     setEditingCategory(null);
     setError("");
+    setImageError("");
   };
 
   const openAddModal = () => {
@@ -337,18 +340,18 @@ const AdminCategories = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Category Image URL
-                </label>
-                <input
-                  type="url"
-                  value={formData.image}
-                  onChange={(e) => handleChange("image", e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
-                  placeholder="https://..."
-                />
-              </div>
+              <AdminImageUrlField
+                label="Category Image URL"
+                value={formData.image}
+                onChange={(image) => handleChange("image", image)}
+                onError={setImageError}
+                placeholder="https://cdn.fairytailspetshop.com/..."
+                previewWrapperClassName="w-24 h-16"
+              />
+
+              {imageError && (
+                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100">{imageError}</p>
+              )}
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
