@@ -4,7 +4,7 @@ import {
   MAX_IMAGE_UPLOAD_MB,
   MAX_IMAGE_UPLOAD_BYTES,
   uploadAdminImageFile,
-} from '../../utils/adminImageUpload';
+} from '@/utils/adminImageUpload';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
