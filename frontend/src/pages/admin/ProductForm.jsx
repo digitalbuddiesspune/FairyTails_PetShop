@@ -1515,57 +1515,41 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess, mode =
 
   const isPageMode = mode === 'page';
 
-  return (
-    <div className={isPageMode ? 'w-full' : 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4'}>
-      <div className={`bg-white rounded-2xl w-full shadow-2xl ${isPageMode ? 'max-w-3xl mx-auto border border-gray-200' : 'max-w-2xl max-h-[90vh] overflow-y-auto'}`}>
-        {/* Header */}
-        <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              {existingProduct ? 'Edit' : 'Add'} {categoryData.label.replace(/s$/, '')}
-            </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {isPageMode ? 'Update product details and capacity pricing' : 'Fill in the details below'}
-            </p>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors text-xl">✕</button>
+  const formBody = (
+    <>
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">
+          {error}
         </div>
+      )}
+      {uploadSuccess && (
+        <div className="bg-blue-50 text-blue-700 p-3 rounded-xl text-sm border border-blue-100">
+          {uploadSuccess}
+        </div>
+      )}
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className={`p-6 space-y-5 ${isPageMode ? 'max-h-[calc(100vh-12rem)] overflow-y-auto' : ''}`}>
-          {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">
-              {error}
-            </div>
+      {FORM_RENDERERS[type]?.()}
+
+      <div className="flex justify-end gap-3 pt-5 border-t border-gray-100">
+        <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors">
+          Cancel
+        </button>
+        <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 text-sm font-semibold transition-colors">
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Saving...
+            </span>
+          ) : (
+            'Save Product'
           )}
-          {uploadSuccess && (
-            <div className="bg-blue-50 text-blue-700 p-3 rounded-xl text-sm border border-blue-100">
-              {uploadSuccess}
-            </div>
-          )}
-
-          {FORM_RENDERERS[type]?.()}
-
-          {/* Footer */}
-          <div className="flex justify-end gap-3 pt-5 border-t border-gray-100">
-            <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors">
-              Cancel
-            </button>
-            <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 text-sm font-semibold transition-colors">
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Saving...
-                </span>
-              ) : (
-                'Save Product'
-              )}
-            </button>
-          </div>
-        </form>
+        </button>
       </div>
+    </>
+  );
 
-      <style>{`
+  const formStyles = (
+    <style>{`
         .input-field {
           width: 100%;
           padding: 0.625rem 0.875rem;
@@ -1590,6 +1574,46 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess, mode =
           resize: vertical;
         }
       `}</style>
+  );
+
+  if (isPageMode) {
+    return (
+      <div className="w-full">
+        <div className="mb-6 pb-4 border-b border-gray-200">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {existingProduct ? 'Edit' : 'Add'} {categoryData.label.replace(/s$/, '')}
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {existingProduct ? 'Update product details and capacity pricing' : 'Fill in the details below'}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-5 w-full">
+          {formBody}
+        </form>
+        {formStyles}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">
+              {existingProduct ? 'Edit' : 'Add'} {categoryData.label.replace(/s$/, '')}
+            </h2>
+            <p className="text-xs text-gray-500 mt-0.5">Fill in the details below</p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors text-xl">✕</button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {formBody}
+        </form>
+      </div>
+      {formStyles}
     </div>
   );
 };

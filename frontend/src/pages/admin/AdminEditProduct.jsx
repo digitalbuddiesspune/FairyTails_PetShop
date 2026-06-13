@@ -90,11 +90,11 @@ const AdminEditProduct = () => {
   }
 
   return (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn w-full">
       <button
         type="button"
         onClick={() => navigate('/admin/my-products')}
-        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
       >
         <ArrowLeft size={16} />
         Back to My Products
