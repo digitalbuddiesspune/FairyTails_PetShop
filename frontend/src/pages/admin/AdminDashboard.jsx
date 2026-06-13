@@ -9,6 +9,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import { formatRupee } from '../../utils/formatPrice';
 import {
     ShoppingBag,
     Clock,
@@ -358,7 +359,7 @@ const AdminDashboard = () => {
                     <div>
                         <p className="text-gray-500 text-sm font-medium">Total Revenue (Est.)</p>
                         <h3 className="text-2xl font-bold text-gray-800 mt-1">
-                            ₹{chartData.reduce((acc, curr) => acc + curr.revenue, 0).toLocaleString()}
+                            {formatRupee(chartData.reduce((acc, curr) => acc + curr.revenue, 0))}
                         </h3>
                     </div>
                     <div className="p-3 bg-blue-50 rounded-xl">
@@ -473,7 +474,7 @@ const AdminDashboard = () => {
                                             {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
                                         </td>
                                         <td className="px-4 py-3 text-sm font-semibold text-gray-800">
-                                            ₹{order.total?.toLocaleString()}
+                                            {formatRupee(order.total)}
                                         </td>
                                         <td className="px-4 py-3">
                                             {getPaymentBadge(order)}
@@ -584,7 +585,7 @@ const AdminDashboard = () => {
                                                             <span className="text-xs text-gray-600">{totalQty}</span>
                                                         </td>
                                                         <td className="px-4 py-3 text-right">
-                                                            <span className="text-xs font-bold text-gray-800">₹{order.total?.toLocaleString()}</span>
+                                                            <span className="text-xs font-bold text-gray-800">{formatRupee(order.total)}</span>
                                                         </td>
                                                         <td className="px-4 py-3 text-center">
                                                             {getStatusBadge(order)}

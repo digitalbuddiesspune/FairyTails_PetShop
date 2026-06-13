@@ -19,6 +19,30 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const priceSchema = new mongoose.Schema(
+  {
+    capacity: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    mrp: {
+      type: Number,
+      required: true,
+    },
+    discountedPrice: {
+      type: Number,
+      required: true,
+    },
+    availableStock: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+  { _id: false }
+);
+
 const productSchema = new mongoose.Schema(
   {
     productName: {
@@ -39,19 +63,23 @@ const productSchema = new mongoose.Schema(
       enum: ['Dry Food', 'Wet Food', 'Treats'],
     },
 
+    prices: {
+      type: [priceSchema],
+      default: [],
+    },
+
+    // Legacy flat fields — synced from prices[] for list sorting / older clients
     capacity: {
-      type: String, // e.g. "1kg", "3kg", "400g"
-      required: true,
+      type: String,
+      trim: true,
     },
 
     mrp: {
       type: Number,
-      required: true,
     },
 
     discountPrice: {
       type: Number,
-      required: true,
     },
 
     discountType: {
@@ -61,7 +89,6 @@ const productSchema = new mongoose.Schema(
 
     availableStock: {
       type: Number,
-      required: true,
       min: 0,
     },
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { formatRupee } from '../../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 const ORDERS_PAGE_SIZE = 100;
@@ -410,7 +411,7 @@ const AdminOrders = () => {
                   </div>
                   <div className="flex items-center justify-between text-xs text-gray-500">
                     <span>{totalQty} item{totalQty !== 1 ? 's' : ''}</span>
-                    <span className="font-bold text-gray-800">₹{order.total?.toLocaleString()}</span>
+                    <span className="font-bold text-gray-800">{formatRupee(order.total)}</span>
                   </div>
                   <p className="text-[10px] text-gray-400 mt-2">
                     {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}, {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
@@ -483,7 +484,7 @@ const AdminOrders = () => {
                           <span className="text-xs text-gray-600">{totalQty}</span>
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <span className="text-xs font-bold text-gray-800">₹{order.total?.toLocaleString()}</span>
+                          <span className="text-xs font-bold text-gray-800">{formatRupee(order.total)}</span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           {isPaymentFailed ? (

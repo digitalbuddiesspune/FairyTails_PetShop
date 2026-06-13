@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getGuestCart, updateGuestCartItem, removeFromGuestCart, clearGuestCart, getGuestCartCount } from '../utils/guestCart';
 import { getApiBearerToken } from '../auth/session';
+import { formatRupee } from '../utils/formatPrice';
 import LoginRequiredModal from '../components/LoginRequiredModal';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -415,11 +416,11 @@ const CartPage = () => {
 
                             <div className="text-right">
                               <p className="text-lg font-bold text-gray-900">
-                                ₹{(pricing.discountedPrice * item.quantity).toLocaleString()}
+                                {formatRupee(pricing.discountedPrice * item.quantity)}
                               </p>
                               {pricing.mrp > pricing.discountedPrice && (
                                 <p className="text-xs text-gray-400 line-through">
-                                  ₹{(pricing.mrp * item.quantity).toLocaleString()}
+                                  {formatRupee(pricing.mrp * item.quantity)}
                                 </p>
                               )}
                             </div>
@@ -441,12 +442,12 @@ const CartPage = () => {
                     {savings > 0 && (
                       <div className="flex justify-between text-[#203D5B]">
                         <span>Discount</span>
-                        <span>- ₹{savings.toLocaleString()}</span>
+                        <span>- {formatRupee(savings)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-gray-600">
                       <span>Subtotal</span>
-                      <span>₹{subtotal.toLocaleString()}</span>
+                      <span>{formatRupee(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-gray-600">
                       <span>18% GST</span>
@@ -461,7 +462,7 @@ const CartPage = () => {
                             <span className="text-blue-600 font-medium">Free</span>
                           </>
                         ) : (
-                          <span>₹{deliveryCharge}</span>
+                          <span>{formatRupee(deliveryCharge)}</span>
                         )}
                       </div>
                     </div>
@@ -470,10 +471,10 @@ const CartPage = () => {
                   <div className="border-t border-gray-100 mt-4 pt-4">
                     <div className="flex justify-between text-lg font-bold text-gray-900">
                       <span>Total</span>
-                      <span>₹{total.toLocaleString()}</span>
+                      <span>{formatRupee(total)}</span>
                     </div>
                     {savings > 0 && (
-                      <p className="text-xs text-[#203D5B] mt-1">You're saving ₹{savings.toLocaleString()} on this order!</p>
+                      <p className="text-xs text-[#203D5B] mt-1">You're saving {formatRupee(savings)} on this order!</p>
                     )}
                   </div>
 

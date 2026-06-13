@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { getApiBearerToken } from '../auth/session';
+import { formatRupee } from '../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -271,9 +272,9 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
         )}
         {startingPrice && (
           <div className="flex items-end gap-2 mb-3">
-            <span className="text-base sm:text-xl font-bold text-gray-900">₹{startingPrice.discountedPrice}</span>
+            <span className="text-base sm:text-xl font-bold text-gray-900">{formatRupee(startingPrice.discountedPrice)}</span>
             {startingPrice.mrp > startingPrice.discountedPrice && (
-              <span className="text-sm text-gray-400 line-through">₹{startingPrice.mrp}</span>
+              <span className="text-sm text-gray-400 line-through">{formatRupee(startingPrice.mrp)}</span>
             )}
             {!isFoodWithNewStructure && !isAccessoryWithNewStructure && priceOptions.length > 1 && (
               <span className="text-xs text-gray-500 ml-auto">{priceOptions.length} sizes</span>

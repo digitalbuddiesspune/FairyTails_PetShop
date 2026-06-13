@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowLeft, Download, ChevronLeft, ChevronRight } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { formatRupee } from '../../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 const PAYMENTS_PAGE_SIZE = 100;
@@ -200,7 +201,7 @@ const AdminPayments = () => {
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <p className="text-sm text-gray-500 mb-1">PAID REVENUE</p>
-          <h3 className="text-3xl font-bold text-blue-600">₹{paidRevenue.toLocaleString()}</h3>
+          <h3 className="text-3xl font-bold text-blue-600">{formatRupee(paidRevenue)}</h3>
         </div>
       </div>
 
@@ -334,7 +335,7 @@ const AdminPayments = () => {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm font-semibold text-gray-900">
-                      ₹{order.total?.toLocaleString()}
+                      {formatRupee(order.total)}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
                       {order.paymentMethod === 'cash_on_delivery' ? 'COD' : 'Online'}

@@ -26,6 +26,7 @@ import TermsAndConditions from './pages/TermsAndConditions';
 import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
+import AdminEditProduct from './pages/admin/AdminEditProduct';
 import AdminMyProducts from './pages/admin/AdminMyProducts';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminCategories from './pages/admin/AdminCategories';
@@ -149,6 +150,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="my-products" element={<AdminMyProducts />} />
           <Route path="products" element={<AdminProducts />} />
+          <Route path="products/:categoryKey/:id/edit" element={<AdminEditProduct />} />
           <Route path="categories" element={<AdminCategories />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="order-details/:id" element={<AdminOrderDetails />} />

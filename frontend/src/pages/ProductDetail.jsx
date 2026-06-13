@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { addToGuestCart, addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } from '../utils/guestCart';
 import { clearUserSession, getApiBearerToken } from '../auth/session';
+import { formatRupee } from '../utils/formatPrice';
 import LoginRequiredModal from '../components/LoginRequiredModal';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -629,12 +630,12 @@ const ProductDetail = () => {
                   <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
                     <div className="flex items-end gap-2 sm:gap-3 flex-wrap mb-2">
                       <span className="text-2xl sm:text-3xl font-bold text-gray-900">
-                        ₹{currentPrice.discountedPrice}
+                        {formatRupee(currentPrice.discountedPrice)}
                       </span>
                       {currentPrice.mrp > currentPrice.discountedPrice && (
                         <>
                           <span className="text-lg text-gray-400 line-through pb-0.5">
-                            ₹{currentPrice.mrp}
+                            {formatRupee(currentPrice.mrp)}
                           </span>
                           <span className="text-sm font-semibold text-red-600 bg-red-50 px-2 py-1 rounded">
                             MRP
@@ -669,7 +670,7 @@ const ProductDetail = () => {
                           >
                             <span>{optLabel}</span>
                             <span className="mx-1">—</span>
-                            <span className="font-bold">₹{p.discountedPrice}</span>
+                            <span className="font-bold">{formatRupee(p.discountedPrice)}</span>
                             {optStock !== undefined && (
                               <span className={`block text-[10px] mt-0.5 ${
                                 outOfStock ? 'text-red-400' : optStock <= 5 ? 'text-orange-500' : 'text-gray-400'

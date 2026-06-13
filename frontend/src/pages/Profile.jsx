@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import dogImage from '../assets/dog.png';
+import { formatRupee } from '../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -181,7 +182,7 @@ const Profile = () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${st.color}`}>{st.label}</span>
-                          <span className="font-bold text-gray-900">₹{order.total.toLocaleString()}</span>
+                          <span className="font-bold text-gray-900">{formatRupee(order.total)}</span>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -192,7 +193,7 @@ const Profile = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>
-                              <p className="text-[10px] text-gray-400">Qty: {item.quantity} × ₹{item.price}</p>
+                              <p className="text-[10px] text-gray-400">Qty: {item.quantity} × {formatRupee(item.price)}</p>
                             </div>
                           </div>
                         ))}

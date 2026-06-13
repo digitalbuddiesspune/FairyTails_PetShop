@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import cattImage from '../assets/catt.png';
+import { formatRupee } from '../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -158,7 +159,7 @@ const OrdersPage = () => {
                             {st.icon} {st.label}
                           </span>
                         )}
-                        <span className="text-lg font-bold text-gray-900">₹{order.total?.toLocaleString()}</span>
+                        <span className="text-lg font-bold text-gray-900">{formatRupee(order.total)}</span>
                       </div>
                     </div>
 
@@ -176,7 +177,7 @@ const OrdersPage = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-semibold text-gray-900 text-sm line-clamp-1">{item.productName}</p>
-                              <p className="text-xs text-gray-400">Qty: {item.quantity} × ₹{item.price?.toLocaleString()}</p>
+                              <p className="text-xs text-gray-400">Qty: {item.quantity} × {formatRupee(item.price)}</p>
                             </div>
                            
                           </div>

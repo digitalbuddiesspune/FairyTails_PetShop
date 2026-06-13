@@ -9,11 +9,8 @@ const INITIAL = {
     productName: '',
     category: 'Dog',
     subCategory: 'Dry Food',
-    capacity: '',
-    mrp: '',
-    discountPrice: '',
+    prices: [{ capacity: '', mrp: '', discountedPrice: '', availableStock: '' }],
     discountType: '',
-    availableStock: '',
     expiryDate: '',
     baseUnit: 'pieces',
     taxes: 18,
@@ -170,7 +167,7 @@ const normalizePetName = (value, mode = 'title') => {
 
 /* ─── Component ───────────────────────────────────────────────────────────── */
 
-const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
+const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess, mode = 'modal' }) => {
   const type = categoryData.type;
   const [formData, setFormData] = useState({ ...INITIAL[type] });
   const [categoryTree, setCategoryTree] = useState([]);
@@ -214,19 +211,29 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         merged.expiryDate = new Date(merged.expiryDate).toISOString().split('T')[0];
       }
 
-      // Ensure sub-arrays exist (food, accessory, health, and grooming no longer use prices/sizes/variants arrays)
-      if (type !== 'food' && type !== 'accessory' && type !== 'health' && type !== 'grooming') {
+      // Ensure sub-arrays exist
+      if (type === 'food') {
+        if (existingProduct.prices?.length) {
+          merged.prices = existingProduct.prices.map((row) => ({
+            capacity: row.capacity || '',
+            mrp: row.mrp ?? '',
+            discountedPrice: row.discountedPrice ?? row.discountPrice ?? '',
+            availableStock: row.availableStock ?? '',
+          }));
+        } else if (existingProduct.capacity) {
+          merged.prices = [{
+            capacity: existingProduct.capacity || '',
+            mrp: existingProduct.mrp ?? '',
+            discountedPrice: existingProduct.discountPrice ?? '',
+            availableStock: existingProduct.availableStock ?? '',
+          }];
+        } else if (!merged.prices?.length) {
+          merged.prices = init.prices;
+        }
+      } else if (type !== 'accessory' && type !== 'health' && type !== 'grooming') {
         ['sizes', 'variants'].forEach((k) => {
           if (init[k] && (!merged[k] || !merged[k].length)) merged[k] = init[k];
         });
-      }
-      
-      // Handle food prices migration (if old format exists)
-      if (type === 'food' && existingProduct.prices && Array.isArray(existingProduct.prices) && existingProduct.prices.length > 0) {
-        const firstPrice = existingProduct.prices[0];
-        merged.capacity = firstPrice.capacity || '';
-        merged.mrp = firstPrice.mrp || '';
-        merged.discountPrice = firstPrice.discountedPrice || '';
       }
       
       // Handle accessory sizes migration (if old format exists)
@@ -472,6 +479,35 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         if (payload.availableStock !== undefined && payload.availableStock !== '') payload.availableStock = Number(payload.availableStock);
       }
       
+      // Convert food capacity variants
+      if (type === 'food' && payload.prices) {
+        payload.prices = payload.prices
+          .map((row) => ({
+            capacity: String(row.capacity || '').trim(),
+            mrp: row.mrp !== '' && row.mrp !== undefined ? Number(row.mrp) : NaN,
+            discountedPrice:
+              row.discountedPrice !== '' && row.discountedPrice !== undefined
+                ? Number(row.discountedPrice)
+                : NaN,
+            availableStock:
+              row.availableStock !== '' && row.availableStock !== undefined
+                ? Number(row.availableStock)
+                : 0,
+          }))
+          .filter((row) => row.capacity && Number.isFinite(row.mrp) && Number.isFinite(row.discountedPrice));
+
+        if (!payload.prices.length) {
+          setError('Please add at least one capacity variant with MRP and sale price');
+          setLoading(false);
+          return;
+        }
+
+        delete payload.capacity;
+        delete payload.mrp;
+        delete payload.discountPrice;
+        delete payload.availableStock;
+      }
+
       // Convert sub-array numbers
       if (payload.prices && type !== 'food') {
         payload.prices = payload.prices.map((p) => ({
@@ -663,34 +699,78 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         </div>
       </div>
 
-      {/* Pricing */}
-      <SectionTitle icon="💰">Pricing</SectionTitle>
+      {/* Capacity variants & pricing */}
+      <SectionTitle icon="💰">Capacity & Pricing</SectionTitle>
+      <p className="text-xs text-gray-500 -mt-2">Add each pack size with its own MRP, sale price, and stock.</p>
+      {formData.prices.map((row, i) => (
+        <div key={i} className="flex flex-wrap gap-2 items-end">
+          <div className="flex-1 min-w-[120px]">
+            {i === 0 && <Label required>Capacity</Label>}
+            <input
+              className="input-field"
+              placeholder="e.g. 1kg"
+              value={row.capacity}
+              onChange={(e) => subArrSet('prices', i, 'capacity', e.target.value)}
+              required
+            />
+          </div>
+          <div className="w-28">
+            {i === 0 && <Label required>MRP</Label>}
+            <input
+              className="input-field"
+              type="number"
+              placeholder="MRP"
+              value={row.mrp}
+              onChange={(e) => subArrSet('prices', i, 'mrp', e.target.value)}
+              required
+            />
+          </div>
+          <div className="w-28">
+            {i === 0 && <Label required>Sale Price</Label>}
+            <input
+              className="input-field"
+              type="number"
+              placeholder="Sale"
+              value={row.discountedPrice}
+              onChange={(e) => subArrSet('prices', i, 'discountedPrice', e.target.value)}
+              required
+            />
+          </div>
+          <div className="w-24">
+            {i === 0 && <Label required>Stock</Label>}
+            <input
+              className="input-field"
+              type="number"
+              min="0"
+              placeholder="Stock"
+              value={row.availableStock}
+              onChange={(e) => subArrSet('prices', i, 'availableStock', e.target.value)}
+              required
+            />
+          </div>
+          {i > 0 && (
+            <button
+              type="button"
+              onClick={() => subArrRemove('prices', i)}
+              className="text-red-400 hover:text-red-600 text-lg pb-2"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => subArrAdd('prices', { capacity: '', mrp: '', discountedPrice: '', availableStock: '' })}
+        className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+      >
+        + Add Capacity Variant
+      </button>
+
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label required>Capacity</Label>
-          <input className="input-field" placeholder="e.g. 1kg" value={formData.capacity || ''} onChange={(e) => set('capacity', e.target.value)} required />
-        </div>
-        <div>
-          <Label required>MRP</Label>
-          <input className="input-field" type="number" placeholder="MRP" value={formData.mrp || ''} onChange={(e) => set('mrp', e.target.value)} required />
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label required>Discount Price</Label>
-          <input className="input-field" type="number" placeholder="Discount Price" value={formData.discountPrice || ''} onChange={(e) => set('discountPrice', e.target.value)} required />
-        </div>
         <div>
           <Label required>Discount Type</Label>
           <input className="input-field" placeholder="e.g. Percentage, Fixed" value={formData.discountType || ''} onChange={(e) => set('discountType', e.target.value)} required />
-        </div>
-      </div>
-
-      {/* Stock & Expiry */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label required>Available Stock</Label>
-          <input className="input-field" type="number" min="0" value={formData.availableStock || ''} onChange={(e) => set('availableStock', e.target.value)} placeholder="e.g. 100" required />
         </div>
         <div>
           <Label required>Expiry Date</Label>
@@ -1433,22 +1513,26 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
   /* ─── Render ──────────────────────────────────────────────────────────── */
 
+  const isPageMode = mode === 'page';
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div className={isPageMode ? 'w-full' : 'fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4'}>
+      <div className={`bg-white rounded-2xl w-full shadow-2xl ${isPageMode ? 'max-w-3xl mx-auto border border-gray-200' : 'max-w-2xl max-h-[90vh] overflow-y-auto'}`}>
         {/* Header */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10 rounded-t-2xl">
           <div>
             <h2 className="text-xl font-bold text-gray-900">
               {existingProduct ? 'Edit' : 'Add'} {categoryData.label.replace(/s$/, '')}
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">Fill in the details below</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {isPageMode ? 'Update product details and capacity pricing' : 'Fill in the details below'}
+            </p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors text-xl">✕</button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className={`p-6 space-y-5 ${isPageMode ? 'max-h-[calc(100vh-12rem)] overflow-y-auto' : ''}`}>
           {error && (
             <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">
               {error}

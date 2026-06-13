@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HeroBanner from './HeroBanner';
+import { formatRupee } from '../utils/formatPrice';
 
 // Color mapping for category circle backgrounds
 const categoryColors = {
@@ -338,9 +339,9 @@ const HomePage = () => {
                       </div>
                     )}
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-gray-900">₹{price?.toLocaleString()}</span>
+                      <span className="text-lg font-bold text-gray-900">{formatRupee(price)}</span>
                       {mrp > price && (
-                        <span className="text-sm text-gray-400 line-through">₹{mrp?.toLocaleString()}</span>
+                        <span className="text-sm text-gray-400 line-through">{formatRupee(mrp)}</span>
                       )}
                     </div>
                   </Link>

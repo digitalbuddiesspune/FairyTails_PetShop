@@ -28,6 +28,7 @@ const API_BASE = import.meta.env.VITE_BACKEND_API;
 const isMinimalAdminHeaderPath = (pathname) =>
     pathname === '/admin/my-products' ||
     pathname === '/admin/products' ||
+    pathname.startsWith('/admin/products/') ||
     pathname === '/admin/categories' ||
     pathname === '/admin/banner' ||
     pathname === '/admin/testimonials' ||

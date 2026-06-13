@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { formatRupee } from '../../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -368,7 +369,7 @@ const AdminOrderDetails = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-gray-800 truncate" title={item.productName}>{item.productName}</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">Qty: {item.quantity} × ₹{(item.price || 0).toLocaleString()} = ₹{((item.price || 0) * item.quantity).toLocaleString()}</p>
+                <p className="text-[10px] text-gray-500 mt-0.5">Qty: {item.quantity} × {formatRupee(item.price || 0)} = {formatRupee((item.price || 0) * item.quantity)}</p>
               </div>
             </div>
           ))}
@@ -397,8 +398,8 @@ const AdminOrderDetails = () => {
                     </div>
                   </td>
                   <td className="px-3 py-3 text-xs text-gray-600 text-center">{item.quantity}</td>
-                  <td className="px-3 py-3 text-xs text-gray-600 text-right">₹{(item.price || 0).toLocaleString()}</td>
-                  <td className="px-4 py-3 text-xs font-bold text-gray-800 text-right">₹{((item.price || 0) * item.quantity).toLocaleString()}</td>
+                  <td className="px-3 py-3 text-xs text-gray-600 text-right">{formatRupee(item.price || 0)}</td>
+                  <td className="px-4 py-3 text-xs font-bold text-gray-800 text-right">{formatRupee((item.price || 0) * item.quantity)}</td>
                 </tr>
               ))}
             </tbody>
@@ -412,12 +413,12 @@ const AdminOrderDetails = () => {
         <div className="space-y-2 text-xs max-w-sm">
           <div className="flex justify-between">
             <span className="text-gray-400">Subtotal</span>
-            <span className="text-gray-700">₹{(order.subtotal || 0).toLocaleString()}</span>
+            <span className="text-gray-700">{formatRupee(order.subtotal || 0)}</span>
           </div>
           {(order.discount || 0) > 0 && (
             <div className="flex justify-between">
               <span className="text-blue-500">Discount</span>
-              <span className="text-blue-500">-₹{(order.discount || 0).toLocaleString()}</span>
+              <span className="text-blue-500">-{formatRupee(order.discount || 0)}</span>
             </div>
           )}
           <div className="flex justify-between">
@@ -434,14 +435,14 @@ const AdminOrderDetails = () => {
                 </>
               ) : (
                 <span className="text-gray-700">
-                  {(order.deliveryCharge || 0) === 0 ? 'Free' : `₹${(order.deliveryCharge || 0).toLocaleString()}`}
+                  {(order.deliveryCharge || 0) === 0 ? 'Free' : formatRupee(order.deliveryCharge || 0)}
                 </span>
               )}
             </div>
           </div>
           <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100 text-sm">
             <span>Total Amount</span>
-            <span>₹{(order.total || 0).toLocaleString()}</span>
+            <span>{formatRupee(order.total || 0)}</span>
           </div>
         </div>
       </div>

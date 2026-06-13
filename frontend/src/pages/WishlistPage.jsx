@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getGuestWishlist, removeFromGuestWishlist, addToGuestCart } from '../utils/guestCart';
 import { getApiBearerToken } from '../auth/session';
+import { formatRupee } from '../utils/formatPrice';
 
 const PRODUCT_ENDPOINTS = [
   '/food',
@@ -329,9 +330,9 @@ const WishlistPage = () => {
 
                       {startingPrice && (
                         <div className="flex items-end gap-2 mb-4">
-                          <span className="text-base sm:text-xl font-bold text-gray-900">₹{startingPrice.discountedPrice}</span>
+                          <span className="text-base sm:text-xl font-bold text-gray-900">{formatRupee(startingPrice.discountedPrice)}</span>
                           {startingPrice.mrp > startingPrice.discountedPrice && (
-                            <span className="text-sm text-gray-400 line-through">₹{startingPrice.mrp}</span>
+                            <span className="text-sm text-gray-400 line-through">{formatRupee(startingPrice.mrp)}</span>
                           )}
                         </div>
                       )}

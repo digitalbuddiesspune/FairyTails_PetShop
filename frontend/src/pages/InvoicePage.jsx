@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { formatRupee } from '../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -220,10 +221,10 @@ const InvoicePage = () => {
                           <td className="py-2.5 px-3 font-medium text-gray-900">{itemName}</td>
                           <td className="py-2.5 px-3 text-center text-gray-600">{category}</td>
                           <td className="py-2.5 px-3 text-center font-semibold">{item.quantity}</td>
-                          <td className="py-2.5 px-3 text-right">₹{ratePerUnit.toFixed(2)}</td>
+                          <td className="py-2.5 px-3 text-right">{formatRupee(ratePerUnit)}</td>
                           <td className="py-2.5 px-3 text-right">{gstPercent}%</td>
-                          <td className="py-2.5 px-3 text-right">₹{gstAmount.toFixed(2)}</td>
-                          <td className="py-2.5 px-3 text-right font-bold text-gray-900">₹{totalAmount.toFixed(2)}</td>
+                          <td className="py-2.5 px-3 text-right">{formatRupee(gstAmount)}</td>
+                          <td className="py-2.5 px-3 text-right font-bold text-gray-900">{formatRupee(totalAmount)}</td>
                         </tr>
                       );
                     })}
@@ -251,7 +252,7 @@ const InvoicePage = () => {
                       <tbody>
                         <tr className="border-b border-gray-100">
                           <td className="py-2 px-4 text-gray-600">Subtotal</td>
-                          <td className="py-2 px-4 text-right font-medium text-gray-900">₹{subtotal.toFixed(2)}</td>
+                          <td className="py-2 px-4 text-right font-medium text-gray-900">{formatRupee(subtotal)}</td>
                         </tr>
                         <tr className="border-b border-gray-100">
                           <td className="py-2 px-4 text-gray-600">18% GST</td>
@@ -266,13 +267,13 @@ const InvoicePage = () => {
                                 <span className="text-blue-600 font-medium">Free</span>
                               </div>
                             ) : (
-                              delivery === 0 ? 'Free' : `₹${delivery.toFixed(2)}`
+                              delivery === 0 ? 'Free' : formatRupee(delivery)
                             )}
                           </td>
                         </tr>
                         <tr className="bg-gray-800 text-white">
                           <td className="py-3 px-4 font-bold">Total Amount</td>
-                          <td className="py-3 px-4 text-right font-bold">₹{total.toFixed(2)}</td>
+                          <td className="py-3 px-4 text-right font-bold">{formatRupee(total)}</td>
                         </tr>
                       </tbody>
                     </table>

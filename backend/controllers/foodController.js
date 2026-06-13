@@ -1,5 +1,73 @@
 import Food from '../models/Food.js';
 
+const normalizeFoodPayload = (body = {}) => {
+  const data = { ...body };
+
+  if (Array.isArray(data.prices) && data.prices.length > 0) {
+    data.prices = data.prices
+      .map((row) => ({
+        capacity: String(row.capacity || '').trim(),
+        mrp: Number(row.mrp),
+        discountedPrice: Number(row.discountedPrice ?? row.discountPrice),
+        availableStock: Number(row.availableStock ?? 0),
+      }))
+      .filter((row) => row.capacity && Number.isFinite(row.mrp) && Number.isFinite(row.discountedPrice));
+
+    if (!data.prices.length) {
+      return { error: 'Please provide at least one valid capacity variant with MRP and sale price' };
+    }
+
+    const lowest = data.prices.reduce(
+      (min, row) => (row.discountedPrice < min.discountedPrice ? row : min),
+      data.prices[0]
+    );
+
+    data.capacity = data.prices[0].capacity;
+    data.mrp = lowest.mrp;
+    data.discountPrice = lowest.discountedPrice;
+    data.availableStock = data.prices.reduce((sum, row) => sum + row.availableStock, 0);
+    return { data };
+  }
+
+  if (
+    data.capacity &&
+    data.mrp !== undefined &&
+    data.mrp !== null &&
+    data.mrp !== '' &&
+    data.discountPrice !== undefined &&
+    data.discountPrice !== null &&
+    data.discountPrice !== ''
+  ) {
+    data.prices = [
+      {
+        capacity: String(data.capacity).trim(),
+        mrp: Number(data.mrp),
+        discountedPrice: Number(data.discountPrice),
+        availableStock: Number(data.availableStock ?? 0),
+      },
+    ];
+    data.mrp = Number(data.mrp);
+    data.discountPrice = Number(data.discountPrice);
+    data.availableStock = Number(data.availableStock ?? 0);
+    return { data };
+  }
+
+  return { error: 'Please provide at least one capacity variant with MRP and sale price' };
+};
+
+const validateFoodRequired = (data) => {
+  if (!data.productName || !data.category || !data.subCategory || !data.discountType || !data.expiryDate) {
+    return 'Please provide productName, category, subCategory, discountType, and expiryDate';
+  }
+  if (!data.images || !data.images.length) {
+    return 'Please provide at least one image';
+  }
+  if (!data.prices || !data.prices.length) {
+    return 'Please provide at least one capacity variant with pricing';
+  }
+  return null;
+};
+
 // @desc    Get all food products (with optional filters)
 // @route   GET /api/food
 // @access  Public
@@ -77,38 +145,18 @@ export const getFoodById = async (req, res) => {
 // @access  Public (should be Admin in production)
 export const createFood = async (req, res) => {
   try {
-    const {
-      productName, category, subCategory, capacity, mrp, discountPrice,
-      discountType, availableStock, expiryDate, baseUnit, taxes, images,
-      // Optional fields
-      itemCode, hsn, brand, details, keyFeatures, flavours,
-      nutrients, healthBenefits, purchasePrice, saleDiscount,
-      minimumStock, itemLocation, taxRateLabel, inclusiveOfTax,
-      secondaryUnit, conversionRate,
-    } = req.body;
-
-    // Basic validation - only required fields (baseUnit and taxes have defaults in schema)
-    if (!productName || !category || !subCategory || !capacity || 
-        mrp === undefined || mrp === null || mrp === '' ||
-        discountPrice === undefined || discountPrice === null || discountPrice === '' ||
-        !discountType || 
-        availableStock === undefined || availableStock === null || availableStock === '' ||
-        !expiryDate || !images || images.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide all required fields: productName, category, subCategory, capacity, mrp, discountPrice, discountType, availableStock, expiryDate, and at least one image',
-      });
+    const normalized = normalizeFoodPayload(req.body);
+    if (normalized.error) {
+      return res.status(400).json({ success: false, message: normalized.error });
     }
 
-    const food = await Food.create({
-      productName, category, subCategory, capacity, mrp, discountPrice,
-      discountType, availableStock, expiryDate, baseUnit, taxes, images,
-      // Optional fields
-      itemCode, hsn, brand, details, keyFeatures, flavours,
-      nutrients, healthBenefits, purchasePrice, saleDiscount,
-      minimumStock, itemLocation, taxRateLabel, inclusiveOfTax,
-      secondaryUnit, conversionRate,
-    });
+    const data = normalized.data;
+    const validationError = validateFoodRequired(data);
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
+    }
+
+    const food = await Food.create(data);
 
     res.status(201).json({
       success: true,
@@ -129,7 +177,18 @@ export const createFood = async (req, res) => {
 // @access  Public (should be Admin in production)
 export const updateFood = async (req, res) => {
   try {
-    const food = await Food.findByIdAndUpdate(req.params.id, req.body, {
+    const normalized = normalizeFoodPayload(req.body);
+    if (normalized.error) {
+      return res.status(400).json({ success: false, message: normalized.error });
+    }
+
+    const data = normalized.data;
+    const validationError = validateFoodRequired(data);
+    if (validationError) {
+      return res.status(400).json({ success: false, message: validationError });
+    }
+
+    const food = await Food.findByIdAndUpdate(req.params.id, data, {
       new: true,
       runValidators: true,
     });

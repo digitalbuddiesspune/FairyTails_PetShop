@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { categories } from './AdminCategorySelection';
+import { formatRupee } from '../../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -47,16 +48,16 @@ const AdminProductList = ({ categoryData, onBack, onEdit }) => {
     // Helper to extract display price
     const getDisplayPrice = (product) => {
         if (product.prices && product.prices.length > 0) {
-            return `₹${product.prices[0].discountedPrice}`;
+            return formatRupee(product.prices[0].discountedPrice);
         }
         if (product.variants && product.variants.length > 0) {
-            return `₹${product.variants[0].discountedPrice}`;
+            return formatRupee(product.variants[0].discountedPrice);
         }
         if (product.sizes && product.sizes.length > 0) { // Clothes/Accessory
-            return `₹${product.sizes[0].discountedPrice}`;
+            return formatRupee(product.sizes[0].discountedPrice);
         }
         if (product.discountedPrice || product.discountPrice) {
-            return `₹${product.discountedPrice || product.discountPrice}`;
+            return formatRupee(product.discountedPrice || product.discountPrice);
         }
         return 'N/A';
     };

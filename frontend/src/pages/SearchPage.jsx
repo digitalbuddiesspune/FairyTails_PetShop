@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { formatRupee } from '../utils/formatPrice';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -122,9 +123,9 @@ const SearchPage = () => {
                     <p className="font-medium text-gray-900 text-sm line-clamp-2">{displayName}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{product.brand}</p>
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="font-bold text-[#205EA9]">₹{discountedPrice ?? '—'}</span>
+                      <span className="font-bold text-[#205EA9]">{discountedPrice != null ? formatRupee(discountedPrice) : '—'}</span>
                       {discountPercent > 0 && (
-                        <span className="text-xs text-gray-400 line-through">₹{mrp}</span>
+                        <span className="text-xs text-gray-400 line-through">{formatRupee(mrp)}</span>
                       )}
                       {discountPercent > 0 && (
                         <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">
