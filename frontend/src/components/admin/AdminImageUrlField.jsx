@@ -3,7 +3,7 @@ import {
   isImageUrl,
   MAX_IMAGE_UPLOAD_MB,
   uploadAdminImageFile,
-} from '../utils/adminImageUpload';
+} from '../../utils/adminImageUpload';
 
 const AdminImageUrlField = ({
   label = 'Image URL',
