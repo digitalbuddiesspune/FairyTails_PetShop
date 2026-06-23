@@ -174,12 +174,16 @@ const CartPage = () => {
     }
   };
 
-  const updateQuantity = async (itemId, newQuantity) => {
+  const updateQuantity = async (item, newQuantity) => {
+    const itemId = item._id;
     try {
       setUpdating(itemId);
       const t = getApiBearerToken();
       if (!t) {
-        updateGuestCartItem(itemId, newQuantity);
+        updateGuestCartItem(itemId, newQuantity, {
+          selectedSize: item.selectedSize ?? 0,
+          productType: item.productType,
+        });
         await fetchGuestCartProducts();
       } else {
         const res = await axios.put(
@@ -398,7 +402,7 @@ const CartPage = () => {
                           <div className="flex items-end justify-between mt-3">
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                                onClick={() => updateQuantity(item, item.quantity - 1)}
                                 disabled={isUpdating}
                                 className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-gray-700 transition-colors disabled:opacity-50"
                               >
@@ -406,7 +410,7 @@ const CartPage = () => {
                               </button>
                               <span className="w-8 text-center font-bold text-gray-900">{item.quantity}</span>
                               <button
-                                onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                                onClick={() => updateQuantity(item, item.quantity + 1)}
                                 disabled={isUpdating}
                                 className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-gray-700 transition-colors disabled:opacity-50"
                               >

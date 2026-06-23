@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { addToGuestCart, addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } from '../utils/guestCart';
+import { addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } from '../utils/guestCart';
 import { clearUserSession, getApiBearerToken } from '../auth/session';
 import { formatRupee } from '../utils/formatPrice';
 import { getProductVariants } from '../utils/productVariants';
+import { useCartQuantity } from '../hooks/useCartQuantity';
+import CartQuantityControl from '../components/CartQuantityControl';
 import LoginRequiredModal from '../components/LoginRequiredModal';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -54,11 +56,9 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [selectedSize, setSelectedSize] = useState(0);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [addingToCart, setAddingToCart] = useState(false);
   const [buyingNow, setBuyingNow] = useState(false);
   const [togglingWishlist, setTogglingWishlist] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
-  const [cartMessage, setCartMessage] = useState('');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [authEpoch, setAuthEpoch] = useState(0);
 
@@ -91,55 +91,6 @@ const ProductDetail = () => {
       setIsInWishlist(isInGuestWishlist(id));
     }
   }, [id, authEpoch]);
-
-  const handleAddToCart = async () => {
-    const t = getApiBearerToken();
-    if (!t) {
-      // Use guest cart
-      try {
-        setAddingToCart(true);
-        const modelType = productType ? (ENDPOINT_TO_MODEL[productType] || undefined) : 'Food';
-        addToGuestCart({
-          productId: id,
-          quantity: 1,
-          selectedSize,
-          productType: modelType,
-        });
-        setCartMessage('Added to cart!');
-        setTimeout(() => setCartMessage(''), 2500);
-      } catch (err) {
-        console.error('Add to guest cart error:', err);
-        setCartMessage('Failed to add');
-        setTimeout(() => setCartMessage(''), 2500);
-      } finally {
-        setAddingToCart(false);
-      }
-      return;
-    }
-    try {
-      setAddingToCart(true);
-      const modelType = productType ? (ENDPOINT_TO_MODEL[productType] || undefined) : undefined;
-      await axios.post(
-        `${API_BASE}/cart`,
-        { productId: id, quantity: 1, selectedSize, productType: modelType },
-        { headers: { Authorization: `Bearer ${t}` } }
-      );
-      setCartMessage('Added to cart!');
-      window.dispatchEvent(new Event('cart-wishlist-update'));
-      setTimeout(() => setCartMessage(''), 2500);
-    } catch (err) {
-      if (err.response?.status === 401) {
-        clearUserSession();
-        navigate('/signin');
-        return;
-      }
-      console.error('Add to cart error:', err);
-      setCartMessage(err.response?.data?.message || 'Failed to add');
-      setTimeout(() => setCartMessage(''), 2500);
-    } finally {
-      setAddingToCart(false);
-    }
-  };
 
   const handleBuyNow = async () => {
     const t = getApiBearerToken();
@@ -326,6 +277,15 @@ const ProductDetail = () => {
     return product?.availableStock ?? null;
   }, [variants, selectedSize, product]);
 
+  const cartModelType = productType ? (ENDPOINT_TO_MODEL[productType] || 'Food') : 'Food';
+  const {
+    quantity: cartQuantity,
+    updating: cartUpdating,
+    addOne: addToCartFromDetail,
+    increment: incrementCartQty,
+    decrement: decrementCartQty,
+  } = useCartQuantity(id, selectedSize, cartModelType);
+
   // Average rating (only food has reviews)
   const avgRating = useMemo(() => {
     if (!product?.reviews?.length) return 0;
@@ -422,74 +382,64 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Two-Column Layout: Sticky Image Left + Scrollable Details Right */}
+      {/* Two-Column Layout: Image + Product Info */}
       <section className="py-4 sm:py-6 md:py-12">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row gap-6">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row">
 
-            {/* LEFT — Sticky Image Gallery */}
-            <div className="w-full md:w-[45%] lg:w-[40%] flex-shrink-0">
-              <div className="md:sticky md:top-24">
-                <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  {/* Main Image */}
-                  <div className="relative aspect-square flex items-center justify-center mb-3 sm:mb-4 bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-8">
-                    {images[selectedImage] ? (
-                      <img
-                        src={images[selectedImage]}
-                        alt={displayName}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    ) : (
-                      <span className="text-8xl text-gray-300">🐾</span>
-                    )}
-                    {/* Wishlist icon on image */}
-                    <button
-                      onClick={handleToggleWishlist}
-                      disabled={togglingWishlist}
-                      className={`absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:scale-110 transition-all disabled:opacity-60 ${
-                        isInWishlist ? 'text-red-500' : 'text-gray-500 hover:text-red-400'
-                      }`}
-                      title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                    >
-                      {isInWishlist ? (
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* Thumbnail Row */}
-                  {images.length > 1 && (
-                    <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
-                      {images.map((img, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setSelectedImage(i)}
-                          className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border-2 overflow-hidden transition-all shrink-0 ${
-                            selectedImage === i
-                              ? 'border-[#205EA9] shadow-md'
-                              : 'border-gray-200 hover:border-gray-300'
-                          }`}
-                        >
-                          <img src={img} alt="" className="w-full h-full object-contain p-1" />
-                        </button>
-                      ))}
-                    </div>
+            {/* Image */}
+            <div className="w-full md:w-[45%] lg:w-[40%] flex-shrink-0 bg-gray-50 md:sticky md:top-24 md:self-start">
+              <div className="relative aspect-square flex items-center justify-center overflow-hidden">
+                {images[selectedImage] ? (
+                  <img
+                    src={images[selectedImage]}
+                    alt={displayName}
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <span className="text-8xl text-gray-300">🐾</span>
+                )}
+                <button
+                  onClick={handleToggleWishlist}
+                  disabled={togglingWishlist}
+                  className={`absolute top-3 right-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 hover:scale-110 transition-all disabled:opacity-60 ${
+                    isInWishlist ? 'text-red-500' : 'text-gray-500 hover:text-red-400'
+                  }`}
+                  title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                >
+                  {isInWishlist ? (
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
                   )}
-                </div>
+                </button>
               </div>
+
+              {images.length > 1 && (
+                <div className="flex gap-2 sm:gap-3 justify-center flex-wrap border-t border-gray-100">
+                  {images.map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg sm:rounded-xl border-2 overflow-hidden transition-all shrink-0 ${
+                        selectedImage === i
+                          ? 'border-[#205EA9] shadow-md'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <img src={img} alt="" className="w-full h-full object-contain" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* RIGHT — Scrollable Product Details */}
-            <div className="w-full md:w-[55%] lg:w-[60%] space-y-4 sm:space-y-6 min-w-0">
-
-              {/* Basic Info Card */}
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 md:p-8">
+            {/* Product Info */}
+            <div className="w-full md:flex-1 min-w-0 flex flex-col">
                 {/* Badges */}
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <span className="bg-[#205EA9]/10 text-[#205EA9] text-xs font-bold px-3 py-1 rounded-full">
@@ -729,36 +679,42 @@ const ProductDetail = () => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={addingToCart || availableStock === 0}
-                    className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 ${
-                      availableStock === 0
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#203D5B] text-white hover:bg-[#1a3149]'
-                    }`}
-                  >
-                    {availableStock === 0
-                      ? 'Out of Stock'
-                      : addingToCart
-                        ? 'Adding...'
-                        : cartMessage || '🛒 Add to Cart'
-                    }
-                  </button>
-                  <button
-                    onClick={handleBuyNow}
-                    disabled={buyingNow || availableStock === 0}
-                    className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 ${
-                      availableStock === 0
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-[#205ea9] text-white hover:bg-[#264a6d]'
-                    }`}
-                  >
-                    {buyingNow ? 'Processing...' : '⚡ Buy Now'}
-                  </button>
+                  {availableStock === 0 ? (
+                    <button
+                      type="button"
+                      disabled
+                      className="flex-1 font-bold py-3 sm:py-3.5 rounded-xl text-sm bg-gray-300 text-gray-500 cursor-not-allowed"
+                    >
+                      Out of Stock
+                    </button>
+                  ) : (
+                    <>
+                      <div className="flex-1 min-w-0">
+                        <CartQuantityControl
+                          quantity={cartQuantity}
+                          updating={cartUpdating}
+                          onAdd={addToCartFromDetail}
+                          onIncrement={incrementCartQty}
+                          onDecrement={decrementCartQty}
+                          addLabel="Add to Cart"
+                          className="!mt-0"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleBuyNow}
+                        disabled={buyingNow}
+                        className="flex-1 h-10 font-bold rounded-md active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 bg-[#205ea9] text-white hover:bg-[#264a6d] flex items-center justify-center"
+                      >
+                        {buyingNow ? 'Processing...' : '⚡ Buy Now'}
+                      </button>
+                    </>
+                  )}
                 </div>
-              </div>
+            </div>
+          </div>
 
+          <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
               {/* Key Features */}
               {product.keyFeatures?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
@@ -937,7 +893,6 @@ const ProductDetail = () => {
                 </div>
               )}
 
-            </div>
           </div>
         </div>
       </section>

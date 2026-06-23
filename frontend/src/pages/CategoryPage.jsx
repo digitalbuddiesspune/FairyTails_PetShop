@@ -2,9 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { getApiBearerToken } from '../auth/session';
-import { formatRupee } from '../utils/formatPrice';
-import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
-import ProductVariantBadges from '../components/ProductVariantBadges';
+import ProductCard from '../components/ProductCard';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -66,165 +64,6 @@ const sortOptions = [
   { value: 'name-asc', label: 'Name: A to Z' },
   { value: 'name-desc', label: 'Name: Z to A' },
 ];
-
-// ─── ProductCard ────────────────────────────────────────────────────────────
-const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint }) => {
-  const navigate = useNavigate();
-  const [addingToCart, setAddingToCart] = useState(false);
-
-  const isInWishlist = wishlistIds.includes(product._id);
-
-  const isToyProduct = product.category === 'Toy';
-  const isHealthSupplement = product.category === 'health-supplement';
-  const isHouseProduct = product.category === 'house';
-  const isAccessory = product.category === 'accessories';
-  const isGrooming = product.category === 'grooming-essentials';
-
-  // Normalised display fields
-  const displayName = product.productName || product.name || 'Unnamed Product';
-  const displayImage = product.images?.[0] || product.image || null;
-
-  const startingPrice = useMemo(() => getStartingVariant(product), [product]);
-  const multiVariants = hasMultipleVariants(product);
-
-  const discountPercent = startingPrice
-    ? Math.round(((startingPrice.mrp - startingPrice.discountedPrice) / startingPrice.mrp) * 100)
-    : 0;
-
-  // Determine Mongoose model name for cart
-  const productModelType = useMemo(() => {
-    if (isToyProduct) return 'Toy';
-    if (isHouseProduct) return 'House';
-    if (isHealthSupplement) return 'HealthSupplement';
-    if (isAccessory) return 'Accessory';
-    if (isGrooming) return 'GroomingEssential';
-    // Distinguish Food vs Clothes: Clothes have sizes array, Food has prices array
-    if (product.sizes && !product.prices) return 'Clothes';
-    return 'Food';
-  }, [isToyProduct, isHouseProduct, isHealthSupplement, isAccessory, isGrooming, product]);
-
-  const handleAddToCart = async (e) => {
-    e.stopPropagation();
-    const token = getApiBearerToken();
-    if (!token) {
-      // Use guest cart
-      try {
-        setAddingToCart(true);
-        const { addToGuestCart } = await import('../utils/guestCart');
-        addToGuestCart({
-          productId: product._id,
-          quantity: 1,
-          selectedSize: 0,
-          productType: productModelType,
-        });
-      } catch (err) { console.error(err); }
-      finally { setAddingToCart(false); }
-      return;
-    }
-    try {
-      setAddingToCart(true);
-      await axios.post(`${API_BASE}/cart`, { productId: product._id, quantity: 1, selectedSize: 0, productType: productModelType }, { headers: { Authorization: `Bearer ${token}` } });
-      window.dispatchEvent(new Event('cart-wishlist-update'));
-    } catch (err) { console.error(err); }
-    finally { setAddingToCart(false); }
-  };
-
-  const handleWishlistToggle = async (e) => {
-    e.stopPropagation();
-    const token = getApiBearerToken();
-    if (!token) {
-      // Use guest wishlist with full product data
-      const { addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } = await import('../utils/guestCart');
-      if (isInGuestWishlist(product._id)) {
-        removeFromGuestWishlist(product._id);
-      } else {
-        addToGuestWishlist(product);
-      }
-      if (onWishlistToggle) onWishlistToggle(product._id);
-      return;
-    }
-    if (onWishlistToggle) onWishlistToggle(product._id);
-  };
-
-  // Build product detail URL with type parameter (derive from product when apiEndpoint is null, e.g. mixed food+clothes)
-  const derivedEndpoint = !apiEndpoint && product.sizes?.length && !product.prices?.length ? '/clothes' : !apiEndpoint && (product.prices?.length || !product.sizes?.length) ? '/food' : apiEndpoint;
-  const productUrl = derivedEndpoint ? `/product/${product._id}?type=${derivedEndpoint}` : `/product/${product._id}`;
-
-  return (
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-w-0">
-      <div className="relative overflow-hidden bg-gray-50">
-        <Link to={productUrl}>
-          <div className="aspect-square flex items-center justify-center p-2 sm:p-4">
-            {displayImage ? (
-              <img src={displayImage} alt={displayName} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-6xl text-gray-300">🐾</div>
-            )}
-          </div>
-        </Link>
-        {discountPercent > 0 && (
-          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">{discountPercent}% OFF</span>
-        )}
-        <div className="absolute top-3 right-3 flex gap-1.5">
-          <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full border border-gray-200">
-            {['Dog', 'dog'].includes(product.category) || ['Dog', 'dog'].includes(product.subCategory) ? (
-              <img src={DOG_ICON} alt="Dog" className="w-4 h-4 object-contain inline" />
-            ) : ['Cat', 'cat'].includes(product.category) || ['Cat', 'cat'].includes(product.subCategory) ? (
-              <img src={CAT_ICON} alt="Cat" className="w-4 h-4 object-contain inline" />
-            ) : (
-              <span>🧸</span>
-            )}{' '}
-            {(isToyProduct || isHealthSupplement || isHouseProduct || isAccessory || isGrooming)
-              ? (product.subCategory?.charAt(0).toUpperCase() + product.subCategory?.slice(1))
-              : product.category}
-          </span>
-        </div>
-        <button
-          onClick={handleWishlistToggle}
-          className="absolute bottom-3 right-3 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all z-10 hover:scale-110"
-          title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-        >
-          {isInWishlist ? (
-            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-          ) : (
-            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-          )}
-        </button>
-      </div>
-      <div className="p-3 sm:p-4">
-        {product.brand && (
-          <p className="text-xs font-semibold text-[#205EA9] uppercase tracking-wide mb-1">{product.brand}</p>
-        )}
-        <Link to={productUrl}>
-          <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#205EA9] transition-colors">{displayName}</h3>
-        </Link>
-        <span className="inline-block bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full mb-2 sm:mb-3">{product.subCategory}</span>
-        <ProductVariantBadges product={product} className="mb-2" />
-        {startingPrice && (
-          <div className="flex items-end gap-2 mb-3">
-            <span className="text-base sm:text-xl font-bold text-gray-900">
-              {multiVariants && <span className="text-xs font-normal text-gray-500 mr-1">from</span>}
-              {formatRupee(startingPrice.discountedPrice)}
-            </span>
-            {startingPrice.mrp > startingPrice.discountedPrice && (
-              <span className="text-sm text-gray-400 line-through">{formatRupee(startingPrice.mrp)}</span>
-            )}
-          </div>
-        )}
-        <div className="mt-2 flex justify-center">
-          <button
-            onClick={handleAddToCart}
-            disabled={addingToCart}
-            className="w-full max-w-[240px] bg-[#205EA9] text-white font-semibold py-3.5 rounded-xl hover:bg-[#205EA9] active:scale-[0.98] transition-all duration-200 text-base disabled:opacity-50"
-            title="Add to Cart"
-          >
-            {addingToCart ? 'Adding...' : '🛒 Add to Cart'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ─── Main CategoryPage ──────────────────────────────────────────────────────
 const CategoryPage = () => {
@@ -507,75 +346,102 @@ const CategoryPage = () => {
   const subCategories = category.subcategories?.map((s) => s.name) || [];
   const subCategoryTabs = ['All', ...subCategories];
 
+  const getSubIcon = (name) => {
+    if (name === 'All') return '📋';
+    if (name === 'Dry Food') return '🥫';
+    if (name === 'Wet Food') return '🍖';
+    if (name === 'Treats') return '🦴';
+    if (name === 'Dog Clothes') return '👕';
+    if (name === 'Cat Clothes') return '👗';
+    if (name === 'Collar & Leash') return '🔗';
+    return '';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Category Header */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              {category.image && (
-                <img src={category.image} alt={category.name} className="w-16 h-16 object-contain" />
-              )}
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{category.name}</h1>
-            </div>
-            {/* Sort */}
-            <div className="flex items-center gap-3">
-              <label className="text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-gray-50 border border-gray-200 text-gray-700 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[170px]"
-              >
-                {sortOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Category toolbar: title + filters + sort */}
+      <section className={`bg-white border-b border-gray-200 ${subCategories.length > 0 ? 'sticky top-14 md:top-[108px] z-30' : ''}`}>
+        <div className="container mx-auto px-3 sm:px-6 py-2">
+          {subCategories.length > 0 ? (
+            <div className="flex flex-col gap-1.5 md:flex-row md:items-center md:gap-3">
+              <div className="flex items-center justify-between gap-2 md:justify-start md:shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0 min-w-0">
+                  {category.image && (
+                    <img src={category.image} alt={category.name} className="w-8 h-8 sm:w-9 sm:h-9 object-contain" />
+                  )}
+                  <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{category.name}</h1>
+                </div>
+                <div className="flex items-center shrink-0 md:hidden">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer max-w-[118px]"
+                  >
+                    {sortOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-      {/* SubCategory Tabs */}
-      {subCategories.length > 0 && (
-        <section className="bg-white border-b border-gray-200 sticky top-[108px] z-30">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-3">
-              {subCategoryTabs.map((sub) => {
-                // Icon mapping for subcategories
-                const getSubIcon = (name) => {
-                  if (name === 'All') return '📋';
-                  if (name === 'Dry Food') return '🥫';
-                  if (name === 'Wet Food') return '🍖';
-                  if (name === 'Treats') return '🦴';
-                  if (name === 'Dog Clothes') return '👕';
-                  if (name === 'Cat Clothes') return '👗';
-                  if (name === 'Collar & Leash') return '🔗';
-                  return '';
-                };
-                return (
+              <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide -mx-0.5 px-0.5 md:flex-1 md:min-w-0">
+                {subCategoryTabs.map((sub) => (
                   <button
                     key={sub}
                     onClick={() => handleSubCategoryChange(sub)}
-                    className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0 ${
                       activeSubCategory === sub
-                        ? `${accent.tab} text-white shadow-md`
+                        ? `${accent.tab} text-white shadow-sm`
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    {getSubIcon(sub) && <span className="mr-1.5">{getSubIcon(sub)}</span>}
+                    {getSubIcon(sub) && <span className="mr-0.5">{getSubIcon(sub)}</span>}
                     {sub}
                   </button>
-                );
-              })}
+                ))}
+              </div>
+
+              <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto">
+                <label className="hidden lg:inline text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[150px]"
+                >
+                  {sortOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 shrink-0 min-w-0">
+                {category.image && (
+                  <img src={category.image} alt={category.name} className="w-8 h-8 sm:w-9 sm:h-9 object-contain" />
+                )}
+                <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{category.name}</h1>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <label className="hidden lg:inline text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[118px] sm:min-w-[150px]"
+                >
+                  {sortOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Products Grid */}
-      <section className="py-8 md:py-10">
-        <div className="container mx-auto px-4">
+      <section className="py-3 sm:py-6 md:py-8">
+        <div className="container mx-auto px-3 sm:px-4">
           {productsLoading && (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -606,7 +472,7 @@ const CategoryPage = () => {
 
           {!productsLoading && products.length > 0 && (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-6">
                 {products.map((product) => (
                   <ProductCard
                     key={product._id}

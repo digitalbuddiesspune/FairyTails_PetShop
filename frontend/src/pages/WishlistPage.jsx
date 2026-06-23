@@ -3,9 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getGuestWishlist, removeFromGuestWishlist, addToGuestCart } from '../utils/guestCart';
 import { getApiBearerToken } from '../auth/session';
-import { formatRupee } from '../utils/formatPrice';
-import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
-import ProductVariantBadges from '../components/ProductVariantBadges';
+import ProductCard from '../components/ProductCard';
 
 const PRODUCT_ENDPOINTS = [
   '/food',
@@ -265,99 +263,21 @@ const WishlistPage = () => {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
               {items.map((product) => {
                 if (!product) return null;
-                const startingPrice = getStartingVariant(product);
-                const multiVariants = hasMultipleVariants(product);
-                const discountPercent = startingPrice
-                  ? Math.round(((startingPrice.mrp - startingPrice.discountedPrice) / startingPrice.mrp) * 100)
-                  : 0;
                 const isRemoving = removing === product._id;
-                const isAdding = addingToCart === product._id;
 
                 return (
                   <div
                     key={product._id}
-                    className={`bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl transition-all duration-300 min-w-0 ${isRemoving ? 'opacity-50 scale-95' : ''}`}
+                    className={isRemoving ? 'opacity-50 scale-95 transition-all' : ''}
                   >
-                    {/* Image */}
-                    <div className="relative overflow-hidden bg-gray-50">
-                      <Link to={`/product/${product._id}`}>
-                        <div className="aspect-square flex items-center justify-center p-2 sm:p-4">
-                          {product.images?.[0] ? (
-                            <img
-                              src={product.images[0]}
-                              alt={product.productName}
-                              className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-6xl text-gray-300">🐾</div>
-                          )}
-                        </div>
-                      </Link>
-
-                      {discountPercent > 0 && (
-                        <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                          {discountPercent}% OFF
-                        </span>
-                      )}
-
-                      {/* Remove from Wishlist */}
-                      <button
-                        onClick={() => removeItem(product._id)}
-                        className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center text-red-500 hover:bg-red-50 transition-all"
-                        title="Remove from Wishlist"
-                      >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-3 sm:p-4">
-                      <p className="text-xs font-semibold text-[#205EA9] uppercase tracking-wide mb-1">{product.brand}</p>
-                      <Link to={`/product/${product._id}`}>
-                        <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#205EA9] transition-colors">
-                          {product.productName}
-                        </h3>
-                      </Link>
-
-                      <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full mb-2">
-                        {product.subCategory}
-                      </span>
-
-                      <ProductVariantBadges product={product} className="mb-2" />
-
-                      {startingPrice && (
-                        <div className="flex items-end gap-2 mb-4">
-                          <span className="text-base sm:text-xl font-bold text-gray-900">
-                            {multiVariants && <span className="text-xs font-normal text-gray-500 mr-1">from</span>}
-                            {formatRupee(startingPrice.discountedPrice)}
-                          </span>
-                          {startingPrice.mrp > startingPrice.discountedPrice && (
-                            <span className="text-sm text-gray-400 line-through">{formatRupee(startingPrice.mrp)}</span>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => addToCart(product._id)}
-                          disabled={isAdding}
-                          className="flex-1 bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white font-semibold py-2.5 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] active:scale-[0.98] transition-all text-sm disabled:opacity-50"
-                        >
-                          {isAdding ? 'Adding...' : '🛒 Add to Cart'}
-                        </button>
-                        <button
-                          onClick={() => navigate(`/product/${product._id}`)}
-                          className="px-4 bg-gray-100 text-gray-700 font-semibold py-2.5 rounded-xl hover:bg-gray-200 transition-all text-sm border border-gray-200"
-                        >
-                          View
-                        </button>
-                      </div>
-                    </div>
+                    <ProductCard
+                      product={product}
+                      wishlistIds={items.map((p) => p?._id).filter(Boolean)}
+                      onWishlistToggle={() => removeItem(product._id)}
+                    />
                   </div>
                 );
               })}

@@ -42,10 +42,16 @@ export const addToGuestCart = (item) => {
   }
 };
 
-export const updateGuestCartItem = (itemId, quantity) => {
+export const updateGuestCartItem = (productId, quantity, options = {}) => {
+  const { selectedSize = 0, productType } = options;
   try {
     const cart = getGuestCart();
-    const index = cart.findIndex((i) => i.productId === itemId);
+    const index = cart.findIndex(
+      (item) =>
+        String(item.productId) === String(productId) &&
+        (item.selectedSize ?? 0) === selectedSize &&
+        (!productType || !item.productType || item.productType === productType)
+    );
     if (index > -1) {
       if (quantity <= 0) {
         cart.splice(index, 1);

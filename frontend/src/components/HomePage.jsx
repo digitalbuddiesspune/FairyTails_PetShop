@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HeroBanner from './HeroBanner';
-import { formatRupee } from '../utils/formatPrice';
-import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
-import ProductVariantBadges from './ProductVariantBadges';
+import ProductCard from './ProductCard';
 
 // Color mapping for category circle backgrounds
 const categoryColors = {
@@ -38,22 +36,6 @@ const TYPE_TO_ENDPOINT = {
   GroomingEssential: '/grooming-essentials',
   HealthSupplement: '/health-supplements',
   House: '/houses',
-};
-
-// Extract a displayable price from any product shape
-const extractPrice = (p) => {
-  const variant = getStartingVariant(p);
-  if (variant) {
-    return { price: variant.discountedPrice, mrp: variant.mrp };
-  }
-  return { price: null, mrp: null };
-};
-
-const extractImage = (p) => {
-  if (Array.isArray(p.images) && p.images.length > 0) return p.images[0];
-  if (typeof p.images === 'string') return p.images;
-  if (typeof p.image === 'string') return p.image;
-  return null;
 };
 
 const HomePage = () => {
@@ -280,7 +262,7 @@ const HomePage = () => {
           </div>
 
           {featuredLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="bg-gray-50 rounded-2xl p-4 animate-pulse">
                   <div className="bg-gray-200 rounded-xl h-40 mb-4" />
@@ -291,61 +273,14 @@ const HomePage = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {featuredProducts.map((product) => {
-                const { price, mrp } = extractPrice(product);
-                const multiVariants = hasMultipleVariants(product);
-                const img = extractImage(product);
-                const discount = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
-                const name = product.productName || product.name || 'Product';
-
-                const typeEndpoint = TYPE_TO_ENDPOINT[product._type];
-                const productLink = typeEndpoint ? `/product/${product._id}?type=${typeEndpoint}` : `/product/${product._id}`;
-                return (
-                  <Link
-                    to={productLink}
-                    key={product._id}
-                    className="bg-gray-50 rounded-2xl p-4 hover:shadow-lg transition-all group relative overflow-hidden"
-                  >
-                    {discount > 0 && (
-                      <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
-                        {discount}% OFF
-                      </span>
-                    )}
-                    <div className="bg-white rounded-xl h-40 mb-4 flex items-center justify-center overflow-hidden">
-                      {img ? (
-                        <img
-                          src={img}
-                          alt={name}
-                          className="max-h-full max-w-full object-contain p-2 group-hover:scale-110 transition-transform duration-300"
-                        />
-                      ) : (
-                        <span className="text-5xl">🐾</span>
-                      )}
-                    </div>
-                    <span className="inline-block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1">
-                      {product._type}
-                    </span>
-                    <h3 className="font-semibold text-gray-900 mb-1.5 line-clamp-2 text-sm leading-snug">{name}</h3>
-                    {product.rating != null && (
-                      <div className="flex items-center gap-1 mb-1.5">
-                        <span className="text-yellow-400 text-sm">★</span>
-                        <span className="text-xs text-gray-500">{product.rating}</span>
-                      </div>
-                    )}
-                    <ProductVariantBadges product={product} className="mb-1.5" />
-                    <div className="flex items-center gap-2">
-                      {multiVariants && price != null && (
-                        <span className="text-[10px] text-gray-500">from</span>
-                      )}
-                      <span className="text-lg font-bold text-gray-900">{price != null ? formatRupee(price) : '—'}</span>
-                      {mrp > price && (
-                        <span className="text-sm text-gray-400 line-through">{formatRupee(mrp)}</span>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard
+                  key={product._id}
+                  product={product}
+                  apiEndpoint={TYPE_TO_ENDPOINT[product._type]}
+                />
+              ))}
             </div>
           )}
         </div>

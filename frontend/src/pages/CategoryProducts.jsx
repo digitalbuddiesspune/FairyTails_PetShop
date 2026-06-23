@@ -2,199 +2,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getApiBearerToken } from '../auth/session';
-import { formatRupee } from '../utils/formatPrice';
-import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
-import ProductVariantBadges from '../components/ProductVariantBadges';
+import ProductCard from '../components/ProductCard';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
 const DOG_ICON = 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457891/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_vzgzug.svg';
 const CAT_ICON = 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457890/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_1_q3xxat.svg';
-
-// ─── Reusable ProductCard Component ─────────────────────────────────────────
-const ProductCard = ({ product, wishlistIds = [], onWishlistToggle }) => {
-  const navigate = useNavigate();
-  const [addingToCart, setAddingToCart] = useState(false);
-
-  const isInWishlist = wishlistIds.includes(product._id);
-
-  const handleAddToCart = async (e) => {
-    e.stopPropagation();
-    const token = getApiBearerToken();
-    if (!token) {
-      // Use guest cart
-      try {
-        setAddingToCart(true);
-        const { addToGuestCart } = await import('../utils/guestCart');
-        addToGuestCart({
-          productId: product._id,
-          quantity: 1,
-          selectedSize: 0,
-          productType: 'Food',
-        });
-      } catch (err) {
-        console.error('Add to guest cart error:', err);
-      } finally {
-        setAddingToCart(false);
-      }
-      return;
-    }
-    try {
-      setAddingToCart(true);
-      await axios.post(
-        `${API_BASE}/cart`,
-        { productId: product._id, quantity: 1, selectedSize: 0, productType: 'Food' },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      window.dispatchEvent(new Event('cart-wishlist-update'));
-    } catch (err) {
-      console.error('Add to cart error:', err);
-    } finally {
-      setAddingToCart(false);
-    }
-  };
-
-  const handleWishlistToggle = async (e) => {
-    e.stopPropagation();
-    const token = getApiBearerToken();
-    if (!token) {
-      // Use guest wishlist with full product data
-      const { addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } = await import('../utils/guestCart');
-      if (isInGuestWishlist(product._id)) {
-        removeFromGuestWishlist(product._id);
-      } else {
-        addToGuestWishlist(product);
-      }
-      if (onWishlistToggle) onWishlistToggle(product._id);
-      return;
-    }
-    if (onWishlistToggle) onWishlistToggle(product._id);
-  };
-
-  const startingPrice = useMemo(() => getStartingVariant(product), [product]);
-  const multiVariants = hasMultipleVariants(product);
-
-  // Calculate discount percentage
-  const discountPercent = startingPrice
-    ? Math.round(((startingPrice.mrp - startingPrice.discountedPrice) / startingPrice.mrp) * 100)
-    : 0;
-
-  return (
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 min-w-0">
-      {/* Image Section */}
-      <div className="relative overflow-hidden bg-gray-50">
-        <div className="aspect-square flex items-center justify-center p-2 sm:p-4">
-          {product.images?.[0] ? (
-            <img
-              src={product.images[0]}
-              alt={product.productName}
-              className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-6xl text-gray-300">
-              🐾
-            </div>
-          )}
-        </div>
-
-        {/* Discount Badge */}
-        {discountPercent > 0 && (
-          <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-            {discountPercent}% OFF
-          </span>
-        )}
-
-        {/* Category Badge */}
-        <div className="absolute top-3 right-3 flex gap-1.5">
-          <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium px-2.5 py-1 rounded-full border border-gray-200">
-            <img src={product.category === 'Dog' ? DOG_ICON : CAT_ICON} alt={product.category} className="w-4 h-4 object-contain inline" /> {product.category}
-          </span>
-        </div>
-
-        {/* Wishlist Heart */}
-        <button
-          onClick={handleWishlistToggle}
-          className="absolute top-3 right-12 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center transition-all z-10 hover:scale-110"
-          title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
-        >
-          {isInWishlist ? (
-            <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          )}
-        </button>
-
-        {/* Quick View Overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 pointer-events-none" />
-      </div>
-
-      {/* Content Section */}
-      <div className="p-3 sm:p-4">
-        {/* Brand */}
-        <p className="text-xs font-semibold text-[#205EA9] uppercase tracking-wide mb-1">
-          {product.brand}
-        </p>
-
-        {/* Product Name */}
-        <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem]">
-          {product.productName}
-        </h3>
-
-        {/* SubCategory Badge */}
-        <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full mb-2">
-          {product.subCategory}
-        </span>
-
-        <ProductVariantBadges product={product} className="mb-2" />
-
-        {/* Pricing */}
-        {startingPrice && (
-          <div className="flex items-end gap-2 mb-3">
-            <span className="text-base sm:text-xl font-bold text-gray-900">
-              {multiVariants && <span className="text-xs font-normal text-gray-500 mr-1">from</span>}
-              {formatRupee(startingPrice.discountedPrice)}
-            </span>
-            {startingPrice.mrp > startingPrice.discountedPrice && (
-              <span className="text-sm text-gray-400 line-through">
-                {formatRupee(startingPrice.mrp)}
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Flavours */}
-        {product.flavours?.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {product.flavours.slice(0, 3).map((f, i) => (
-              <span key={i} className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">
-                {f}
-              </span>
-            ))}
-            {product.flavours.length > 3 && (
-              <span className="text-xs text-gray-400">+{product.flavours.length - 3} more</span>
-            )}
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="mt-2 flex justify-center">
-          <button
-            onClick={handleAddToCart}
-            disabled={addingToCart}
-            className="w-full max-w-[240px] bg-[#205EA9] text-white font-semibold py-3.5 rounded-xl hover:bg-[#205EA9] active:scale-[0.98] transition-all duration-200 text-base disabled:opacity-50"
-            title="Add to Cart"
-          >
-            {addingToCart ? 'Adding...' : '🛒 Add to Cart'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ─── Sub-category filter tabs ────────────────────────────────────────────────
 const subCategoryOptions = ['All', 'Dry Food', 'Wet Food', 'Treats'];
@@ -379,27 +192,60 @@ const CategoryProducts = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Category Header */}
-      <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 flex items-center gap-3">
+      {/* Category toolbar: title + filters + sort */}
+      <section className="bg-white border-b border-gray-200 sticky top-14 md:top-[108px] z-30">
+        <div className="container mx-auto px-3 sm:px-4 py-2">
+          <div className="flex flex-col gap-1.5 md:flex-row md:items-center md:gap-3">
+            <div className="flex items-center justify-between gap-2 md:justify-start md:shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0 min-w-0">
                 {categoryIcon ? (
-                  <img src={categoryIcon} alt={category} className="w-12 h-12 md:w-14 md:h-14 object-contain" />
+                  <img src={categoryIcon} alt={category} className="w-8 h-8 sm:w-9 sm:h-9 object-contain" />
                 ) : (
-                  <span className="text-4xl md:text-5xl">🐾</span>
+                  <span className="text-xl sm:text-2xl">🐾</span>
                 )}
-                {pageTitle}
-              </h1>
+                <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{pageTitle}</h1>
+              </div>
+              <div className="flex items-center shrink-0 md:hidden">
+                <select
+                  value={sortBy}
+                  onChange={handleSortChange}
+                  className="bg-gray-50 text-gray-900 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer max-w-[118px]"
+                >
+                  {sortOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-3">
-              <label className="text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
+
+            <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide -mx-0.5 px-0.5 md:flex-1 md:min-w-0">
+              {subCategoryOptions.map((sub) => (
+                <button
+                  key={sub}
+                  onClick={() => handleSubCategoryChange(sub)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0 ${
+                    activeSubCategory === sub
+                      ? 'bg-[#205EA9] text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {sub === 'All' && '📋 '}
+                  {sub === 'Dry Food' && '🥫 '}
+                  {sub === 'Wet Food' && '🍖 '}
+                  {sub === 'Treats' && '🦴 '}
+                  {sub}
+                </button>
+              ))}
+            </div>
+
+            <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto">
+              <label className="hidden lg:inline text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
               <select
                 value={sortBy}
                 onChange={handleSortChange}
-                className="bg-gray-50 text-gray-900 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[180px]"
+                className="bg-gray-50 text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[150px]"
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -412,34 +258,9 @@ const CategoryProducts = () => {
         </div>
       </section>
 
-      {/* SubCategory Filter Tabs */}
-      <section className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-3">
-            {subCategoryOptions.map((sub) => (
-              <button
-                key={sub}
-                onClick={() => handleSubCategoryChange(sub)}
-                className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
-                  activeSubCategory === sub
-                    ? 'bg-[#205EA9] text-white shadow-md shadow-blue-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {sub === 'All' && '📋 '}
-                {sub === 'Dry Food' && '🥫 '}
-                {sub === 'Wet Food' && '🍖 '}
-                {sub === 'Treats' && '🦴 '}
-                {sub}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Products Grid */}
-      <section className="py-8 md:py-12">
-        <div className="container mx-auto px-4">
+      <section className="py-3 sm:py-6 md:py-8">
+        <div className="container mx-auto px-3 sm:px-4">
           {/* Loading State */}
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
@@ -495,7 +316,7 @@ const CategoryProducts = () => {
           {/* Product Grid */}
           {!loading && !error && products.length > 0 && (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-6">
                 {products.map((product) => (
                   <ProductCard
                     key={product._id}

@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import { formatRupee } from '../utils/formatPrice';
-import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
-import ProductVariantBadges from '../components/ProductVariantBadges';
+import ProductCard from '../components/ProductCard';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -82,54 +80,17 @@ const SearchPage = () => {
         )}
 
         {!loading && !error && results.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {results.map((product) => {
-              const displayName = product.productName || product.name || 'Unnamed Product';
-              const displayImage = product.images?.[0] || product.image || null;
               const endpoint = PRODUCT_TYPE_TO_ENDPOINT[product._productType] || 'food';
               const productUrl = `/product/${product._id}?type=${endpoint}`;
 
-              const startingPrice = getStartingVariant(product);
-              const multiVariants = hasMultipleVariants(product);
-              const discountedPrice = startingPrice?.discountedPrice;
-              const mrp = startingPrice?.mrp;
-              const discountPercent = mrp && discountedPrice != null
-                ? Math.round(((mrp - discountedPrice) / mrp) * 100)
-                : 0;
-
               return (
-                <Link
+                <ProductCard
                   key={`${product._productType}-${product._id}`}
-                  to={productUrl}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all"
-                >
-                  <div className="aspect-square flex items-center justify-center p-4 bg-gray-50">
-                    {displayImage ? (
-                      <img src={displayImage} alt={displayName} className="w-full h-full object-contain" />
-                    ) : (
-                      <span className="text-5xl text-gray-300">🐾</span>
-                    )}
-                  </div>
-                  <div className="p-3">
-                    <p className="font-medium text-gray-900 text-sm line-clamp-2">{displayName}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{product.brand}</p>
-                    <ProductVariantBadges product={product} className="mt-1.5" />
-                    <div className="flex items-center gap-2 mt-2">
-                      {multiVariants && (
-                        <span className="text-[10px] text-gray-500">from</span>
-                      )}
-                      <span className="font-bold text-[#205EA9]">{discountedPrice != null ? formatRupee(discountedPrice) : '—'}</span>
-                      {discountPercent > 0 && (
-                        <span className="text-xs text-gray-400 line-through">{formatRupee(mrp)}</span>
-                      )}
-                      {discountPercent > 0 && (
-                        <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">
-                          {discountPercent}% off
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
+                  product={product}
+                  productUrl={productUrl}
+                />
               );
             })}
           </div>
