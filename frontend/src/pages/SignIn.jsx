@@ -139,12 +139,6 @@ const SignIn = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-end">
-            <Link to="/forgot-password" className="text-sm text-[#205EA9] hover:text-[#1d4f8f] transition-colors">
-              Forgot your password?
-            </Link>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
