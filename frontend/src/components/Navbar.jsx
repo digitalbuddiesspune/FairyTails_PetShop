@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { useAuth } from 'react-oidc-context';
 import MobileBottomNav from './MobileBottomNav';
 import CatalogMenuContent from './CatalogMenuContent';
-import { clearUserSession, getAuthToken, getStoredUser, isOidcBackedSession, isUserAuthenticated } from '../auth/session';
+import { clearUserSession, getAuthToken, getStoredUser, isUserAuthenticated } from '../auth/session';
 import logoImage from '../assets/image.png';
 
 // Icon mapping for subcategory names in the dropdown
@@ -69,7 +68,6 @@ const DropdownMenu = ({ category, index, onClose }) => {
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const auth = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -209,32 +207,11 @@ const Navbar = () => {
     }
   };
 
-  const handleLogout = async () => {
-    const shouldUseOidcLogout = Boolean(auth?.isAuthenticated) || isOidcBackedSession();
+  const handleLogout = () => {
     clearUserSession();
     setUserDropdownOpen(false);
     setCartCount(0);
     setWishlistCount(0);
-
-    if (shouldUseOidcLogout) {
-      try {
-        await auth.removeUser();
-      } catch {
-        // Continue with hosted logout URL fallback.
-      }
-      const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
-      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
-      const logoutUri =
-        import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI || `${window.location.origin}/`;
-      if (cognitoDomain && clientId) {
-        const logoutUrl =
-          `${cognitoDomain}/logout?client_id=${encodeURIComponent(clientId)}` +
-          `&logout_uri=${encodeURIComponent(logoutUri)}`;
-        window.location.assign(logoutUrl);
-        return;
-      }
-    }
-
     navigate('/signin');
   };
 

@@ -51,6 +51,7 @@ const SignIn = () => {
       if (data.success) {
         localStorage.setItem('token', data.data.token);
         localStorage.setItem('user', JSON.stringify(data.data));
+        window.dispatchEvent(new Event('auth-changed'));
         
         // Sync guest cart and wishlist to backend
         const { syncGuestCartToBackend, syncGuestWishlistToBackend } = await import('../utils/guestCart');

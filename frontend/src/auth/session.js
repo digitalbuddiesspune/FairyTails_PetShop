@@ -1,29 +1,7 @@
-import { oidcConfig } from './oidcConfig.js';
-
 const USER_TOKEN_KEY = 'token';
 const ADMIN_TOKEN_KEY = 'adminToken';
 const USER_DATA_KEY = 'user';
 const ADMIN_DATA_KEY = 'admin';
-const OIDC_META_KEY = 'oidc_user';
-
-const getOidcUserStorageKey = () => {
-  const authority = oidcConfig?.authority;
-  const clientId = oidcConfig?.client_id;
-  if (!authority || !clientId) return null;
-  return `oidc.user:${authority}:${clientId}`;
-};
-
-/** Bearer token for API calls: prefer live OIDC session (refreshed tokens), then legacy `token` key. */
-export const getApiBearerToken = () => {
-  const key = getOidcUserStorageKey();
-  if (key) {
-    const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
-    const oidcUser = safeJsonParse(raw);
-    const t = oidcUser?.id_token || oidcUser?.access_token;
-    if (t) return t;
-  }
-  return localStorage.getItem(USER_TOKEN_KEY);
-};
 
 const safeJsonParse = (value) => {
   try {
@@ -33,193 +11,27 @@ const safeJsonParse = (value) => {
   }
 };
 
-const looksLikeUuid = (value) =>
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(value || '').trim());
-
-const isRealEmail = (value) =>
-  typeof value === 'string' &&
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) &&
-  !value.trim().toLowerCase().endsWith('@cognito.com');
-
-const resolveOidcDisplayName = (profile) => {
-  const fromParts = [profile.given_name, profile.family_name].filter(Boolean).join(' ').trim();
-  const email = isRealEmail(profile.email) ? profile.email : null;
-
-  if (profile.name?.trim()) return profile.name.trim();
-  if (fromParts) return fromParts;
-  if (profile.preferred_username?.trim() && !looksLikeUuid(profile.preferred_username)) {
-    return profile.preferred_username.trim();
-  }
-  if (email) return email.split('@')[0];
-  return 'User';
-};
-
-const resolveOidcEmail = (profile) => {
-  const candidates = [
-    profile.email,
-    profile.preferred_username,
-    profile.username,
-    profile['cognito:username'],
-  ];
-  return candidates.find((value) => isRealEmail(value))?.trim().toLowerCase() || '';
-};
-
-const buildUserFromOidc = (oidcUser) => {
-  const profile = oidcUser?.profile || {};
-
-  return {
-    _id: profile.sub || profile.username || profile['cognito:username'],
-    name: resolveOidcDisplayName(profile),
-    email: resolveOidcEmail(profile),
-    phone: profile.phone_number || '',
-  };
-};
-
-const decodeJwtPayload = (token) => {
-  if (!token || typeof token !== 'string') return null;
-  const parts = token.split('.');
-  if (parts.length < 2) return null;
-
-  try {
-    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-    const normalized = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
-    return JSON.parse(atob(normalized));
-  } catch {
-    return null;
-  }
-};
-
-const tokenHasAdminGroup = (idToken) => {
-  const payload = decodeJwtPayload(idToken);
-  const groups = payload?.['cognito:groups'];
-  return Array.isArray(groups) && groups.includes('admin');
-};
+export const getApiBearerToken = () => localStorage.getItem(USER_TOKEN_KEY);
 
 export const getAuthToken = () => getApiBearerToken();
 
-export const isUserAuthenticated = () => Boolean(getAuthToken());
+export const isUserAuthenticated = () => Boolean(getApiBearerToken());
 
 export const getStoredUser = () => safeJsonParse(localStorage.getItem(USER_DATA_KEY));
 
-export const syncCognitoProfileToBackend = async (oidcUser, apiBase) => {
-  const token = getApiBearerToken();
-  const profile = oidcUser?.profile || {};
-  if (!token || !apiBase) return;
-
-  const payload = {
-    sub: profile.sub,
-    email: profile.email,
-    name:
-      profile.name ||
-      [profile.given_name, profile.family_name].filter(Boolean).join(' ') ||
-      undefined,
-    preferred_username: profile.preferred_username,
-    username: profile.username,
-    'cognito:username': profile['cognito:username'],
-    given_name: profile.given_name,
-    family_name: profile.family_name,
-    phone: profile.phone_number,
-  };
-
-  if (import.meta.env.DEV) {
-    console.info('[Cognito:frontend-sync]', {
-      profile: {
-        sub: profile.sub,
-        email: profile.email,
-        name: profile.name,
-        preferred_username: profile.preferred_username,
-        username: profile.username,
-        'cognito:username': profile['cognito:username'],
-        phone_number: profile.phone_number,
-      },
-      payload,
-    });
-  }
-
-  try {
-    const response = await fetch(`${apiBase}/auth/cognito-sync`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
-    const data = await response.json();
-    if (response.ok && data.success && data.data) {
-      localStorage.setItem(USER_DATA_KEY, JSON.stringify(data.data));
-      window.dispatchEvent(new Event('auth-changed'));
-    }
-  } catch (error) {
-    console.error('Failed to sync Cognito profile to backend:', error);
-  }
-};
-
-export const persistCognitoSession = (oidcUser) => {
-  if (!oidcUser) return null;
-  const token = oidcUser.id_token || oidcUser.access_token;
-  const idToken = oidcUser.id_token;
-  if (!token) return null;
-
-  const mappedUser = buildUserFromOidc(oidcUser);
-  localStorage.setItem(USER_TOKEN_KEY, token);
-  // Mirror token for legacy admin calls that still read adminToken.
-  localStorage.setItem(ADMIN_TOKEN_KEY, token);
-  localStorage.setItem(USER_DATA_KEY, JSON.stringify(mappedUser));
-  localStorage.setItem(OIDC_META_KEY, 'true');
-
-  // Admin access is based on Cognito ID token group claim.
-  if (tokenHasAdminGroup(idToken)) {
-    localStorage.setItem(ADMIN_DATA_KEY, JSON.stringify(mappedUser));
-  } else {
-    localStorage.removeItem(ADMIN_DATA_KEY);
-  }
-
-  window.dispatchEvent(new Event('auth-changed'));
-  return token;
-};
-
-export const bootstrapTokenFromOidcStorage = (oidcConfig) => {
-  const authority = oidcConfig?.authority;
-  const clientId = oidcConfig?.client_id;
-  if (!authority || !clientId) return null;
-
-  const key = `oidc.user:${authority}:${clientId}`;
-  const oidcUser =
-    safeJsonParse(localStorage.getItem(key)) || safeJsonParse(sessionStorage.getItem(key));
-
-  if (!oidcUser) return null;
-  return persistCognitoSession(oidcUser);
-};
-
 export const clearUserSession = () => {
   localStorage.removeItem(USER_TOKEN_KEY);
-  localStorage.removeItem(ADMIN_TOKEN_KEY);
   localStorage.removeItem(USER_DATA_KEY);
-  localStorage.removeItem(ADMIN_DATA_KEY);
-  localStorage.removeItem(OIDC_META_KEY);
-  // Clear oidc-client-ts persisted user/session caches.
-  const stores = [localStorage, sessionStorage];
-  for (const store of stores) {
-    Object.keys(store).forEach((key) => {
-      if (
-        key.startsWith('oidc.user:') ||
-        key.startsWith('oidc.session_state:') ||
-        key.startsWith('oidc.authorize:') ||
-        key.startsWith('oidc.signout:')
-      ) {
-        store.removeItem(key);
-      }
-    });
-  }
   window.dispatchEvent(new Event('auth-changed'));
 };
 
-export const isOidcBackedSession = () => localStorage.getItem(OIDC_META_KEY) === 'true';
+export const clearAdminSession = () => {
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+  localStorage.removeItem(ADMIN_DATA_KEY);
+};
 
 export const isAdminAuthenticated = () => {
   const adminToken = localStorage.getItem(ADMIN_TOKEN_KEY);
   const adminData = localStorage.getItem(ADMIN_DATA_KEY);
   return Boolean(adminToken && adminData);
 };
-

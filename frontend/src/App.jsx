@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
-import { useAuth } from 'react-oidc-context';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
 import Footer from './components/Footer';
-import CognitoAuthRedirect from './pages/CognitoAuthRedirect';
-import AuthCallback from './pages/AuthCallback';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import Contact from './pages/Contact';
 import About from './pages/About';
@@ -24,6 +23,7 @@ import RefundPolicy from './pages/RefundPolicy';
 import ShippingPolicy from './pages/ShippingPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
 import AdminLayout from './components/AdminLayout';
+import AdminSignIn from './pages/AdminSignIn';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProducts from './pages/admin/AdminProducts';
 import AdminAddProduct from './pages/admin/AdminAddProduct';
@@ -38,10 +38,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminBanner from './pages/admin/AdminBanner';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import './App.css';
-import { isAdminAuthenticated, persistCognitoSession, syncCognitoProfileToBackend } from './auth/session';
-import { syncGuestCartToBackend, syncGuestWishlistToBackend } from './utils/guestCart';
-
-const API_BASE = import.meta.env.VITE_BACKEND_API;
+import { isAdminAuthenticated } from './auth/session';
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -72,79 +69,17 @@ const AdminRouteGuard = ({ children }) => {
   return children;
 };
 
-const AuthSessionBridge = () => {
-  const auth = useAuth();
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const renewSession = async () => {
-      try {
-        const renewedUser = await auth.signinSilent();
-        if (isMounted && renewedUser) {
-          persistCognitoSession(renewedUser);
-        }
-      } catch (error) {
-        console.error('Silent token renewal failed:', error);
-      }
-    };
-
-    const run = async () => {
-      if (!auth.isAuthenticated || !auth.user) return;
-      const token = persistCognitoSession(auth.user);
-      if (!token) return;
-
-      await syncCognitoProfileToBackend(auth.user, API_BASE);
-      await syncGuestCartToBackend(token, API_BASE);
-      await syncGuestWishlistToBackend(token, API_BASE);
-      window.dispatchEvent(new Event('cart-wishlist-update'));
-    };
-
-    // Keep local session in sync whenever oidc-client renews tokens.
-    const onUserLoaded = async (user) => {
-      if (!user) return;
-      persistCognitoSession(user);
-      await syncCognitoProfileToBackend(user, API_BASE);
-    };
-    const onAccessTokenExpiring = () => {
-      renewSession().catch(() => {});
-    };
-    const onAccessTokenExpired = () => {
-      renewSession().catch(() => {});
-    };
-
-    auth.events?.addUserLoaded?.(onUserLoaded);
-    auth.events?.addAccessTokenExpiring?.(onAccessTokenExpiring);
-    auth.events?.addAccessTokenExpired?.(onAccessTokenExpired);
-
-    run().catch((error) => {
-      console.error('Failed to sync Cognito session:', error);
-    });
-
-    return () => {
-      isMounted = false;
-      auth.events?.removeUserLoaded?.(onUserLoaded);
-      auth.events?.removeAccessTokenExpiring?.(onAccessTokenExpiring);
-      auth.events?.removeAccessTokenExpired?.(onAccessTokenExpired);
-    };
-  }, [auth]);
-
-  return null;
-};
-
 function App() {
   return (
     <Router>
       <ScrollToTop />
-      <AuthSessionBridge />
       <Routes>
         {/* Auth Pages - No Navbar/Footer */}
-        <Route path="/signup" element={<CognitoAuthRedirect mode="signup" />} />
-        <Route path="/signin" element={<CognitoAuthRedirect mode="signin" />} />
-        <Route path="/callback" element={<AuthCallback />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signin" element={<SignIn />} />
 
         {/* Admin Pages */}
-        <Route path="/admin/signin" element={<CognitoAuthRedirect mode="admin-signin" />} />
+        <Route path="/admin/signin" element={<AdminSignIn />} />
 
         <Route path="/admin" element={<AdminRouteGuard><AdminLayout /></AdminRouteGuard>}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />

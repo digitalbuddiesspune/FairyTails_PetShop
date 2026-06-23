@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from 'react-oidc-context';
 import axios from 'axios';
-import { clearUserSession, isOidcBackedSession } from '../auth/session';
+import { clearUserSession } from '../auth/session';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -20,7 +19,6 @@ const emptyAddress = { addressType: 'home', firstName: '', lastName: '', phone: 
 
 const AccountSettingsPage = () => {
   const navigate = useNavigate();
-  const auth = useAuth();
   const token = localStorage.getItem('token');
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -155,29 +153,8 @@ const AccountSettingsPage = () => {
     }
   };
 
-  const handleLogout = async () => {
-    const shouldUseOidcLogout = Boolean(auth?.isAuthenticated) || isOidcBackedSession();
+  const handleLogout = () => {
     clearUserSession();
-
-    if (shouldUseOidcLogout) {
-      try {
-        await auth.removeUser();
-      } catch {
-        // Continue with hosted logout URL.
-      }
-      const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
-      const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
-      const logoutUri =
-        import.meta.env.VITE_COGNITO_POST_LOGOUT_REDIRECT_URI || `${window.location.origin}/`;
-      if (cognitoDomain && clientId) {
-        const logoutUrl =
-          `${cognitoDomain}/logout?client_id=${encodeURIComponent(clientId)}` +
-          `&logout_uri=${encodeURIComponent(logoutUri)}`;
-        window.location.assign(logoutUrl);
-        return;
-      }
-    }
-
     navigate('/signin');
   };
 

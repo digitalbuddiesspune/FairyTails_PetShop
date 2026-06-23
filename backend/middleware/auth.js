@@ -1,4 +1,3 @@
-import { protectWithCognito } from './cognitoAuth.js';
+import { protect } from './authMiddleware.js';
 
-export default protectWithCognito;
-
+export default protect;
