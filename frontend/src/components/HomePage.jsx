@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HeroBanner from './HeroBanner';
 import { formatRupee } from '../utils/formatPrice';
+import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
+import ProductVariantBadges from './ProductVariantBadges';
 
 // Color mapping for category circle backgrounds
 const categoryColors = {
@@ -40,19 +42,11 @@ const TYPE_TO_ENDPOINT = {
 
 // Extract a displayable price from any product shape
 const extractPrice = (p) => {
-  // Food has prices[], Clothes has sizes[], Toys has variants[], Accessories has variants[]
-  const options = p.prices || p.sizes || p.variants || [];
-  if (options.length > 0) {
-    const best = options.reduce(
-      (min, o) => ((o.discountedPrice ?? o.price) < (min.discountedPrice ?? min.price) ? o : min),
-      options[0],
-    );
-    return { price: best.discountedPrice ?? best.price, mrp: best.mrp ?? best.price };
+  const variant = getStartingVariant(p);
+  if (variant) {
+    return { price: variant.discountedPrice, mrp: variant.mrp };
   }
-  // Flat-price models (HealthSupplement, House, Grooming)
-  const disc = p.discountedPrice ?? p.discountPrice ?? p.price;
-  const mrp = p.mrp ?? p.price;
-  return { price: disc, mrp };
+  return { price: null, mrp: null };
 };
 
 const extractImage = (p) => {
@@ -300,6 +294,7 @@ const HomePage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {featuredProducts.map((product) => {
                 const { price, mrp } = extractPrice(product);
+                const multiVariants = hasMultipleVariants(product);
                 const img = extractImage(product);
                 const discount = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
                 const name = product.productName || product.name || 'Product';
@@ -338,8 +333,12 @@ const HomePage = () => {
                         <span className="text-xs text-gray-500">{product.rating}</span>
                       </div>
                     )}
+                    <ProductVariantBadges product={product} className="mb-1.5" />
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-gray-900">{formatRupee(price)}</span>
+                      {multiVariants && price != null && (
+                        <span className="text-[10px] text-gray-500">from</span>
+                      )}
+                      <span className="text-lg font-bold text-gray-900">{price != null ? formatRupee(price) : '—'}</span>
                       {mrp > price && (
                         <span className="text-sm text-gray-400 line-through">{formatRupee(mrp)}</span>
                       )}

@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios';
 import { getApiBearerToken } from '../auth/session';
 import { formatRupee } from '../utils/formatPrice';
+import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
+import ProductVariantBadges from '../components/ProductVariantBadges';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -72,84 +74,18 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
 
   const isInWishlist = wishlistIds.includes(product._id);
 
-  // Normalise across product types
-  const priceOptions = product.prices || product.sizes || product.variants || [];
   const isToyProduct = product.category === 'Toy';
   const isHealthSupplement = product.category === 'health-supplement';
   const isHouseProduct = product.category === 'house';
   const isAccessory = product.category === 'accessories';
   const isGrooming = product.category === 'grooming-essentials';
-  const hasFlatPrice = isToyProduct || isHealthSupplement || isHouseProduct;
-  
-  // Check if it's a food, accessory, toy, health, grooming, or house product with new structure (flat fields instead of prices/sizes/variants array)
-  const isFoodWithNewStructure = product.mrp !== undefined && product.discountPrice !== undefined && product.capacity !== undefined;
-  const isAccessoryWithNewStructure = isAccessory && product.mrp !== undefined && product.discountPrice !== undefined;
-  const isToyWithNewStructure = isToyProduct && product.mrp !== undefined && product.discountPrice !== undefined;
-  const isHealthWithNewStructure = isHealthSupplement && product.mrp !== undefined && product.discountPrice !== undefined;
-  const isGroomingWithNewStructure = isGrooming && product.mrp !== undefined && product.discountPrice !== undefined;
-  const isHouseWithNewStructure = isHouseProduct && product.mrp !== undefined && product.discountPrice !== undefined;
 
   // Normalised display fields
   const displayName = product.productName || product.name || 'Unnamed Product';
   const displayImage = product.images?.[0] || product.image || null;
 
-  const startingPrice = useMemo(() => {
-    // New food structure (flat fields)
-    if (isFoodWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc };
-    }
-    // New accessory structure (flat fields)
-    if (isAccessoryWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc };
-    }
-    // New toy structure (flat fields)
-    if (isToyWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc };
-    }
-    // New health structure (flat fields)
-    if (isHealthWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc };
-    }
-    // New grooming structure (flat fields)
-    if (isGroomingWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc };
-    }
-    // New house structure (flat fields)
-    if (isHouseWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc };
-    }
-    // Flat price products (old structures)
-    if (hasFlatPrice && !isHealthWithNewStructure && !isGroomingWithNewStructure && !isHouseWithNewStructure) {
-      const mrp = product.price || product.mrp;
-      const disc = product.discountedPrice || product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc };
-    }
-    // Old structure with prices/sizes array
-    if (priceOptions.length === 0) return null;
-    return priceOptions.reduce(
-      (min, p) => (p.discountedPrice < min.discountedPrice ? p : min),
-      priceOptions[0]
-    );
-  }, [priceOptions, hasFlatPrice, isFoodWithNewStructure, isAccessoryWithNewStructure, isToyWithNewStructure, isHealthWithNewStructure, isGroomingWithNewStructure, isHouseWithNewStructure, product.mrp, product.discountPrice, product.price, product.discountedPrice]);
+  const startingPrice = useMemo(() => getStartingVariant(product), [product]);
+  const multiVariants = hasMultipleVariants(product);
 
   const discountPercent = startingPrice
     ? Math.round(((startingPrice.mrp - startingPrice.discountedPrice) / startingPrice.mrp) * 100)
@@ -263,21 +199,15 @@ const ProductCard = ({ product, wishlistIds = [], onWishlistToggle, apiEndpoint 
           <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-tight mb-2 line-clamp-2 min-h-[2rem] sm:min-h-[2.5rem] hover:text-[#205EA9] transition-colors">{displayName}</h3>
         </Link>
         <span className="inline-block bg-gray-100 text-gray-600 text-[10px] sm:text-xs font-medium px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full mb-2 sm:mb-3">{product.subCategory}</span>
-        {/* Show capacity for food or size for accessories */}
-        {(isFoodWithNewStructure && product.capacity) && (
-          <p className="text-xs text-gray-500 mb-1">Capacity: {product.capacity}</p>
-        )}
-        {(isAccessoryWithNewStructure && product.size) && (
-          <p className="text-xs text-gray-500 mb-1">Size: {product.size}</p>
-        )}
+        <ProductVariantBadges product={product} className="mb-2" />
         {startingPrice && (
           <div className="flex items-end gap-2 mb-3">
-            <span className="text-base sm:text-xl font-bold text-gray-900">{formatRupee(startingPrice.discountedPrice)}</span>
+            <span className="text-base sm:text-xl font-bold text-gray-900">
+              {multiVariants && <span className="text-xs font-normal text-gray-500 mr-1">from</span>}
+              {formatRupee(startingPrice.discountedPrice)}
+            </span>
             {startingPrice.mrp > startingPrice.discountedPrice && (
               <span className="text-sm text-gray-400 line-through">{formatRupee(startingPrice.mrp)}</span>
-            )}
-            {!isFoodWithNewStructure && !isAccessoryWithNewStructure && priceOptions.length > 1 && (
-              <span className="text-xs text-gray-500 ml-auto">{priceOptions.length} sizes</span>
             )}
           </div>
         )}

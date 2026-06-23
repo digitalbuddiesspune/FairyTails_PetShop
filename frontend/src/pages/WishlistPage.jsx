@@ -4,6 +4,8 @@ import axios from 'axios';
 import { getGuestWishlist, removeFromGuestWishlist, addToGuestCart } from '../utils/guestCart';
 import { getApiBearerToken } from '../auth/session';
 import { formatRupee } from '../utils/formatPrice';
+import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
+import ProductVariantBadges from '../components/ProductVariantBadges';
 
 const PRODUCT_ENDPOINTS = [
   '/food',
@@ -266,10 +268,8 @@ const WishlistPage = () => {
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {items.map((product) => {
                 if (!product) return null;
-                const startingPrice = product.prices?.reduce(
-                  (min, p) => (p.discountedPrice < min.discountedPrice ? p : min),
-                  product.prices[0]
-                );
+                const startingPrice = getStartingVariant(product);
+                const multiVariants = hasMultipleVariants(product);
                 const discountPercent = startingPrice
                   ? Math.round(((startingPrice.mrp - startingPrice.discountedPrice) / startingPrice.mrp) * 100)
                   : 0;
@@ -324,13 +324,18 @@ const WishlistPage = () => {
                         </h3>
                       </Link>
 
-                      <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full mb-3">
+                      <span className="inline-block bg-gray-100 text-gray-600 text-xs font-medium px-2.5 py-1 rounded-full mb-2">
                         {product.subCategory}
                       </span>
 
+                      <ProductVariantBadges product={product} className="mb-2" />
+
                       {startingPrice && (
                         <div className="flex items-end gap-2 mb-4">
-                          <span className="text-base sm:text-xl font-bold text-gray-900">{formatRupee(startingPrice.discountedPrice)}</span>
+                          <span className="text-base sm:text-xl font-bold text-gray-900">
+                            {multiVariants && <span className="text-xs font-normal text-gray-500 mr-1">from</span>}
+                            {formatRupee(startingPrice.discountedPrice)}
+                          </span>
                           {startingPrice.mrp > startingPrice.discountedPrice && (
                             <span className="text-sm text-gray-400 line-through">{formatRupee(startingPrice.mrp)}</span>
                           )}

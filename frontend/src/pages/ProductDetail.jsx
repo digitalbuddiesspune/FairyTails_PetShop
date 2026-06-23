@@ -4,6 +4,7 @@ import axios from 'axios';
 import { addToGuestCart, addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } from '../utils/guestCart';
 import { clearUserSession, getApiBearerToken } from '../auth/session';
 import { formatRupee } from '../utils/formatPrice';
+import { getProductVariants } from '../utils/productVariants';
 import LoginRequiredModal from '../components/LoginRequiredModal';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
@@ -283,6 +284,11 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
+  useEffect(() => {
+    setSelectedSize(0);
+    setSelectedImage(0);
+  }, [id, product?._id]);
+
   // ─── Normalised fields across all product types ───────────────────────────
   const displayName = product?.productName || product?.name || 'Unnamed Product';
   const images = product?.images || (product?.image ? [product.image] : []);
@@ -290,126 +296,35 @@ const ProductDetail = () => {
   const category = product?.category || '';
   const subCategory = product?.subCategory || '';
 
-  // Price options: food=prices, clothes/accessories=sizes, grooming=variants, toys/health/house=flat
-  const priceOptions = product?.prices || product?.sizes || product?.variants || [];
+  // Price variants: food=prices[], clothes=sizes[], grooming=variants[], or flat single SKU
+  const variants = useMemo(() => getProductVariants(product), [product]);
+  const multiVariants = variants.length > 1;
+  const variantKind = variants[0]?.kind;
   const isFlatPrice = ['Toy', 'health-supplement', 'house'].includes(category);
-  
-  // Check if it's a food product with new structure (flat fields instead of prices array)
-  const isFoodWithNewStructure = category === 'Dog' || category === 'Cat' || category === 'Bird' || category === 'Fish' || category === 'Other' 
-    ? (product?.mrp !== undefined && product?.discountPrice !== undefined && product?.capacity !== undefined)
-    : false;
-  
-  // Check if it's an accessory product with new structure (flat fields instead of sizes array)
-  // Also check by productType from URL or by having mrp/discountPrice without sizes array
-  const isAccessory = category === 'accessories' || productType === '/accessories' || (product?.mrp !== undefined && product?.discountPrice !== undefined && !product?.sizes);
-  const isAccessoryWithNewStructure = isAccessory && product?.mrp !== undefined && product?.discountPrice !== undefined;
-  
-  // Check if it's a toy, health, grooming, or house product with new structure (flat fields instead of price/discountedPrice/variants)
-  const isToyWithNewStructure = category === 'Toy' && product?.mrp !== undefined && product?.discountPrice !== undefined;
-  const isHealthWithNewStructure = category === 'health-supplement' && product?.mrp !== undefined && product?.discountPrice !== undefined;
-  const isGroomingWithNewStructure = category === 'grooming-essentials' && product?.mrp !== undefined && product?.discountPrice !== undefined;
-  const isHouseWithNewStructure = category === 'house' && product?.mrp !== undefined && product?.discountPrice !== undefined;
 
   const currentPrice = useMemo(() => {
-    if (!product) return null;
-    
-    // New food structure (flat fields: capacity, mrp, discountPrice)
-    if (isFoodWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc, label: product.capacity || '' };
-    }
-    
-    // New accessory structure (flat fields: mrp, discountPrice)
-    if (isAccessoryWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc, label: product.size || '' };
-    }
-    
-    // New toy structure (flat fields: mrp, discountPrice)
-    if (isToyWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc, label: product.size || '' };
-    }
-    
-    // New health structure (flat fields: mrp, discountPrice)
-    if (isHealthWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc, label: product.size || '' };
-    }
-    
-    // New grooming structure (flat fields: mrp, discountPrice)
-    if (isGroomingWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc, label: product.size || '' };
-    }
-    
-    // New house structure (flat fields: mrp, discountPrice)
-    if (isHouseWithNewStructure) {
-      const mrp = product.mrp;
-      const disc = product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc, label: '' };
-    }
-    
-    // Flat price products (old structures)
-    if (isFlatPrice && !isHealthWithNewStructure && !isGroomingWithNewStructure && !isHouseWithNewStructure) {
-      const mrp = product.price || product.mrp;
-      const disc = product.discountedPrice || product.discountPrice || mrp;
-      if (!mrp) return null;
-      return { mrp, discountedPrice: disc, label: product.size || '' };
-    }
-    
-    // Old structure with prices/sizes/variants array
-    if (priceOptions.length === 0) return null;
-    const p = priceOptions[selectedSize];
+    if (!variants.length) return null;
+    const row = variants[selectedSize] ?? variants[0];
     return {
-      mrp: p.mrp,
-      discountedPrice: p.discountedPrice,
-      label: p.capacity || p.size || p.volume || '',
+      mrp: row.mrp,
+      discountedPrice: row.discountedPrice,
+      label: row.label,
     };
-  }, [product, selectedSize, priceOptions, isFlatPrice, isFoodWithNewStructure, isAccessoryWithNewStructure, isToyWithNewStructure, isHealthWithNewStructure, isGroomingWithNewStructure, isHouseWithNewStructure]);
+  }, [variants, selectedSize]);
 
   const discountPercent = useMemo(() => {
     if (!currentPrice) return 0;
     if (product?.discountPercentage) return Math.round(product.discountPercentage);
+    if (!currentPrice.mrp) return 0;
     return Math.round(((currentPrice.mrp - currentPrice.discountedPrice) / currentPrice.mrp) * 100);
   }, [currentPrice, product]);
 
-  // Compute available stock — flat-price products store it at root, multi-option products per option
   const availableStock = useMemo(() => {
-    if (!product) return null;
-    // New food structure (flat fields, stock at root level)
-    if (isFoodWithNewStructure) return product.availableStock ?? null;
-    // New accessory structure (flat fields, stock at root level)
-    if (isAccessoryWithNewStructure) return product.availableStock ?? null;
-    // New toy structure (flat fields, stock at root level)
-    if (isToyWithNewStructure) return product.availableStock ?? null;
-    // New health structure (flat fields, stock at root level)
-    if (isHealthWithNewStructure) return product.availableStock ?? null;
-    // New grooming structure (flat fields, stock at root level)
-    if (isGroomingWithNewStructure) return product.availableStock ?? null;
-    // New house structure (flat fields, stock at root level)
-    if (isHouseWithNewStructure) return product.availableStock ?? null;
-    // Flat-price products (old structures)
-    if (isFlatPrice && !isHealthWithNewStructure && !isGroomingWithNewStructure && !isHouseWithNewStructure) return product.availableStock ?? null;
-    // Multi-option products (Food/Clothes/Accessories/Grooming) - old structure
-    if (priceOptions.length > 0 && priceOptions[selectedSize]?.availableStock !== undefined) {
-      return priceOptions[selectedSize].availableStock;
-    }
-    // Fallback to root-level stock
-    if (product.availableStock !== undefined) return product.availableStock;
-    return null;
-  }, [product, isFlatPrice, isFoodWithNewStructure, isAccessoryWithNewStructure, priceOptions, selectedSize]);
+    if (!variants.length) return product?.availableStock ?? null;
+    const row = variants[selectedSize] ?? variants[0];
+    if (row.availableStock !== undefined) return row.availableStock;
+    return product?.availableStock ?? null;
+  }, [variants, selectedSize, product]);
 
   // Average rating (only food has reviews)
   const avgRating = useMemo(() => {
@@ -646,18 +561,25 @@ const ProductDetail = () => {
                   </div>
                 )}
 
-                {/* Size / Variant Options (for products with multiple options) */}
-                {!isFlatPrice && !isFoodWithNewStructure && !isAccessoryWithNewStructure && priceOptions.length > 1 && (
+                {/* Capacity / size / variant options */}
+                {multiVariants && (
                   <div className="mb-5">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">Select Option:</p>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                      {variantKind === 'capacity'
+                        ? 'Select Capacity:'
+                        : variantKind === 'size'
+                          ? 'Select Size:'
+                          : 'Select Option:'}
+                    </p>
                     <div className="flex flex-wrap gap-3">
-                      {priceOptions.map((p, i) => {
-                        const optLabel = p.capacity || p.size || p.volume || `Option ${i + 1}`;
-                        const optStock = p.availableStock;
+                      {variants.map((row, i) => {
+                        const optLabel = row.label || `Option ${i + 1}`;
+                        const optStock = row.availableStock;
                         const outOfStock = optStock !== undefined && optStock <= 0;
                         return (
                           <button
                             key={i}
+                            type="button"
                             onClick={() => !outOfStock && setSelectedSize(i)}
                             disabled={outOfStock}
                             className={`px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
@@ -670,7 +592,7 @@ const ProductDetail = () => {
                           >
                             <span>{optLabel}</span>
                             <span className="mx-1">—</span>
-                            <span className="font-bold">{formatRupee(p.discountedPrice)}</span>
+                            <span className="font-bold">{formatRupee(row.discountedPrice)}</span>
                             {optStock !== undefined && (
                               <span className={`block text-[10px] mt-0.5 ${
                                 outOfStock ? 'text-red-400' : optStock <= 5 ? 'text-orange-500' : 'text-gray-400'
@@ -685,6 +607,18 @@ const ProductDetail = () => {
                   </div>
                 )}
 
+                {/* Single variant label (when only one capacity/size) */}
+                {!multiVariants && variants[0]?.label && (
+                  <div className="mb-5">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                      {variantKind === 'capacity' ? 'Capacity:' : variantKind === 'size' ? 'Size:' : 'Option:'}
+                    </p>
+                    <span className="inline-block bg-amber-50 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full border border-amber-200">
+                      {variants[0].label}
+                    </span>
+                  </div>
+                )}
+
                 {/* Flavours (Food) */}
                 {product.flavours?.length > 0 && (
                   <div className="mb-5">
@@ -696,34 +630,6 @@ const ProductDetail = () => {
                         </span>
                       ))}
                     </div>
-                  </div>
-                )}
-
-                {/* Capacity (Food) */}
-                {isFoodWithNewStructure && (
-                  <div className="mb-5">
-                    <p className="text-bold font-semibold text-gray-700 mb-2">Capacity:</p>
-                    {product.capacity ? (
-                      <span className="inline-block bg-amber-50 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full border border-amber-200">
-                        {product.capacity}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-gray-400 italic">Not specified</span>
-                    )}
-                  </div>
-                )}
-
-                {/* Size (Accessories) */}
-                {isAccessory && (
-                  <div className="mb-5">
-                    <p className="text-bold font-semibold text-gray-700 mb-2">Size:</p>
-                    {product.size ? (
-                      <span className="inline-block bg-blue-50 text-blue-700 text-sm font-medium px-3 py-1.5 rounded-full border border-blue-200">
-                        {product.size}
-                      </span>
-                    ) : (
-                      <span className="text-sm text-gray-400 italic">Not specified</span>
-                    )}
                   </div>
                 )}
 
@@ -759,10 +665,8 @@ const ProductDetail = () => {
                     </div>
                   )}
 
-                  {/* Capacity (Food) */}
-                  
-                  {/* Size (Toys — single size like "One Size", "Large", etc.) - Accessories size shown in dedicated section above */}
-                  {typeof product.size === 'string' && product.size && !isAccessory && !isFoodWithNewStructure && (
+                  {/* Size (Toys — single size) */}
+                  {typeof product.size === 'string' && product.size && !variants[0]?.label && (
                     <div className="text-sm">
                       <span className="font-semibold text-gray-700">Size: </span>
                       <span className="text-gray-600">{product.size}</span>

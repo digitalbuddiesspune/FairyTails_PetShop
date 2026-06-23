@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { formatRupee } from '../utils/formatPrice';
+import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
+import ProductVariantBadges from '../components/ProductVariantBadges';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -87,24 +89,13 @@ const SearchPage = () => {
               const endpoint = PRODUCT_TYPE_TO_ENDPOINT[product._productType] || 'food';
               const productUrl = `/product/${product._id}?type=${endpoint}`;
 
-              let discountedPrice, mrp;
-              if (product.prices?.length) {
-                const p = product.prices[0];
-                discountedPrice = p.discountedPrice;
-                mrp = p.mrp;
-              } else if (product.sizes?.length) {
-                const s = product.sizes[0];
-                discountedPrice = s.discountedPrice;
-                mrp = s.mrp;
-              } else if (product.variants?.length) {
-                const v = product.variants[0];
-                discountedPrice = v.discountedPrice;
-                mrp = v.mrp;
-              } else {
-                discountedPrice = product.discountedPrice || product.discountPrice || product.price;
-                mrp = product.price || product.mrp;
-              }
-              const discountPercent = mrp ? Math.round(((mrp - discountedPrice) / mrp) * 100) : 0;
+              const startingPrice = getStartingVariant(product);
+              const multiVariants = hasMultipleVariants(product);
+              const discountedPrice = startingPrice?.discountedPrice;
+              const mrp = startingPrice?.mrp;
+              const discountPercent = mrp && discountedPrice != null
+                ? Math.round(((mrp - discountedPrice) / mrp) * 100)
+                : 0;
 
               return (
                 <Link
@@ -122,7 +113,11 @@ const SearchPage = () => {
                   <div className="p-3">
                     <p className="font-medium text-gray-900 text-sm line-clamp-2">{displayName}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{product.brand}</p>
+                    <ProductVariantBadges product={product} className="mt-1.5" />
                     <div className="flex items-center gap-2 mt-2">
+                      {multiVariants && (
+                        <span className="text-[10px] text-gray-500">from</span>
+                      )}
                       <span className="font-bold text-[#205EA9]">{discountedPrice != null ? formatRupee(discountedPrice) : '—'}</span>
                       {discountPercent > 0 && (
                         <span className="text-xs text-gray-400 line-through">{formatRupee(mrp)}</span>
