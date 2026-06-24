@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import type from '../styles/typography';
 
 // Category icons (used for main category list in menu/catalog)
 const categoryIconMap = {
@@ -73,7 +74,7 @@ export default function CatalogMenuContent({ categories, getSubcategoryLink, onS
       <div>
         <button
           onClick={handleBack}
-          className={`w-full flex items-center gap-2 ${px} ${py} text-gray-700 font-medium hover:bg-gray-50 rounded-lg transition-colors`}
+          className={`w-full flex items-center gap-2 ${px} ${py} text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg transition-colors`}
         >
           <BackIcon />
           <span>Back to categories</span>
@@ -87,7 +88,7 @@ export default function CatalogMenuContent({ categories, getSubcategoryLink, onS
               className={`flex items-center gap-3 ${px} ${py} text-gray-700 hover:bg-gray-50 rounded-lg transition-colors`}
             >
               <SubIcon name={sub.name} />
-              <span className="font-medium">{sub.name}</span>
+              <span className={type.nav}>{sub.name}</span>
             </Link>
           ))}
         </div>
@@ -106,7 +107,7 @@ export default function CatalogMenuContent({ categories, getSubcategoryLink, onS
               key={category._id || category.slug}
               to={categoryLink}
               onClick={onClose}
-              className={`flex items-center gap-2 ${px} ${py} text-gray-700 font-medium hover:bg-gray-50 rounded-lg transition-colors`}
+              className={`flex items-center gap-2 ${px} ${py} text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg transition-colors`}
             >
               <CategoryIcon slug={category.slug} name={category.name} />
               <span>{category.name}</span>
@@ -117,7 +118,7 @@ export default function CatalogMenuContent({ categories, getSubcategoryLink, onS
           <button
             key={category._id || category.slug}
             onClick={() => setSelectedCategory(category)}
-            className={`w-full flex items-center justify-between gap-2 ${px} ${py} text-gray-700 font-medium hover:bg-gray-50 rounded-lg transition-colors text-left`}
+            className={`w-full flex items-center justify-between gap-2 ${px} ${py} text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg transition-colors text-left`}
           >
             <div className="flex items-center gap-2">
               <CategoryIcon slug={category.slug} name={category.name} />

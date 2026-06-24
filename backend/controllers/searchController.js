@@ -5,27 +5,47 @@ import Accessory from '../models/Accessory.js';
 import GroomingEssential from '../models/GroomingEssential.js';
 import HealthSupplement from '../models/HealthSupplement.js';
 import House from '../models/House.js';
+import {
+  buildMongoSearchFilter,
+  matchesSearchQuery,
+  searchRelevanceScore,
+} from '../utils/productSearch.js';
 
-const SEARCH_LIMIT = 50;
+const CANDIDATE_LIMIT = 120;
+const RESULT_LIMIT = 50;
 
-// Build search filter - most models use productName, House/HealthSupplement use name
-const regex = (q) => ({ $regex: q, $options: 'i' });
-const productNameFilter = (q) => ({
-  $or: [
-    { productName: regex(q) },
-    { brand: regex(q) },
-    { subCategory: regex(q) },
-  ],
-});
-const nameFilter = (q) => ({
-  $or: [
-    { name: regex(q) },
-    { brand: regex(q) },
-    { subCategory: regex(q) },
-  ],
-});
+const COLLECTIONS = [
+  { model: Food, productType: 'Food', useNameField: false },
+  { model: Clothes, productType: 'Clothes', useNameField: false },
+  { model: Toy, productType: 'Toy', useNameField: false },
+  { model: Accessory, productType: 'Accessory', useNameField: false },
+  { model: GroomingEssential, productType: 'GroomingEssential', useNameField: false },
+  { model: HealthSupplement, productType: 'HealthSupplement', useNameField: true },
+  { model: House, productType: 'House', useNameField: true },
+];
 
-// @desc    Search products across all collections
+const fetchCandidates = async (collection, q) => {
+  const filter = buildMongoSearchFilter(q, collection.useNameField);
+  let items = await collection.model.find(filter).limit(CANDIDATE_LIMIT).lean();
+
+  if (items.length < 8) {
+    const broader = await collection.model.find().sort({ createdAt: -1 }).limit(CANDIDATE_LIMIT).lean();
+    const seen = new Set(items.map((p) => String(p._id)));
+    broader.forEach((p) => {
+      const id = String(p._id);
+      if (!seen.has(id)) {
+        seen.add(id);
+        items.push(p);
+      }
+    });
+  }
+
+  return items
+    .filter((product) => matchesSearchQuery(product, q))
+    .map((product) => ({ ...product, _productType: collection.productType }));
+};
+
+// @desc    Search products across all collections (name, brand, category, description, features, fuzzy)
 // @route   GET /api/v1/search
 // @access  Public
 export const searchProducts = async (req, res) => {
@@ -40,28 +60,11 @@ export const searchProducts = async (req, res) => {
       });
     }
 
-    const pf = productNameFilter(q);
-    const nf = nameFilter(q);
-
-    const [foods, clothes, toys, accessories, grooming, health, houses] = await Promise.all([
-      Food.find(pf).limit(SEARCH_LIMIT).lean(),
-      Clothes.find(pf).limit(SEARCH_LIMIT).lean(),
-      Toy.find(pf).limit(SEARCH_LIMIT).lean(),
-      Accessory.find(pf).limit(SEARCH_LIMIT).lean(),
-      GroomingEssential.find(pf).limit(SEARCH_LIMIT).lean(),
-      HealthSupplement.find(nf).limit(SEARCH_LIMIT).lean(),
-      House.find(nf).limit(SEARCH_LIMIT).lean(),
-    ]);
-
-    const results = [
-      ...foods.map((p) => ({ ...p, _productType: 'Food' })),
-      ...clothes.map((p) => ({ ...p, _productType: 'Clothes' })),
-      ...toys.map((p) => ({ ...p, _productType: 'Toy' })),
-      ...accessories.map((p) => ({ ...p, _productType: 'Accessory' })),
-      ...grooming.map((p) => ({ ...p, _productType: 'GroomingEssential' })),
-      ...health.map((p) => ({ ...p, _productType: 'HealthSupplement' })),
-      ...houses.map((p) => ({ ...p, _productType: 'House' })),
-    ];
+    const batches = await Promise.all(COLLECTIONS.map((collection) => fetchCandidates(collection, q)));
+    const results = batches
+      .flat()
+      .sort((a, b) => searchRelevanceScore(b, q) - searchRelevanceScore(a, q))
+      .slice(0, RESULT_LIMIT);
 
     res.status(200).json({
       success: true,

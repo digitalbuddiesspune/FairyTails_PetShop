@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { type } from '../../styles/typography';
 import {
   isImageUrl,
   MAX_IMAGE_UPLOAD_MB,
@@ -615,15 +616,15 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
   /* ─── Reusable UI helpers ─────────────────────────────────────────────── */
 
   const Label = ({ children, required }) => (
-    <label className="block text-sm font-semibold text-gray-700 mb-1">
+    <label className={`${type.bodySm} block text-gray-700 mb-1`}>
       {children} {required && <span className="text-red-400">*</span>}
     </label>
   );
 
   const SectionTitle = ({ icon, children }) => (
     <div className="flex items-center gap-2 pt-5 pb-2 border-t border-gray-100">
-      <span className="text-lg">{icon}</span>
-      <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">{children}</h3>
+      <span className={`${type.body}`}>{icon}</span>
+      <h3 className={`${type.caption} text-gray-800 uppercase tracking-wide`}>{children}</h3>
     </div>
   );
 
@@ -631,7 +632,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
     <div>
       <Label required={required}>{label}</Label>
       {field === 'images' && (
-        <p className="text-xs text-gray-500 mb-2">
+        <p className={`${type.caption} text-gray-500 mb-2`}>
           Paste a URL or upload directly to storage (max {MAX_IMAGE_UPLOAD_MB} MB). Uploaded images are served via CloudFront.
         </p>
       )}
@@ -645,7 +646,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
               className="input-field"
             />
             {field === 'images' && (
-              <label className="px-3 py-2 text-xs font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer whitespace-nowrap flex items-center shrink-0">
+              <label className={`${type.captionMedium} px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer whitespace-nowrap flex items-center shrink-0`}>
                 {uploadingImageIndex === `${field}-${i}` ? 'Uploading...' : 'Upload'}
                 <input
                   type="file"
@@ -661,7 +662,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
               </label>
             )}
             {i > 0 && (
-              <button type="button" onClick={() => arrRemove(field, i)} className="text-red-400 hover:text-red-600 text-lg px-1 shrink-0">×</button>
+              <button type="button" onClick={() => arrRemove(field, i)} className={`${type.body} text-red-400 hover:text-red-600 px-1 shrink-0`}>×</button>
             )}
           </div>
           {field === 'images' && isImageUrl(val) && (
@@ -674,12 +675,12 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
                   e.currentTarget.style.display = 'none';
                 }}
               />
-              <p className="text-xs text-gray-500 pt-1 break-all">{val}</p>
+              <p className={`${type.caption} text-gray-500 pt-1 break-all`}>{val}</p>
             </div>
           )}
         </div>
       ))}
-      <button type="button" onClick={() => arrAdd(field)} className="text-xs text-purple-600 hover:text-purple-800 font-medium">
+      <button type="button" onClick={() => arrAdd(field)} className={`${type.caption} text-purple-600 hover:text-purple-800`}>
         + Add {label.replace(/s$/, '')}
       </button>
     </div>
@@ -717,7 +718,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
       {/* Capacity variants & pricing */}
       <SectionTitle icon="💰">Capacity & Pricing</SectionTitle>
-      <p className="text-xs text-gray-500 -mt-2">Add each pack size with its own MRP, sale price, and stock.</p>
+      <p className={`${type.caption} text-gray-500 -mt-2`}>Add each pack size with its own MRP, sale price, and stock.</p>
       {formData.prices.map((row, i) => (
         <div key={i} className="flex flex-wrap gap-2 items-end">
           <div className="flex-1 min-w-[120px]">
@@ -768,7 +769,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
             <button
               type="button"
               onClick={() => subArrRemove('prices', i)}
-              className="text-red-400 hover:text-red-600 text-lg pb-2"
+              className={`${type.body} text-red-400 hover:text-red-600 pb-2`}
             >
               ×
             </button>
@@ -778,7 +779,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
       <button
         type="button"
         onClick={() => subArrAdd('prices', { capacity: '', mrp: '', discountedPrice: '', availableStock: '' })}
-        className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+        className={`${type.caption} text-purple-600 hover:text-purple-800`}
       >
         + Add Capacity Variant
       </button>
@@ -883,10 +884,10 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
             {i === 0 && <Label required>Stock</Label>}
             <input className="input-field" type="number" placeholder="Stock" value={s.availableStock} onChange={(e) => subArrSet('sizes', i, 'availableStock', e.target.value)} />
           </div>
-          {i > 0 && <button type="button" onClick={() => subArrRemove('sizes', i)} className="text-red-400 hover:text-red-600 text-lg pb-2">×</button>}
+          {i > 0 && <button type="button" onClick={() => subArrRemove('sizes', i)} className={`${type.body} text-red-400 hover:text-red-600 pb-2`}>×</button>}
         </div>
       ))}
-      <button type="button" onClick={() => subArrAdd('sizes', { size: 'M', mrp: '', discountedPrice: '', availableStock: '' })} className="text-xs text-purple-600 hover:text-purple-800 font-medium">+ Add Size</button>
+      <button type="button" onClick={() => subArrAdd('sizes', { size: 'M', mrp: '', discountedPrice: '', availableStock: '' })} className={`${type.caption} text-purple-600 hover:text-purple-800`}>+ Add Size</button>
 
       {/* Appearance */}
       <SectionTitle icon="🎨">Appearance</SectionTitle>
@@ -917,7 +918,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
         <div className="flex items-end pb-1">
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" checked={formData.isReturnable} onChange={(e) => set('isReturnable', e.target.checked)} className="w-4 h-4 accent-purple-600" />
-            <span className="text-sm text-gray-700">Returnable</span>
+            <span className={`${type.bodySm} text-gray-700`}>Returnable</span>
           </label>
         </div>
       </div>
@@ -1035,7 +1036,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
       <div className="flex items-center gap-2 pt-2">
         <input type="checkbox" checked={formData.isReturnable} onChange={(e) => set('isReturnable', e.target.checked)} className="w-4 h-4 accent-purple-600" />
-        <span className="text-sm text-gray-700">Returnable</span>
+        <span className={`${type.bodySm} text-gray-700`}>Returnable</span>
       </div>
 
       {/* Images */}
@@ -1094,7 +1095,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
             </option>
           ))}
         </select>
-        <p className="text-xs text-gray-500 mt-1">Optional: Use this if you want to categorize as Collar & Leash</p>
+        <p className={`${type.caption} text-gray-500 mt-1`}>Optional: Use this if you want to categorize as Collar & Leash</p>
       </div>
 
       {/* Pricing */}
@@ -1157,7 +1158,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
       <div>
         <Label>Size</Label>
         <input className="input-field" value={formData.size || ''} onChange={(e) => set('size', e.target.value)} placeholder="e.g. S, XL, Large, Medium, Size01, Size02, 1kg, 250ml, etc." />
-        <p className="text-xs text-gray-500 mt-1">Enter any size format: S/XL/Large/Medium, Size01/Size02, kg, ml, etc.</p>
+        <p className={`${type.caption} text-gray-500 mt-1`}>Enter any size format: S/XL/Large/Medium, Size01/Size02, kg, ml, etc.</p>
       </div>
 
       {/* Appearance */}
@@ -1180,7 +1181,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
       <div className="flex items-center gap-2 pt-2">
         <input type="checkbox" checked={formData.isReturnable} onChange={(e) => set('isReturnable', e.target.checked)} className="w-4 h-4 accent-purple-600" />
-        <span className="text-sm text-gray-700">Returnable</span>
+        <span className={`${type.bodySm} text-gray-700`}>Returnable</span>
       </div>
 
       {/* Images */}
@@ -1292,7 +1293,7 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
 
       <div className="flex items-center gap-2 pt-2">
         <input type="checkbox" checked={formData.isReturnable} onChange={(e) => set('isReturnable', e.target.checked)} className="w-4 h-4 accent-purple-600" />
-        <span className="text-sm text-gray-700">Returnable</span>
+        <span className={`${type.bodySm} text-gray-700`}>Returnable</span>
       </div>
 
       {/* Images */}
@@ -1532,12 +1533,12 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
   const formBody = (
     <>
       {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-100">
+        <div className={`${type.bodySm} bg-red-50 text-red-600 p-3 rounded-xl border border-red-100`}>
           {error}
         </div>
       )}
       {uploadSuccess && (
-        <div className="bg-blue-50 text-blue-700 p-3 rounded-xl text-sm border border-blue-100">
+        <div className={`${type.bodySm} bg-blue-50 text-blue-700 p-3 rounded-xl border border-blue-100`}>
           {uploadSuccess}
         </div>
       )}
@@ -1545,10 +1546,10 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
       {FORM_RENDERERS[type]?.()}
 
       <div className="flex justify-end gap-3 pt-5 border-t border-gray-100">
-        <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium transition-colors">
+        <button type="button" onClick={onClose} className={`${type.nav} px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors`}>
           Cancel
         </button>
-        <button type="submit" disabled={loading} className="px-6 py-2.5 rounded-xl bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 text-sm font-semibold transition-colors">
+        <button type="submit" disabled={loading} className={`${type.bodySm} px-6 py-2.5 rounded-xl bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors`}>
           {loading ? (
             <span className="flex items-center gap-2">
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1593,10 +1594,10 @@ const ProductForm = ({ categoryData, existingProduct, onClose, onSuccess }) => {
   return (
     <div className="w-full mx-auto my-2 sm:my-4 p-4 sm:p-6 lg:p-8 bg-white border border-gray-200 rounded-xl shadow-sm">
       <div className="mb-6 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className={`${type.h2} text-gray-900`}>
           {existingProduct ? 'Edit' : 'Add'} {categoryData.label.replace(/s$/, '')}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className={`${type.bodySm} text-gray-500 mt-1`}>
           {existingProduct ? 'Update product details and capacity pricing' : 'Fill in the details below'}
         </p>
       </div>

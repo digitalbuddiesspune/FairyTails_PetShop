@@ -1,4 +1,5 @@
 import React from 'react';
+import { type } from '../../styles/typography';
 
 const categories = [
     { id: 'Food', label: 'Foods', icon: '🍖', color: 'bg-orange-100 text-orange-600', endpoint: 'food', type: 'food' },
@@ -22,8 +23,8 @@ const AdminCategorySelection = ({ onSelect }) => {
                     <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-4 ${cat.color} group-hover:scale-110 transition-transform`}>
                         {cat.icon}
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800">{cat.label}</h3>
-                    <p className="text-sm text-gray-500 mt-1">Manage {cat.label}</p>
+                    <h3 className={`${type.h4} text-gray-800`}>{cat.label}</h3>
+                    <p className={`${type.bodySm} text-gray-500 mt-1`}>Manage {cat.label}</p>
                 </button>
             ))}
         </div>

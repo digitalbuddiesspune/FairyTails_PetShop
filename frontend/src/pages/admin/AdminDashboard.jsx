@@ -10,6 +10,7 @@ import {
     ResponsiveContainer
 } from 'recharts';
 import { formatRupee } from '../../utils/formatPrice';
+import { type } from '../../styles/typography';
 import {
     ShoppingBag,
     Clock,
@@ -242,7 +243,7 @@ const AdminDashboard = () => {
         // If payment failed, show Failed for status too
         if (isPaymentFailed(order)) {
             return (
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                <span className={`${type.caption} px-2 py-0.5 rounded-full bg-red-100 text-red-700`}>
                     Failed
                 </span>
             );
@@ -264,7 +265,7 @@ const AdminDashboard = () => {
     const getPaymentBadge = (order) => {
         if (isPaymentFailed(order)) {
             return (
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                <span className={`${type.caption} px-2 py-0.5 rounded-full bg-red-100 text-red-700`}>
                     Failed
                 </span>
             );
@@ -299,8 +300,8 @@ const AdminDashboard = () => {
         <div className="space-y-8 animate-fadeIn">
             {/* Header */}
             <div>
-                <h2 className="text-2xl font-bold text-gray-800">Dashboard Overview</h2>
-                <p className="text-gray-500 text-sm">Welcome back, here's what's happening today.</p>
+                <h2 className={`${type.h2} text-gray-800`}>Dashboard Overview</h2>
+                <p className={`${type.bodySm} text-gray-500`}>Welcome back, here's what's happening today.</p>
             </div>
 
             {/* Today's Metrics Grid */}
@@ -339,8 +340,8 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p className="text-gray-500 text-sm font-medium">Total Users</p>
-                        <h3 className="text-2xl font-bold text-gray-800 mt-1">{stats.totalUsers}</h3>
+                        <p className={`${type.nav} text-gray-500`}>Total Users</p>
+                        <h3 className={`${type.h2} text-gray-800 mt-1`}>{stats.totalUsers}</h3>
                     </div>
                     <div className="p-3 bg-purple-50 rounded-xl">
                         <Users className="w-6 h-6 text-purple-600" />
@@ -348,8 +349,8 @@ const AdminDashboard = () => {
                 </div>
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p className="text-gray-500 text-sm font-medium">Total Products</p>
-                        <h3 className="text-2xl font-bold text-gray-800 mt-1">{stats.totalProducts}</h3>
+                        <p className={`${type.nav} text-gray-500`}>Total Products</p>
+                        <h3 className={`${type.h2} text-gray-800 mt-1`}>{stats.totalProducts}</h3>
                     </div>
                     <div className="p-3 bg-pink-50 rounded-xl">
                         <Package className="w-6 h-6 text-pink-600" />
@@ -357,8 +358,8 @@ const AdminDashboard = () => {
                 </div>
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
                     <div>
-                        <p className="text-gray-500 text-sm font-medium">Total Revenue (Est.)</p>
-                        <h3 className="text-2xl font-bold text-gray-800 mt-1">
+                        <p className={`${type.nav} text-gray-500`}>Total Revenue (Est.)</p>
+                        <h3 className={`${type.h2} text-gray-800 mt-1`}>
                             {formatRupee(chartData.reduce((acc, curr) => acc + curr.revenue, 0))}
                         </h3>
                     </div>
@@ -372,13 +373,13 @@ const AdminDashboard = () => {
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h3 className="text-lg font-bold text-gray-800">Orders & Sales Graph</h3>
-                        <p className="text-sm text-gray-500">Monthly breakdown of performance</p>
+                        <h3 className={`${type.h4} text-gray-800`}>Orders & Sales Graph</h3>
+                        <p className={`${type.bodySm} text-gray-500`}>Monthly breakdown of performance</p>
                     </div>
                     <select
                         value={selectedYear}
                         onChange={(e) => setSelectedYear(Number(e.target.value))}
-                        className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors outline-none focus:ring-2 focus:ring-purple-500"
+                        className={`${type.nav} px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors outline-none focus:ring-2 focus:ring-purple-500`}
                     >
                         {[2023, 2024, 2025, 2026].map(year => (
                             <option key={year} value={year}>{year}</option>
@@ -431,10 +432,10 @@ const AdminDashboard = () => {
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="flex items-center justify-between mb-4">
                     <div>
-                        <h3 className="text-lg font-bold text-gray-800">Recent Orders</h3>
-                        <p className="text-sm text-gray-500">Orders placed today</p>
+                        <h3 className={`${type.h4} text-gray-800`}>Recent Orders</h3>
+                        <p className={`${type.bodySm} text-gray-500`}>Orders placed today</p>
                     </div>
-                    <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                    <span className={`${type.captionMedium} text-purple-600 bg-purple-50 px-3 py-1 rounded-full`}>
                         {recentOrders.length} order{recentOrders.length !== 1 ? 's' : ''}
                     </span>
                 </div>
@@ -442,38 +443,38 @@ const AdminDashboard = () => {
                 {recentOrders.length === 0 ? (
                     <div className="text-center py-10">
                         <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                        <p className="text-gray-400 text-sm">No orders placed today yet</p>
+                        <p className={`${type.bodySm} text-gray-400`}>No orders placed today yet</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Order ID</th>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Items</th>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment</th>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Time</th>
+                                    <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-600 uppercase tracking-wider`}>Order ID</th>
+                                    <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-600 uppercase tracking-wider`}>Customer</th>
+                                    <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-600 uppercase tracking-wider`}>Items</th>
+                                    <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-600 uppercase tracking-wider`}>Amount</th>
+                                    <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-600 uppercase tracking-wider`}>Payment</th>
+                                    <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-600 uppercase tracking-wider`}>Status</th>
+                                    <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-600 uppercase tracking-wider`}>Time</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {recentOrders.map((order) => (
                                     <tr key={order._id} className="hover:bg-gray-50 transition-colors">
-                                        <td className="px-4 py-3 text-sm font-semibold text-purple-600">
+                                        <td className={`${type.bodySm} px-4 py-3 text-purple-600`}>
                                             #{order.orderNumber || parseInt(order._id.slice(-8), 16)}
                                         </td>
                                         <td className="px-4 py-3">
-                                            <p className="text-sm font-medium text-gray-800">
+                                            <p className={`${type.nav} text-gray-800`}>
                                                 {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
                                             </p>
-                                            <p className="text-xs text-gray-400">{order.user?.email || 'N/A'}</p>
+                                            <p className={`${type.caption} text-gray-400`}>{order.user?.email || 'N/A'}</p>
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
+                                        <td className={`${type.bodySm} px-4 py-3 text-gray-600`}>
                                             {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
                                         </td>
-                                        <td className="px-4 py-3 text-sm font-semibold text-gray-800">
+                                        <td className={`${type.bodySm} px-4 py-3 text-gray-800`}>
                                             {formatRupee(order.total)}
                                         </td>
                                         <td className="px-4 py-3">
@@ -482,7 +483,7 @@ const AdminDashboard = () => {
                                         <td className="px-4 py-3">
                                             {getStatusBadge(order)}
                                         </td>
-                                        <td className="px-4 py-3 text-xs text-gray-500">
+                                        <td className={`${type.caption} px-4 py-3 text-gray-500`}>
                                             {new Date(order.createdAt).toLocaleTimeString('en-IN', {
                                                 hour: '2-digit',
                                                 minute: '2-digit',
@@ -507,8 +508,8 @@ const AdminDashboard = () => {
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-5 border-b border-gray-200 shrink-0">
                             <div>
-                                <h3 className="text-lg font-bold text-gray-800">{modalTitle}</h3>
-                                <p className="text-sm text-gray-500">{modalOrders.length} order{modalOrders.length !== 1 ? 's' : ''} found</p>
+                                <h3 className={`${type.h4} text-gray-800`}>{modalTitle}</h3>
+                                <p className={`${type.bodySm} text-gray-500`}>{modalOrders.length} order{modalOrders.length !== 1 ? 's' : ''} found</p>
                             </div>
                             <button
                                 onClick={() => setModalOpen(false)}
@@ -530,14 +531,14 @@ const AdminDashboard = () => {
                                     <table className="w-full text-left min-w-[900px]">
                                         <thead>
                                             <tr className="bg-gray-50 border-b border-gray-200">
-                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Order ID</th>
-                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Customer</th>
-                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Products</th>
-                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Qty</th>
-                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-right">Price</th>
-                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Status</th>
-                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center">Payment</th>
-                                                <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date</th>
+                                                <th className={`${type.button} px-4 py-3 text-gray-400 uppercase tracking-wider`}>Order ID</th>
+                                                <th className={`${type.button} px-4 py-3 text-gray-400 uppercase tracking-wider`}>Customer</th>
+                                                <th className={`${type.button} px-4 py-3 text-gray-400 uppercase tracking-wider`}>Products</th>
+                                                <th className={`${type.button} px-4 py-3 text-gray-400 uppercase tracking-wider text-center`}>Qty</th>
+                                                <th className={`${type.button} px-4 py-3 text-gray-400 uppercase tracking-wider text-right`}>Price</th>
+                                                <th className={`${type.button} px-4 py-3 text-gray-400 uppercase tracking-wider text-center`}>Status</th>
+                                                <th className={`${type.button} px-4 py-3 text-gray-400 uppercase tracking-wider text-center`}>Payment</th>
+                                                <th className={`${type.button} px-4 py-3 text-gray-400 uppercase tracking-wider`}>Date</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
@@ -555,12 +556,12 @@ const AdminDashboard = () => {
                                                 return (
                                                     <tr key={order._id} className="hover:bg-gray-50 transition-colors">
                                                         <td className="px-4 py-3">
-                                                            <p className="text-xs font-bold text-gray-800">#{displayOrderId}</p>
+                                                            <p className={`${type.caption} text-gray-800`}>#{displayOrderId}</p>
                                                         </td>
                                                         <td className="px-4 py-3">
-                                                            <p className="text-xs font-semibold text-gray-800">{userName}</p>
-                                                            <p className="text-[10px] text-gray-400">{userEmail}</p>
-                                                            <p className="text-[10px] text-gray-400">{userPhone}</p>
+                                                            <p className={`${type.captionMedium} text-gray-800`}>{userName}</p>
+                                                            <p className={`${type.bodySm} text-gray-400`}>{userEmail}</p>
+                                                            <p className={`${type.bodySm} text-gray-400`}>{userPhone}</p>
                                                         </td>
                                                         <td className="px-4 py-3">
                                                             <div className="flex flex-col gap-1.5 max-w-[200px]">
@@ -570,22 +571,22 @@ const AdminDashboard = () => {
                                                                             {item.productImage ? (
                                                                                 <img src={item.productImage} alt="" className="w-full h-full object-contain" />
                                                                             ) : (
-                                                                                <span className="flex items-center justify-center h-full text-[10px]">🐾</span>
+                                                                                <span className={`${type.bodySm} flex items-center justify-center h-full`}>🐾</span>
                                                                             )}
                                                                         </div>
-                                                                        <p className="text-[11px] text-gray-700 truncate">{item.productName}</p>
+                                                                        <p className={`${type.bodySm} text-gray-700 truncate`}>{item.productName}</p>
                                                                     </div>
                                                                 ))}
                                                                 {(order.items || []).length > 2 && (
-                                                                    <p className="text-[10px] text-gray-400 pl-9">+{order.items.length - 2} more</p>
+                                                                    <p className={`${type.bodySm} text-gray-400 pl-9`}>+{order.items.length - 2} more</p>
                                                                 )}
                                                             </div>
                                                         </td>
                                                         <td className="px-4 py-3 text-center">
-                                                            <span className="text-xs text-gray-600">{totalQty}</span>
+                                                            <span className={`${type.caption} text-gray-600`}>{totalQty}</span>
                                                         </td>
                                                         <td className="px-4 py-3 text-right">
-                                                            <span className="text-xs font-bold text-gray-800">{formatRupee(order.total)}</span>
+                                                            <span className={`${type.caption} text-gray-800`}>{formatRupee(order.total)}</span>
                                                         </td>
                                                         <td className="px-4 py-3 text-center">
                                                             {getStatusBadge(order)}
@@ -594,10 +595,10 @@ const AdminDashboard = () => {
                                                             {getPaymentBadge(order)}
                                                         </td>
                                                         <td className="px-4 py-3">
-                                                            <p className="text-[10px] text-gray-400">
+                                                            <p className={`${type.bodySm} text-gray-400`}>
                                                                 {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                                                             </p>
-                                                            <p className="text-[10px] text-gray-300">
+                                                            <p className={`${type.bodySm} text-gray-300`}>
                                                                 {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                                                             </p>
                                                         </td>
@@ -631,14 +632,14 @@ const StatCard = ({ title, value, icon, color, onClick }) => (
     >
         <div className="flex items-center justify-between z-10 relative">
             <div>
-                <p className="text-gray-500 text-sm font-medium mb-1">{title}</p>
-                <h3 className="text-3xl font-bold text-gray-800">{value}</h3>
+                <p className={`${type.nav} text-gray-500 mb-1`}>{title}</p>
+                <h3 className={`${type.h1} text-gray-800`}>{value}</h3>
             </div>
             <div className={`p-3 rounded-xl shadow-lg ${color} group-hover:scale-110 transition-transform`}>
                 {icon}
             </div>
         </div>
-        <p className="text-xs text-purple-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Click to view details →</p>
+        <p className={`${type.caption} text-purple-500 mt-2 opacity-0 group-hover:opacity-100 transition-opacity`}>Click to view details →</p>
         {/* Decorative background element */}
         <div className={`absolute -bottom-6 -right-6 w-24 h-24 rounded-full opacity-10 ${color}`} />
     </div>

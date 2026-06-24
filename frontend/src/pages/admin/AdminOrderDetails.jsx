@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { formatRupee } from '../../utils/formatPrice';
+import { type } from '../../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -131,21 +132,21 @@ const AdminOrderDetails = () => {
               <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             </button>
             <div className="min-w-0">
-              <p className="text-[10px] text-gray-400 uppercase font-bold">Order ID</p>
-              <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">#{displayOrderId}</h2>
+              <p className={`${type.button} text-gray-400 uppercase`}>Order ID</p>
+              <h2 className={`${type.h4} sm:text-lg text-gray-900 truncate`}>#{displayOrderId}</h2>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {/* Order Status Dropdown */}
             <div>
-              <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Order Status</p>
+              <p className={`${type.button} text-gray-400 uppercase mb-1`}>Order Status</p>
               {(() => {
                 const isPaymentFailed = order.paymentStatus === 'failed' ||
                   (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
                 if (isPaymentFailed) {
                   return (
-                    <div className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-red-50 border-red-300 text-red-700">
+                    <div className={`${type.caption} px-3 py-1.5 rounded-lg border bg-red-50 border-red-300 text-red-700`}>
                       Failed
                     </div>
                   );
@@ -167,13 +168,13 @@ const AdminOrderDetails = () => {
 
             {/* Payment Status Dropdown */}
             <div>
-              <p className="text-[9px] text-gray-400 uppercase font-bold mb-1">Payment Status</p>
+              <p className={`${type.button} text-gray-400 uppercase mb-1`}>Payment Status</p>
               {(() => {
                 const isPaymentFailed = order.paymentStatus === 'failed' ||
                   (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
                 if (isPaymentFailed) {
                   return (
-                    <div className="px-3 py-1.5 rounded-lg border text-xs font-bold bg-red-50 border-red-300 text-red-700">
+                    <div className={`${type.caption} px-3 py-1.5 rounded-lg border bg-red-50 border-red-300 text-red-700`}>
                       Failed
                     </div>
                   );
@@ -197,25 +198,25 @@ const AdminOrderDetails = () => {
         </div>
 
         {/* Order Meta Row */}
-        <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs">
+        <div className={`${type.caption} mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4`}>
           <div>
-            <p className="text-gray-400 font-semibold mb-0.5">Date</p>
-            <p className="text-gray-700 font-medium">
+            <p className={`${type.label} text-gray-400 mb-0.5`}>Date</p>
+            <p className={`${type.nav} text-gray-700`}>
               {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })},{' '}
               {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold mb-0.5">Customer</p>
-            <p className="text-gray-700 font-medium">{order.user?.name || '—'}</p>
+            <p className={`${type.label} text-gray-400 mb-0.5`}>Customer</p>
+            <p className={`${type.nav} text-gray-700`}>{order.user?.name || '—'}</p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold mb-0.5">Phone</p>
-            <p className="text-gray-700 font-medium">{order.user?.phone || order.shippingAddress?.phone || '—'}</p>
+            <p className={`${type.label} text-gray-400 mb-0.5`}>Phone</p>
+            <p className={`${type.nav} text-gray-700`}>{order.user?.phone || order.shippingAddress?.phone || '—'}</p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold mb-0.5">Payment Mode</p>
-            <p className="text-gray-700 font-medium">{order.paymentMethod === 'cash_on_delivery' ? 'Cash' : 'Online'}</p>
+            <p className={`${type.label} text-gray-400 mb-0.5`}>Payment Mode</p>
+            <p className={`${type.nav} text-gray-700`}>{order.paymentMethod === 'cash_on_delivery' ? 'Cash' : 'Online'}</p>
           </div>
         </div>
       </div>
@@ -244,16 +245,16 @@ const AdminOrderDetails = () => {
                     {done && !isCancelled ? (
                       <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                     ) : isCancelled && order.status === 'cancelled' ? (
-                      <span className="text-[10px] font-bold">✕</span>
+                      <span className={`${type.button}`}>✕</span>
                     ) : (
-                      <span className="text-[10px] font-bold">{i + 1}</span>
+                      <span className={`${type.button}`}>{i + 1}</span>
                     )}
                   </div>
                   <p className={`text-[9px] sm:text-[10px] mt-1.5 font-bold text-center truncate w-full px-0.5 ${done && !isCancelled ? 'text-gray-800' : isCancelled && order.status === 'cancelled' ? 'text-red-500' : 'text-gray-300'}`} title={STATUS_CONFIG[s].label}>
                     {STATUS_CONFIG[s].label}
                   </p>
                   {ts && (done || (isCancelled && order.status === 'cancelled')) && (
-                    <p className="text-[8px] sm:text-[9px] text-gray-400 text-center mt-0.5 truncate w-full px-0.5" title={formatDate(ts)}>{formatDate(ts).replace('\n', ', ')}</p>
+                    <p className={`${type.bodySm} sm:text-[9px] text-gray-400 text-center mt-0.5 truncate w-full px-0.5`} title={formatDate(ts)}>{formatDate(ts).replace('\n', ', ')}</p>
                   )}
                 </div>
               </React.Fragment>
@@ -264,35 +265,35 @@ const AdminOrderDetails = () => {
 
       {/* ─── Order Info Grid ─── */}
       <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 text-xs">
+        <div className={`${type.caption} grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4`}>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Order ID</p>
-            <p className="text-gray-700 font-bold">#{displayOrderId}</p>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Order ID</p>
+            <p className={`${type.button} text-gray-700`}>#{displayOrderId}</p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Order Count</p>
-            <p className="text-gray-700 font-bold">{totalQty}</p>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Order Count</p>
+            <p className={`${type.button} text-gray-700`}>{totalQty}</p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Customer</p>
-            <p className="text-gray-700 font-bold">{order.user?.name || '—'}</p>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Customer</p>
+            <p className={`${type.button} text-gray-700`}>{order.user?.name || '—'}</p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Phone</p>
-            <p className="text-gray-700 font-bold">{order.user?.phone || order.shippingAddress?.phone || '—'}</p>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Phone</p>
+            <p className={`${type.button} text-gray-700`}>{order.user?.phone || order.shippingAddress?.phone || '—'}</p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Email</p>
-            <p className="text-gray-700 font-bold truncate">{order.user?.email || 'N/A'}</p>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Email</p>
+            <p className={`${type.button} text-gray-700 truncate`}>{order.user?.email || 'N/A'}</p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Payment Status</p>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Payment Status</p>
             {(() => {
               const isPaymentFailed = order.paymentStatus === 'failed' ||
                 (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
               if (isPaymentFailed) {
                 return (
-                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600">
+                  <span className={`${type.button} inline-block px-2 py-0.5 rounded bg-red-100 text-red-600`}>
                     Failed
                   </span>
                 );
@@ -314,19 +315,19 @@ const AdminOrderDetails = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 text-xs mt-4 pt-4 border-t border-gray-100">
+        <div className={`${type.caption} grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mt-4 pt-4 border-t border-gray-100`}>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Payment Mode</p>
-            <p className="text-gray-700 font-bold">{order.paymentMethod === 'cash_on_delivery' ? 'Cash' : 'Online'}</p>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Payment Mode</p>
+            <p className={`${type.button} text-gray-700`}>{order.paymentMethod === 'cash_on_delivery' ? 'Cash' : 'Online'}</p>
           </div>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Order Status</p>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Order Status</p>
             {(() => {
               const isPaymentFailed = order.paymentStatus === 'failed' ||
                 (order.paymentMethod !== 'cash_on_delivery' && !order.razorpayPaymentId);
               if (isPaymentFailed) {
                 return (
-                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600">
+                  <span className={`${type.button} inline-block px-2 py-0.5 rounded bg-red-100 text-red-600`}>
                     Failed
                   </span>
                 );
@@ -339,15 +340,15 @@ const AdminOrderDetails = () => {
             })()}
           </div>
           <div>
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Order Date & Time</p>
-            <p className="text-gray-700 font-bold">
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Order Date & Time</p>
+            <p className={`${type.button} text-gray-700`}>
               {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })},{' '}
               {new Date(order.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
           <div className="col-span-2 sm:col-span-3 min-w-0">
-            <p className="text-gray-400 font-semibold uppercase mb-0.5">Address</p>
-            <p className="text-gray-700 font-medium leading-relaxed line-clamp-2" title={`${order.shippingAddress?.streetAddress}, ${order.shippingAddress?.city}, ${order.shippingAddress?.state} — ${order.shippingAddress?.pincode}`}>
+            <p className={`${type.label} text-gray-400 uppercase mb-0.5`}>Address</p>
+            <p className={`${type.body} text-gray-700 line-clamp-2`} title={`${order.shippingAddress?.streetAddress}, ${order.shippingAddress?.city}, ${order.shippingAddress?.state} — ${order.shippingAddress?.pincode}`}>
               {order.shippingAddress?.streetAddress}, {order.shippingAddress?.city}, {order.shippingAddress?.state} — {order.shippingAddress?.pincode}
             </p>
           </div>
@@ -357,7 +358,7 @@ const AdminOrderDetails = () => {
       {/* ─── Order Items (no scroll, card on mobile / table on larger) ─── */}
       <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div className="px-4 sm:px-5 py-3 border-b border-gray-100">
-          <h3 className="text-sm font-bold text-gray-800">Order Items</h3>
+          <h3 className={`${type.caption} text-gray-800`}>Order Items</h3>
         </div>
 
         {/* Mobile: Card layout */}
@@ -365,11 +366,11 @@ const AdminOrderDetails = () => {
           {order.items.map((item, i) => (
             <div key={i} className="p-4 flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg bg-gray-50 border border-gray-200 shrink-0 overflow-hidden">
-                {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className="flex items-center justify-center h-full text-sm">🐾</span>}
+                {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className={`${type.bodySm} flex items-center justify-center h-full`}>🐾</span>}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-800 truncate" title={item.productName}>{item.productName}</p>
-                <p className="text-[10px] text-gray-500 mt-0.5">Qty: {item.quantity} × {formatRupee(item.price || 0)} = {formatRupee((item.price || 0) * item.quantity)}</p>
+                <p className={`${type.captionMedium} text-gray-800 truncate`} title={item.productName}>{item.productName}</p>
+                <p className={`${type.bodySm} text-gray-500 mt-0.5`}>Qty: {item.quantity} × {formatRupee(item.price || 0)} = {formatRupee((item.price || 0) * item.quantity)}</p>
               </div>
             </div>
           ))}
@@ -380,10 +381,10 @@ const AdminOrderDetails = () => {
           <table className="w-full text-left table-fixed">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-4 py-2.5 text-[10px] font-bold text-gray-400 uppercase w-[45%]">Item</th>
-                <th className="px-3 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-center w-[12%]">Qty</th>
-                <th className="px-3 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-right w-[20%]">Unit Price</th>
-                <th className="px-4 py-2.5 text-[10px] font-bold text-gray-400 uppercase text-right w-[23%]">Total</th>
+                <th className={`${type.button} px-4 py-2.5 text-gray-400 uppercase w-[45%]`}>Item</th>
+                <th className={`${type.button} px-3 py-2.5 text-gray-400 uppercase text-center w-[12%]`}>Qty</th>
+                <th className={`${type.button} px-3 py-2.5 text-gray-400 uppercase text-right w-[20%]`}>Unit Price</th>
+                <th className={`${type.button} px-4 py-2.5 text-gray-400 uppercase text-right w-[23%]`}>Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -392,14 +393,14 @@ const AdminOrderDetails = () => {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-200 shrink-0 overflow-hidden">
-                        {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className="flex items-center justify-center h-full text-sm">🐾</span>}
+                        {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className={`${type.bodySm} flex items-center justify-center h-full`}>🐾</span>}
                       </div>
-                      <p className="text-xs font-medium text-gray-800 truncate" title={item.productName}>{item.productName}</p>
+                      <p className={`${type.captionMedium} text-gray-800 truncate`} title={item.productName}>{item.productName}</p>
                     </div>
                   </td>
-                  <td className="px-3 py-3 text-xs text-gray-600 text-center">{item.quantity}</td>
-                  <td className="px-3 py-3 text-xs text-gray-600 text-right">{formatRupee(item.price || 0)}</td>
-                  <td className="px-4 py-3 text-xs font-bold text-gray-800 text-right">{formatRupee((item.price || 0) * item.quantity)}</td>
+                  <td className={`${type.caption} px-3 py-3 text-gray-600 text-center`}>{item.quantity}</td>
+                  <td className={`${type.caption} px-3 py-3 text-gray-600 text-right`}>{formatRupee(item.price || 0)}</td>
+                  <td className={`${type.caption} px-4 py-3 text-gray-800 text-right`}>{formatRupee((item.price || 0) * item.quantity)}</td>
                 </tr>
               ))}
             </tbody>
@@ -409,8 +410,8 @@ const AdminOrderDetails = () => {
 
       {/* ─── Billing Summary with GST ─── */}
       <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm p-4 sm:p-5">
-        <h3 className="text-sm font-bold text-gray-800 mb-3">Billing Summary</h3>
-        <div className="space-y-2 text-xs max-w-sm">
+        <h3 className={`${type.caption} text-gray-800 mb-3`}>Billing Summary</h3>
+        <div className={`${type.caption} space-y-2 max-w-sm`}>
           <div className="flex justify-between">
             <span className="text-gray-400">Subtotal</span>
             <span className="text-gray-700">{formatRupee(order.subtotal || 0)}</span>
@@ -423,15 +424,15 @@ const AdminOrderDetails = () => {
           )}
           <div className="flex justify-between">
             <span className="text-gray-400">18% GST</span>
-            <span className="text-gray-500 text-xs">Included</span>
+            <span className={`${type.caption} text-gray-500`}>Included</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-400">Delivery Charges</span>
             <div className="flex items-center gap-2">
               {(order.subtotal || 0) >= 500 ? (
                 <>
-                  <span className="text-gray-400 line-through text-xs">₹50</span>
-                  <span className="text-blue-600 font-medium text-xs">Free</span>
+                  <span className={`${type.caption} text-gray-400 line-through`}>₹50</span>
+                  <span className={`${type.caption} text-blue-600`}>Free</span>
                 </>
               ) : (
                 <span className="text-gray-700">
@@ -440,7 +441,7 @@ const AdminOrderDetails = () => {
               )}
             </div>
           </div>
-          <div className="flex justify-between font-bold text-gray-900 pt-2 border-t border-gray-100 text-sm">
+          <div className={`${type.bodySm} flex justify-between text-gray-900 pt-2 border-t border-gray-100`}>
             <span>Total Amount</span>
             <span>{formatRupee(order.total || 0)}</span>
           </div>

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import AdminCategorySelection from './AdminCategorySelection';
 import { TYPE_TO_CATEGORY_KEY } from './adminProductConfig';
+import { type } from '../../styles/typography';
 
 const AdminProducts = () => {
   const navigate = useNavigate();
@@ -15,8 +16,8 @@ const AdminProducts = () => {
   return (
     <div className="w-full animate-fadeIn">
       <div className="mb-6 pb-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-900">Add Product</h1>
-        <p className="text-sm text-gray-500 mt-1">Choose a category to create a new product</p>
+        <h1 className={`${type.h2} text-gray-900`}>Add Product</h1>
+        <p className={`${type.bodySm} text-gray-500 mt-1`}>Choose a category to create a new product</p>
       </div>
 
       <div className="p-4 sm:p-6 bg-white border border-gray-200 rounded-xl shadow-sm">

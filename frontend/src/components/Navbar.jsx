@@ -2,7 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import MobileBottomNav from './MobileBottomNav';
 import CatalogMenuContent from './CatalogMenuContent';
+import SearchOverlay from './SearchOverlay';
 import { clearUserSession, getAuthToken, getStoredUser, isUserAuthenticated } from '../auth/session';
+import { type } from '../styles/typography';
 import logoImage from '../assets/image.png';
 
 // Icon mapping for subcategory names in the dropdown
@@ -57,7 +59,7 @@ const DropdownMenu = ({ category, index, onClose }) => {
             className="flex items-center gap-3 px-4 py-3 text-black hover:bg-gray-100 transition-colors"
           >
             <SubIcon name={sub.name} />
-            <span className="font-medium text-black">{sub.name}</span>
+            <span className={type.nav}>{sub.name}</span>
           </Link>
         </div>
       ))}
@@ -68,7 +70,6 @@ const DropdownMenu = ({ category, index, onClose }) => {
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [categories, setCategories] = useState([]);
   const [cartCount, setCartCount] = useState(0);
@@ -76,13 +77,19 @@ const Navbar = () => {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [catalogPanelOpen, setCatalogPanelOpen] = useState(false);
-  const [mobileSearchExpanded, setMobileSearchExpanded] = useState(false);
-  const mobileSearchInputRef = useRef(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const userDropdownRef = useRef(null);
 
-  // Close dropdown when route changes
+  const openSearch = () => {
+    setMobileMenuOpen(false);
+    setCatalogPanelOpen(false);
+    setSearchOpen(true);
+  };
+
+  // Close dropdowns and search when route changes
   useEffect(() => {
     setActiveDropdown(null);
+    setSearchOpen(false);
   }, [location.pathname]);
 
   // Fetch categories from backend API on mount
@@ -198,15 +205,6 @@ const Navbar = () => {
     }
   };
 
-  const handleSearchSubmit = (e) => {
-    e?.preventDefault?.();
-    const q = searchQuery.trim();
-    if (q.length >= 2) {
-      navigate(`/search?q=${encodeURIComponent(q)}`);
-      setMobileSearchExpanded(false);
-    }
-  };
-
   const handleLogout = () => {
     clearUserSession();
     setUserDropdownOpen(false);
@@ -228,13 +226,6 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [userDropdownOpen]);
 
-  // Focus mobile search input when expanded
-  useEffect(() => {
-    if (mobileSearchExpanded && mobileSearchInputRef.current) {
-      mobileSearchInputRef.current.focus();
-    }
-  }, [mobileSearchExpanded]);
-
   return (
     <header className="sticky top-0 z-50 w-full">
       {/* Top Bar */}
@@ -251,35 +242,31 @@ const Navbar = () => {
               />
             </Link>
 
-            {/* Search Bar - Desktop */}
-            <form onSubmit={handleSearchSubmit} className="flex-1 max-w-xl">
-              <div className="flex border border-gray-300 rounded-md overflow-hidden">
-                <input
-                  type="text"
-                  placeholder="Search for pet food, toys, accessories..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white text-gray-800 focus:outline-none placeholder-gray-500"
-                />
-                <button type="submit" className="bg-[#205ea9] px-4 py-2.5 hover:bg-gray-800 transition-colors">
-                  <SearchIcon />
-                </button>
-              </div>
-            </form>
+            {/* Search - Desktop */}
+            <button
+              type="button"
+              onClick={openSearch}
+              className={`flex-1 max-w-xl flex items-center gap-3 px-4 py-2.5 bg-white border border-gray-300 rounded-md text-left ${type.bodySm} text-gray-500 hover:border-gray-400 transition-colors`}
+            >
+              <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span>Search for pet food, toys, accessories...</span>
+            </button>
 
             {/* Right Icons - Desktop */}
             <div className="flex items-center gap-3 md:gap-4 shrink-0">
-              <Link to="/contact" className="hidden lg:flex items-center gap-1 text-white hover:text-gray-200 font-medium text-sm transition-colors">
+              <Link to="/contact" className={`hidden lg:flex items-center gap-1 text-white hover:text-gray-200 ${type.nav} transition-colors`}>
                 <PhoneIcon />
                 <span>Contact</span>
               </Link>
-              <Link to="/about" className="hidden lg:flex items-center text-white hover:text-gray-200 font-medium text-sm transition-colors">
+              <Link to="/about" className={`hidden lg:flex items-center text-white hover:text-gray-200 ${type.nav} transition-colors`}>
                 About
               </Link>
               <Link to="/wishlist" className="text-white hover:text-gray-200 transition-colors relative" title="Wishlist">
                 <HeartIcon />
                 {wishlistCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
+                  <span className={`absolute -top-2 -right-2 bg-red-500 text-white ${type.captionMedium} w-5 h-5 rounded-full flex items-center justify-center leading-none`}>
                     {wishlistCount > 99 ? '99+' : wishlistCount}
                   </span>
                 )}
@@ -287,7 +274,7 @@ const Navbar = () => {
               <Link to="/cart" className="text-white hover:text-gray-200 transition-colors relative" title="Cart">
                 <CartIcon />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
+                  <span className={`absolute -top-2 -right-2 bg-red-500 text-white ${type.captionMedium} w-5 h-5 rounded-full flex items-center justify-center leading-none`}>
                     {cartCount > 99 ? '99+' : cartCount}
                   </span>
                 )}
@@ -299,27 +286,27 @@ const Navbar = () => {
                 {userDropdownOpen && isUserAuthenticated() && (
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[100]" style={{ animation: 'dropIn .2s ease-out' }}>
                     <div className="px-4 py-2.5 border-b border-gray-100">
-                      <p className="text-sm font-bold text-gray-900">
+                      <p className={`${type.label} font-bold text-gray-900`}>
                         {(() => {
                           const u = getStoredUser();
                           return `Hi, ${u?.name?.split(' ')[0] || 'User'}`;
                         })()}
                       </p>
-                      <p className="text-[11px] text-gray-400">Welcome back!</p>
+                      <p className={`${type.caption} text-gray-400`}>Welcome back!</p>
                     </div>
                     <button onClick={() => { setUserDropdownOpen(false); navigate('/orders'); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 ${type.bodySm} text-gray-700 hover:bg-gray-50 transition-colors`}>
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                       My Orders
                     </button>
                     <button onClick={() => { setUserDropdownOpen(false); navigate('/account-settings'); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 ${type.bodySm} text-gray-700 hover:bg-gray-50 transition-colors`}>
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                       Account Settings
                     </button>
                     <div className="border-t border-gray-100 mt-1 pt-1">
                       <button onClick={() => { handleLogout(); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 ${type.bodySm} text-red-500 hover:bg-red-50 transition-colors`}>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                         Log Out
                       </button>
@@ -349,37 +336,13 @@ const Navbar = () => {
                 />
               </Link>
               <button
-                onClick={() => setMobileSearchExpanded(true)}
+                onClick={openSearch}
                 className="p-2 text-white hover:text-gray-200 hover:bg-white/10 rounded-lg transition-colors shrink-0"
                 aria-label="Search"
               >
                 <SearchIconGray />
               </button>
             </div>
-            {/* Search bar row: appears below when expanded */}
-            {mobileSearchExpanded && (
-              <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 animate-slideDown">
-                <input
-                  ref={mobileSearchInputRef}
-                  type="text"
-                  placeholder="Search for pet food, toys, accessories..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-white text-gray-800 rounded-lg focus:outline-none placeholder-gray-500 text-sm border border-gray-300"
-                />
-                <button type="submit" className="bg-black text-white px-4 py-2.5 rounded-lg hover:bg-gray-800 shrink-0">
-                  <SearchIcon />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setMobileSearchExpanded(false); setSearchQuery(''); }}
-                  className="p-2.5 text-white hover:bg-white/10 rounded-lg shrink-0"
-                  aria-label="Close search"
-                >
-                  <CloseIcon />
-                </button>
-              </form>
-            )}
           </div>
         </div>
       </div>
@@ -391,7 +354,7 @@ const Navbar = () => {
               <li key={category._id || index} className="relative" data-idx={index}>
                 <button
                   onClick={() => handleCategoryClick(index, category.slug, category.subcategories?.length > 0)}
-                  className="flex items-center gap-1 px-4 md:px-6 py-3 text-sm font-medium text-black hover:text-[#205ea9] hover:bg-gray-100 transition-colors whitespace-nowrap"
+                  className={`flex items-center gap-1 px-4 md:px-6 py-3 ${type.nav} text-black hover:text-[#205ea9] hover:bg-gray-100 transition-colors whitespace-nowrap`}
                 >
                   {category.name}
                   {category.subcategories?.length > 0 && (
@@ -403,12 +366,12 @@ const Navbar = () => {
             
             {/* Mobile Contact & About */}
             <li className="lg:hidden">
-              <Link to="/contact" className="px-4 py-3 text-sm font-medium text-black hover:text-[#205ea9] whitespace-nowrap block">
+              <Link to="/contact" className={`px-4 py-3 ${type.nav} text-black hover:text-[#205ea9] whitespace-nowrap block`}>
                 Contact
               </Link>
             </li>
             <li className="lg:hidden">
-              <Link to="/about" className="px-4 py-3 text-sm font-medium text-black hover:text-[#205ea9] whitespace-nowrap block">
+              <Link to="/about" className={`px-4 py-3 ${type.nav} text-black hover:text-[#205ea9] whitespace-nowrap block`}>
                 About
               </Link>
             </li>
@@ -443,7 +406,7 @@ const Navbar = () => {
             className="fixed top-0 left-0 bottom-0 w-[min(320px,85vw)] z-[80] bg-white shadow-2xl md:hidden flex flex-col animate-slideInLeft overflow-y-auto"
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <span className="font-bold text-gray-900">Menu</span>
+              <span className={`${type.h4} text-gray-900`}>Menu</span>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-gray-100"
@@ -453,11 +416,11 @@ const Navbar = () => {
               </button>
             </div>
             <div className="p-4 space-y-1">
-              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-3 text-gray-700 font-medium hover:bg-gray-50 rounded-lg">
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className={`block py-3 px-3 text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg`}>
                 Home
               </Link>
               <div className="py-2">
-                <p className="px-3 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wide">Catalog</p>
+                <p className={`px-3 py-1 ${type.captionMedium} text-gray-500 uppercase tracking-wide`}>Catalog</p>
                 <CatalogMenuContent
                   categories={categories}
                   getSubcategoryLink={getSubcategoryLink}
@@ -466,20 +429,20 @@ const Navbar = () => {
                 />
               </div>
               <div className="border-t border-gray-100 pt-3 mt-3 space-y-0.5">
-                <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3 px-3 text-gray-700 font-medium hover:bg-gray-50 rounded-lg">
+                <Link to="/wishlist" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 py-3 px-3 text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg`}>
                   <HeartIcon />
                   <span>Wishlist</span>
                   {wishlistCount > 0 && (
-                    <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className={`ml-auto bg-red-500 text-white ${type.captionMedium} px-2 py-0.5 rounded-full`}>
                       {wishlistCount > 99 ? '99+' : wishlistCount}
                     </span>
                   )}
                 </Link>
-                <Link to="/cart" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3 px-3 text-gray-700 font-medium hover:bg-gray-50 rounded-lg">
+                <Link to="/cart" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-3 py-3 px-3 text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg`}>
                   <CartIcon />
                   <span>Cart</span>
                   {cartCount > 0 && (
-                    <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    <span className={`ml-auto bg-red-500 text-white ${type.captionMedium} px-2 py-0.5 rounded-full`}>
                       {cartCount > 99 ? '99+' : cartCount}
                     </span>
                   )}
@@ -493,18 +456,18 @@ const Navbar = () => {
                       navigate('/signin');
                     }
                   }}
-                  className="w-full flex items-center gap-3 py-3 px-3 text-gray-700 font-medium hover:bg-gray-50 rounded-lg text-left"
+                  className={`w-full flex items-center gap-3 py-3 px-3 text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg text-left`}
                 >
                   <UserIcon />
                   <span>Account</span>
                 </button>
               </div>
               <div className="border-t border-gray-100 pt-3 mt-3">
-                <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 py-3 px-3 text-gray-700 font-medium hover:bg-gray-50 rounded-lg">
+                <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2 py-3 px-3 text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg`}>
                   <PhoneIcon />
                   Contact
                 </Link>
-                <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="block py-3 px-3 text-gray-700 font-medium hover:bg-gray-50 rounded-lg">
+                <Link to="/about" onClick={() => setMobileMenuOpen(false)} className={`block py-3 px-3 text-gray-700 ${type.nav} hover:bg-gray-50 rounded-lg`}>
                   About
                 </Link>
               </div>
@@ -523,7 +486,7 @@ const Navbar = () => {
           />
           <div className="fixed bottom-0 left-0 right-0 z-[80] bg-white rounded-t-2xl shadow-2xl md:hidden max-h-[70vh] flex flex-col animate-slideUp">
             <div className="flex items-center justify-between p-4 border-b border-gray-100 shrink-0">
-              <span className="font-bold text-gray-900">Catalog</span>
+              <span className={`${type.h4} text-gray-900`}>Catalog</span>
               <button
                 onClick={() => setCatalogPanelOpen(false)}
                 className="p-2 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-gray-100"
@@ -550,17 +513,13 @@ const Navbar = () => {
         isLoggedIn={isUserAuthenticated()}
         onCatalogClick={() => setCatalogPanelOpen(true)}
       />
+
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   );
 };
 
 // Icon Components
-const SearchIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-  </svg>
-);
-
 const SearchIconGray = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

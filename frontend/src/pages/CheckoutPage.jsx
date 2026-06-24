@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { formatRupee } from '../utils/formatPrice';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -319,7 +320,7 @@ const CheckoutPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#2f5a87] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-lg">Loading checkout...</p>
+          <p className={`text-gray-500 ${type.body}`}>Loading checkout...</p>
         </div>
       </div>
     );
@@ -330,7 +331,7 @@ const CheckoutPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <p className="text-5xl mb-4">🛒</p>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Your cart is empty</h2>
+          <h2 className={`${type.h3} text-gray-800 mb-2`}>Your cart is empty</h2>
           <p className="text-gray-500 mb-6">Add some products before checking out.</p>
           <Link to="/" className="inline-block bg-[#2f5a87] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#23476a] transition-colors">
             Browse Products
@@ -343,14 +344,14 @@ const CheckoutPage = () => {
   // ─── Helper: field wrapper ─────────────────────────────────────────────────
   const Field = ({ label, error, children, className = '' }) => (
     <div className={className}>
-      <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
+      <label className={`block ${type.label} text-gray-700 mb-1.5`}>{label}</label>
       {children}
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && <p className={`${type.caption} text-red-500 mt-1`}>{error}</p>}
     </div>
   );
 
   const inputClass = (field) =>
-    `w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all ${
+    `w-full px-4 py-3 rounded-xl border ${type.input} outline-none transition-all ${
       errors[field]
         ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-2 focus:ring-red-100'
         : 'border-gray-200 bg-white focus:border-[#2f5a87] focus:ring-2 focus:ring-[#2f5a87]/10'
@@ -360,21 +361,21 @@ const CheckoutPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-6">
-          <nav className="mb-2 text-gray-400 text-sm flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <nav className={`mb-2 text-gray-400 ${type.bodySm} flex items-center gap-2`}>
             <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             <span>/</span>
             <Link to="/cart" className="hover:text-gray-700 transition-colors">Cart</Link>
             <span>/</span>
             <span className="text-gray-900 font-medium">Checkout</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Checkout</h1>
-          <p className="mt-1 text-gray-500 text-sm">Enter your delivery address to complete the order</p>
+          <h1 className={`${type.h1} text-gray-900`}>Checkout</h1>
+          <p className={`mt-1 text-gray-500 ${type.bodySm}`}>Enter your delivery address to complete the order</p>
         </div>
       </section>
 
       <section className="py-8">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-8">
 
             {/* ─── LEFT: Payment + Address ────────────────────────────────── */}
@@ -382,15 +383,15 @@ const CheckoutPage = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
 
                 {serverError && (
-                  <div className="bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl text-sm">
+                  <div className={`bg-red-50 text-red-600 border border-red-200 p-4 rounded-xl ${type.bodySm}`}>
                     {serverError}
                   </div>
                 )}
 
                 {/* ① Payment Method — shown first */}
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Payment Method</h3>
-                  {errors.paymentMethod && <p className="text-xs text-red-500 mb-2">{errors.paymentMethod}</p>}
+                  <h3 className={`${type.h3} text-gray-900 mb-4`}>Payment Method</h3>
+                  {errors.paymentMethod && <p className={`${type.caption} text-red-500 mb-2`}>{errors.paymentMethod}</p>}
                   <div className="space-y-3">
                     <label
                       className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -401,8 +402,8 @@ const CheckoutPage = () => {
                     >
                       <input type="radio" name="payment" value="cash_on_delivery" checked={paymentMethod === 'cash_on_delivery'} onChange={() => setToggle('paymentMethod', 'cash_on_delivery')} className="w-4 h-4 accent-[#2f5a87]" />
                       <div>
-                        <p className="font-semibold text-gray-900 text-sm">💵 Cash on Delivery</p>
-                        <p className="text-xs text-gray-500">Pay when you receive your order</p>
+                        <p className={`${type.label} text-gray-900`}>💵 Cash on Delivery</p>
+                        <p className={`${type.caption} text-gray-500`}>Pay when you receive your order</p>
                       </div>
                     </label>
                     <label
@@ -414,8 +415,8 @@ const CheckoutPage = () => {
                     >
                       <input type="radio" name="payment" value="online" checked={paymentMethod === 'online'} onChange={() => setToggle('paymentMethod', 'online')} className="w-4 h-4 accent-[#2f5a87]" />
                       <div>
-                        <p className="font-semibold text-gray-900 text-sm">💳 Pay Online</p>
-                        <p className="text-xs text-gray-500">UPI, Cards, Net Banking</p>
+                        <p className={`${type.label} text-gray-900`}>💳 Pay Online</p>
+                        <p className={`${type.caption} text-gray-500`}>UPI, Cards, Net Banking</p>
                       </div>
                     </label>
                   </div>
@@ -424,7 +425,7 @@ const CheckoutPage = () => {
                 {/* ② Saved Addresses (only if user has any) */}
                 {savedAddresses.length > 0 && (
                   <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Deliver To</h3>
+                    <h3 className={`${type.h3} text-gray-900 mb-4`}>Deliver To</h3>
                     <div className="space-y-3">
                       {savedAddresses.map((addr) => (
                         <button
@@ -438,20 +439,20 @@ const CheckoutPage = () => {
                           }`}
                         >
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                            <span className={`${type.captionMedium} uppercase px-2 py-0.5 rounded-full ${
                               addr.addressType === 'home' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
                             }`}>{addr.addressType === 'home' ? '🏠 Home' : '🏢 Office'}</span>
-                            <span className="font-semibold text-gray-900 text-sm">{addr.firstName} {addr.lastName}</span>
+                            <span className={`${type.label} text-gray-900`}>{addr.firstName} {addr.lastName}</span>
                           </div>
-                          <p className="text-sm text-gray-600">{addr.streetAddress}, {addr.city}, {addr.state} — {addr.pincode}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">📞 {addr.phone}</p>
+                          <p className={`${type.bodySm} text-gray-600`}>{addr.streetAddress}, {addr.city}, {addr.state} — {addr.pincode}</p>
+                          <p className={`${type.caption} text-gray-400 mt-0.5`}>📞 {addr.phone}</p>
                         </button>
                       ))}
                     </div>
                     <button
                       type="button"
                       onClick={openNewForm}
-                      className={`mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed text-sm font-semibold transition-all ${
+                      className={`mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed ${type.button} transition-all ${
                         showNewForm
                           ? 'border-[#2f5a87] bg-[#2f5a87]/5 text-[#2f5a87]'
                           : 'border-gray-200 text-gray-500 hover:border-[#2f5a87] hover:text-[#2f5a87]'
@@ -466,7 +467,7 @@ const CheckoutPage = () => {
                 {showNewForm && (
                   <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold text-gray-900">
+                      <h3 className={`${type.h3} text-gray-900`}>
                         {savedAddresses.length > 0 ? 'New Address' : 'Delivery Address'}
                       </h3>
                       {savedAddresses.length > 0 && (
@@ -477,7 +478,7 @@ const CheckoutPage = () => {
                             // Re-select the first saved address if available
                             if (savedAddresses.length > 0) selectSavedAddress(savedAddresses[0]);
                           }}
-                          className="text-xs text-gray-400 hover:text-gray-600 font-medium"
+                          className={`${type.caption} text-gray-400 hover:text-gray-600 font-medium`}
                         >
                           ✕ Cancel
                         </button>
@@ -490,7 +491,7 @@ const CheckoutPage = () => {
                           key={t}
                           type="button"
                           onClick={() => setToggle('addressType', t)}
-                          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${
+                          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 ${type.button} transition-all ${
                             addressType === t
                               ? 'border-[#2f5a87] bg-[#2f5a87]/5 text-[#2f5a87]'
                               : 'border-gray-200 text-gray-500 hover:border-gray-300'
@@ -534,7 +535,7 @@ const CheckoutPage = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="lg:hidden w-full bg-[#2f5a87] hover:bg-[#23476a] text-white font-bold py-4 rounded-xl active:scale-[0.98] transition-all text-sm disabled:opacity-60"
+                  className={`lg:hidden w-full bg-[#2f5a87] hover:bg-[#23476a] text-white font-bold py-4 rounded-xl active:scale-[0.98] transition-all ${type.button} disabled:opacity-60`}
                 >
                   {submitting ? 'Placing Order...' : `Place Order · ${formatRupee(total)}`}
                 </button>
@@ -544,7 +545,7 @@ const CheckoutPage = () => {
             {/* ─── RIGHT: Order Summary (sticky) ────────────────────────── */}
             <div className="lg:w-96">
               <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm sticky top-24">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h3>
+                <h3 className={`${type.h3} text-gray-900 mb-4`}>Order Summary</h3>
 
                 {/* Mini cart items */}
                 <div className="space-y-3 max-h-60 overflow-y-auto mb-4 pr-1">
@@ -560,16 +561,16 @@ const CheckoutPage = () => {
                           {img ? <img src={img} alt="" className="w-full h-full object-contain" /> : <span className="flex items-center justify-center h-full text-lg">🐾</span>}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{name}</p>
-                          <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                          <p className={`${type.bodySm} font-medium text-gray-900 truncate`}>{name}</p>
+                          <p className={`${type.caption} text-gray-400`}>Qty: {item.quantity}</p>
                         </div>
-                        <p className="text-sm font-bold text-gray-900 shrink-0">{formatRupee(pricing.discountedPrice * item.quantity)}</p>
+                        <p className={`${type.bodySm} font-bold text-gray-900 shrink-0`}>{formatRupee(pricing.discountedPrice * item.quantity)}</p>
                       </div>
                     );
                   })}
                 </div>
 
-                <div className="border-t border-gray-100 pt-4 space-y-2.5 text-sm">
+                <div className={`border-t border-gray-100 pt-4 space-y-2.5 ${type.bodySm}`}>
                  
                   {savings > 0 && (
                     <div className="flex justify-between text-blue-600">
@@ -583,14 +584,14 @@ const CheckoutPage = () => {
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>18% GST</span>
-                    <span className="text-gray-500 text-xs">Included</span>
+                    <span className={`text-gray-500 ${type.caption}`}>Included</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery Charges</span>
                     <div className="flex items-center gap-2">
                       {subtotal >= 500 ? (
                         <>
-                          <span className="text-gray-400 line-through text-xs">₹50</span>
+                          <span className={`text-gray-400 line-through ${type.caption}`}>₹50</span>
                           <span className="text-blue-600 font-medium">Free</span>
                         </>
                       ) : (
@@ -601,12 +602,12 @@ const CheckoutPage = () => {
                 </div>
 
                 <div className="border-t border-gray-100 mt-4 pt-4">
-                  <div className="flex justify-between text-lg font-bold text-gray-900">
+                  <div className={`flex justify-between ${type.priceSm} text-gray-900`}>
                     <span>Total</span>
                     <span>{formatRupee(total)}</span>
                   </div>
                   {savings > 0 && (
-                    <p className="text-xs text-blue-600 mt-1">You're saving {formatRupee(savings)} on this order!</p>
+                    <p className={`${type.caption} text-blue-600 mt-1`}>You're saving {formatRupee(savings)} on this order!</p>
                   )}
                 </div>
 
@@ -614,12 +615,12 @@ const CheckoutPage = () => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="hidden lg:block w-full mt-6 bg-[#2f5a87] text-white font-bold py-3.5 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] active:scale-[0.98] transition-all text-sm disabled:opacity-60"
+                  className={`hidden lg:block w-full mt-6 bg-[#2f5a87] text-white font-bold py-3.5 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] active:scale-[0.98] transition-all ${type.button} disabled:opacity-60`}
                 >
                   {submitting ? 'Placing Order...' : 'Place Order'}
                 </button>
 
-                <Link to="/cart" className="block mt-3 text-center text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
+                <Link to="/cart" className={`block mt-3 text-center ${type.bodySm} text-gray-500 hover:text-gray-700 font-medium transition-colors`}>
                   ← Back to Cart
                 </Link>
               </div>
@@ -637,12 +638,12 @@ const CheckoutPage = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Placed!</h2>
-            <p className="text-gray-500 text-sm mb-1">Your order has been placed successfully.</p>
-            <p className="text-gray-400 text-xs mb-6">Redirecting to your orders...</p>
+            <h2 className={`${type.h3} text-gray-900 mb-2`}>Order Placed!</h2>
+            <p className={`text-gray-500 ${type.bodySm} mb-1`}>Your order has been placed successfully.</p>
+            <p className={`text-gray-400 ${type.caption} mb-6`}>Redirecting to your orders...</p>
             <button
               onClick={() => navigate('/orders')}
-              className="w-full bg-gradient-to-r from-[#2f5a87] to-[#23476a] text-white font-bold py-3 rounded-xl hover:from-[#23476a] hover:to-[#1c3553] transition-all text-sm"
+              className={`w-full bg-gradient-to-r from-[#2f5a87] to-[#23476a] text-white font-bold py-3 rounded-xl hover:from-[#23476a] hover:to-[#1c3553] transition-all ${type.button}`}
             >
               View My Orders
             </button>

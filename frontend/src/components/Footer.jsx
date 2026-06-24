@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { type } from '../styles/typography';
 
 const Footer = () => {
   const footerLinks = {
@@ -22,7 +23,7 @@ const Footer = () => {
   return (
     <footer className="bg-[#1a1a1a] text-white w-full">
       {/* Main Footer Content */}
-      <div className="w-full px-4 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {/* Brand Column */}
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
@@ -33,7 +34,7 @@ const Footer = () => {
                 className="h-14 w-auto object-contain"
               />
             </a>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className={`text-gray-400 ${type.bodySm} mb-4`}>
               Your one-stop shop for all things pets. Quality products, expert advice, and endless love for your furry friends.
             </p>
             {/* Social Links */}
@@ -56,21 +57,21 @@ const Footer = () => {
           {/* Link Columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <div key={title}>
-              <h4 className="font-semibold text-white mb-4">{title}</h4>
+              <h4 className={`${type.h4} text-white mb-4`}>{title}</h4>
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.name}>
                     {link.path.startsWith('/') ? (
                       <Link
                         to={link.path}
-                        className="text-gray-400 text-sm hover:text-[#205EA9] transition-colors"
+                        className={`text-gray-400 ${type.bodySm} hover:text-[#205EA9] transition-colors`}
                       >
                         {link.name}
                       </Link>
                     ) : (
                       <a
                         href={link.path}
-                        className="text-gray-400 text-sm hover:text-[#205EA9] transition-colors"
+                        className={`text-gray-400 ${type.bodySm} hover:text-[#205EA9] transition-colors`}
                       >
                         {link.name}
                       </a>
@@ -85,7 +86,7 @@ const Footer = () => {
         {/* Contact Info */}
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400">
+            <div className={`flex flex-wrap items-center justify-center gap-6 ${type.bodySm} text-gray-400`}>
               <a href="mailto:support@fairytails.com" className="flex items-center gap-2 hover:text-[#205EA9] transition-colors">
                 <EmailIcon />
                 support@fairytails.com
@@ -97,12 +98,12 @@ const Footer = () => {
             </div>
             {/* Payment Methods */}
             <div className="flex items-center gap-3">
-              <span className="text-gray-400 text-sm">We accept:</span>
+              <span className={`text-gray-400 ${type.bodySm}`}>We accept:</span>
               <div className="flex gap-2">
-                <span className="bg-white px-2 py-1 rounded text-xs font-bold text-gray-800">VISA</span>
-                <span className="bg-white px-2 py-1 rounded text-xs font-bold text-gray-800">MC</span>
-                <span className="bg-white px-2 py-1 rounded text-xs font-bold text-gray-800">UPI</span>
-                <span className="bg-white px-2 py-1 rounded text-xs font-bold text-gray-800">COD</span>
+                <span className={`bg-white px-2 py-1 rounded ${type.captionMedium} text-gray-800`}>VISA</span>
+                <span className={`bg-white px-2 py-1 rounded ${type.captionMedium} text-gray-800`}>MC</span>
+                <span className={`bg-white px-2 py-1 rounded ${type.captionMedium} text-gray-800`}>UPI</span>
+                <span className={`bg-white px-2 py-1 rounded ${type.captionMedium} text-gray-800`}>COD</span>
               </div>
             </div>
           </div>
@@ -111,8 +112,8 @@ const Footer = () => {
 
       {/* Policy Links Bar */}
       <div className="border-t border-gray-800 w-full">
-        <div className="w-full px-4 lg:px-8 py-4">
-          <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-500">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+          <div className={`flex flex-wrap items-center justify-center gap-2 ${type.bodySm} text-gray-500`}>
             <Link to="/privacy-policy" className="hover:text-[#205EA9] transition-colors">Privacy Policy</Link>
             <span className="text-gray-700">·</span>
             <Link to="/refund-policy" className="hover:text-[#205EA9] transition-colors">Refund & Cancellation Policy</Link>
@@ -126,8 +127,8 @@ const Footer = () => {
 
       {/* Bottom Bar */}
       <div className="border-t border-gray-800 w-full">
-        <div className="w-full px-4 lg:px-8 py-4">
-          <p className="text-center text-gray-500 text-sm">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-4">
+          <p className={`text-center text-gray-500 ${type.bodySm}`}>
             © 2026 FairyTails Pet Shop. All rights reserved. Made with  💙 for pets everywhere.
           </p>
         </div>

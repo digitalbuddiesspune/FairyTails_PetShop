@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Edit2, Plus, Trash2, X } from "lucide-react";
 import AdminImageUrlField from "../../components/admin/AdminImageUrlField";
+import { type } from '../../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -216,16 +217,16 @@ const AdminCategories = () => {
       </div>
 
       {error && (
-        <div className="mb-4 px-4 py-3 rounded-xl text-sm bg-red-50 text-red-700 border border-red-100">
+        <div className={`${type.bodySm} mb-4 px-4 py-3 rounded-xl bg-red-50 text-red-700 border border-red-100`}>
           {error}
         </div>
       )}
 
       {sortedCategories.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-          <span className="text-5xl mb-4 block">📂</span>
-          <p className="text-gray-500 text-lg font-medium">No categories yet</p>
-          <p className="text-gray-400 text-sm mt-1">Organize your products into categories</p>
+          <span className={`${type.hero} mb-4 block`}>📂</span>
+          <p className={`${type.body} text-gray-500`}>No categories yet</p>
+          <p className={`${type.bodySm} text-gray-400 mt-1`}>Organize your products into categories</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -233,9 +234,9 @@ const AdminCategories = () => {
             <table className="min-w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Image</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Category Name</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                  <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-500 uppercase`}>Image</th>
+                  <th className={`${type.captionMedium} px-4 py-3 text-left text-gray-500 uppercase`}>Category Name</th>
+                  <th className={`${type.captionMedium} px-4 py-3 text-right text-gray-500 uppercase`}>Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -249,17 +250,17 @@ const AdminCategories = () => {
                           className="w-16 h-10 object-cover rounded-md border border-gray-200"
                         />
                       ) : (
-                        <span className="text-xs text-gray-400">No image</span>
+                        <span className={`${type.caption} text-gray-400`}>No image</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-gray-900 whitespace-nowrap">
+                    <td className={`${type.bodySm} px-4 py-3 text-gray-900 whitespace-nowrap`}>
                       {category.name}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEditModal(category)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-xs font-medium"
+                          className={`${type.captionMedium} inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors`}
                           title="Edit Category"
                         >
                           <Edit2 size={13} />
@@ -267,7 +268,7 @@ const AdminCategories = () => {
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(category)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium"
+                          className={`${type.captionMedium} inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors`}
                           title="Delete Category"
                         >
                           <Trash2 size={13} />
@@ -296,7 +297,7 @@ const AdminCategories = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className={`${type.h3} text-gray-900`}>
                 {editingCategory ? "Edit Category" : "Add Category"}
               </h3>
               <button
@@ -312,28 +313,28 @@ const AdminCategories = () => {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                   Category Name *
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => handleChange("name", e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                  className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100`}
                   placeholder="e.g. Dogs"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                   Slug {editingCategory ? "(readonly while editing)" : "*"}
                 </label>
                 <input
                   type="text"
                   value={formData.slug}
                   onChange={(e) => handleChange("slug", e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:bg-gray-50 disabled:text-gray-500"
+                  className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 disabled:bg-gray-50 disabled:text-gray-500`}
                   placeholder="e.g. dogs"
                   disabled={Boolean(editingCategory)}
                   required={!editingCategory}
@@ -350,28 +351,28 @@ const AdminCategories = () => {
               />
 
               {imageError && (
-                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100">{imageError}</p>
+                <p className={`${type.bodySm} text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100`}>{imageError}</p>
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                   Subcategories
                 </label>
                 <textarea
                   rows={8}
                   value={formData.subcategoriesText}
                   onChange={(e) => handleChange("subcategoriesText", e.target.value)}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100"
+                  className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100`}
                   placeholder={"Dry Food\nTreats | Dental Treats, Biscuits\nWet Food"}
                 />
-                <p className="text-xs text-gray-500 mt-2">
+                <p className={`${type.caption} text-gray-500 mt-2`}>
                   Use one subcategory per line. Optional sub-subcategories can be added as
                   `Subcategory | sub1, sub2`.
                 </p>
               </div>
 
               {error && (
-                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+                <p className={`${type.bodySm} text-red-600 bg-red-50 px-3 py-2 rounded-lg`}>{error}</p>
               )}
 
               <div className="flex gap-3 pt-1">
@@ -381,14 +382,14 @@ const AdminCategories = () => {
                     setShowModal(false);
                     resetForm();
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                  className={`${type.nav} flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors`}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                  className={`${type.nav} flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50`}
                 >
                   {submitting
                     ? editingCategory
@@ -407,20 +408,20 @@ const AdminCategories = () => {
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-100">
-            <h4 className="text-lg font-bold text-gray-900 mb-2">Delete Category</h4>
-            <p className="text-sm text-gray-600 mb-5">
+            <h4 className={`${type.h4} text-gray-900 mb-2`}>Delete Category</h4>
+            <p className={`${type.bodySm} text-gray-600 mb-5`}>
               Are you sure you want to delete <b>{deleteConfirm.name}</b>?
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                className={`${type.bodySm} px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50`}
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700"
+                className={`${type.bodySm} px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700`}
               >
                 Delete
               </button>

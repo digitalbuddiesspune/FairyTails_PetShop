@@ -3,6 +3,7 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getApiBearerToken } from '../auth/session';
 import ProductCard from '../components/ProductCard';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -201,15 +202,15 @@ const CategoryProducts = () => {
                 {categoryIcon ? (
                   <img src={categoryIcon} alt={category} className="w-8 h-8 sm:w-9 sm:h-9 object-contain" />
                 ) : (
-                  <span className="text-xl sm:text-2xl">🐾</span>
+                  <span className={`${type.h3} sm:text-2xl`}>🐾</span>
                 )}
-                <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{pageTitle}</h1>
+                <h1 className={`${type.h4} sm:text-lg text-gray-900 truncate`}>{pageTitle}</h1>
               </div>
               <div className="flex items-center shrink-0 md:hidden">
                 <select
                   value={sortBy}
                   onChange={handleSortChange}
-                  className="bg-gray-50 text-gray-900 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer max-w-[118px]"
+                  className={`${type.caption} bg-gray-50 text-gray-900 border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer max-w-[118px]`}
                 >
                   {sortOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -241,11 +242,11 @@ const CategoryProducts = () => {
             </div>
 
             <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto">
-              <label className="hidden lg:inline text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
+              <label className={`${type.nav} hidden lg:inline text-gray-500 whitespace-nowrap`}>Sort by:</label>
               <select
                 value={sortBy}
                 onChange={handleSortChange}
-                className="bg-gray-50 text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[150px]"
+                className={`${type.bodySm} bg-gray-50 text-gray-900 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[150px]`}
               >
                 {sortOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -265,19 +266,19 @@ const CategoryProducts = () => {
           {loading && (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-500 text-lg">Loading products...</p>
+              <p className={`${type.body} text-gray-500`}>Loading products...</p>
             </div>
           )}
 
           {/* Error State */}
           {!loading && error && (
             <div className="flex flex-col items-center justify-center py-20">
-              <p className="text-5xl mb-4">⚠️</p>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Oops! Something went wrong</h3>
+              <p className={`${type.hero} mb-4`}>⚠️</p>
+              <h3 className={`${type.h3} text-gray-800 mb-2`}>Oops! Something went wrong</h3>
               <p className="text-gray-500 mb-6 text-center max-w-md">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-[#205EA9] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1d4f8f] transition-colors"
+                className={`${type.label} bg-[#205EA9] text-white px-6 py-2.5 rounded-xl hover:bg-[#1d4f8f] transition-colors`}
               >
                 Try Again
               </button>
@@ -287,8 +288,8 @@ const CategoryProducts = () => {
           {/* Empty State */}
           {!loading && !error && products.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20">
-              <p className="text-6xl mb-4">🔍</p>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">No Products Found</h3>
+              <p className={`${type.hero} mb-4`}>🔍</p>
+              <h3 className={`${type.h3} text-gray-800 mb-2`}>No Products Found</h3>
               <p className="text-gray-500 mb-6 text-center max-w-md">
                 We couldn't find any {category ? `${category.toLowerCase()} ` : ''}
                 {activeSubCategory !== 'All' ? activeSubCategory.toLowerCase() + ' ' : ''}
@@ -298,14 +299,14 @@ const CategoryProducts = () => {
                 {activeSubCategory !== 'All' && (
                   <button
                     onClick={() => handleSubCategoryChange('All')}
-                    className="bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                    className={`${type.label} bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl hover:bg-gray-200 transition-colors`}
                   >
                     View All
                   </button>
                 )}
                 <Link
                   to="/"
-                  className="bg-[#205EA9] text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-[#1d4f8f] transition-colors"
+                  className={`${type.label} bg-[#205EA9] text-white px-5 py-2.5 rounded-xl hover:bg-[#1d4f8f] transition-colors`}
                 >
                   Back to Home
                 </Link>
@@ -335,13 +336,13 @@ const CategoryProducts = () => {
       {/* Browse More Section */}
       <section className="py-10 bg-white border-t border-gray-100">
         <div className="container mx-auto px-4 text-center">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Looking for more?</h3>
+          <h3 className={`${type.h3} text-gray-900 mb-2`}>Looking for more?</h3>
           <p className="text-gray-500 mb-6">Explore other categories for your pets</p>
           <div className="flex items-center justify-center gap-3 flex-wrap">
             {category !== 'Dog' && (
               <Link
                 to="/category/dogs"
-                className="px-5 py-2.5 bg-amber-50 text-amber-700 font-semibold rounded-xl border border-amber-200 hover:bg-amber-100 transition-colors"
+                className={`${type.label} px-5 py-2.5 bg-amber-50 text-amber-700 rounded-xl border border-amber-200 hover:bg-amber-100 transition-colors`}
               >
                 <img src={DOG_ICON} alt="Dog" className="w-5 h-5 object-contain inline" /> Dogs
               </Link>
@@ -349,14 +350,14 @@ const CategoryProducts = () => {
             {category !== 'Cat' && (
               <Link
                 to="/category/cats"
-                className="px-5 py-2.5 bg-purple-50 text-purple-700 font-semibold rounded-xl border border-purple-200 hover:bg-purple-100 transition-colors"
+                className={`${type.label} px-5 py-2.5 bg-purple-50 text-purple-700 rounded-xl border border-purple-200 hover:bg-purple-100 transition-colors`}
               >
                 <img src={CAT_ICON} alt="Cat" className="w-5 h-5 object-contain inline" /> Cats
               </Link>
             )}
             <Link
               to="/"
-              className="px-5 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl border border-gray-200 hover:bg-gray-200 transition-colors"
+              className={`${type.label} px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl border border-gray-200 hover:bg-gray-200 transition-colors`}
             >
               🏠 All Categories
             </Link>

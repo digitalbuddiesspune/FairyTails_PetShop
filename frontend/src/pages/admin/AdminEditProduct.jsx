@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import ProductForm from './ProductForm';
 import { getCategoryDataByKey } from './adminProductConfig';
+import { type } from '../../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -54,7 +55,7 @@ const AdminEditProduct = () => {
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-sm">Loading product...</p>
+          <p className={`${type.bodySm} text-gray-500`}>Loading product...</p>
         </div>
       </div>
     );
@@ -81,7 +82,7 @@ const AdminEditProduct = () => {
       <button
         type="button"
         onClick={() => navigate('/admin/my-products')}
-        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
+        className={`${type.bodySm} inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6`}
       >
         <ArrowLeft size={16} />
         Back to My Products

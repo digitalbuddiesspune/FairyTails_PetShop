@@ -4,6 +4,7 @@ import axios from 'axios';
 import { getGuestWishlist, removeFromGuestWishlist, addToGuestCart } from '../utils/guestCart';
 import { getApiBearerToken } from '../auth/session';
 import ProductCard from '../components/ProductCard';
+import { type } from '../styles/typography';
 
 const PRODUCT_ENDPOINTS = [
   '/food',
@@ -209,7 +210,7 @@ const WishlistPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500 text-lg">Loading your wishlist...</p>
+          <p className={`text-gray-500 ${type.body}`}>Loading your wishlist...</p>
         </div>
       </div>
     );
@@ -220,7 +221,7 @@ const WishlistPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <p className="text-5xl mb-4">⚠️</p>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">Something went wrong</h3>
+          <h3 className={`${type.h3} text-gray-800 mb-2`}>Something went wrong</h3>
           <p className="text-gray-500 mb-6">{error}</p>
           <button onClick={fetchWishlist} className="bg-[#205EA9] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1d4f8f]">
             Try Again
@@ -234,21 +235,21 @@ const WishlistPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-6">
-          <nav className="mb-2 text-gray-400 text-sm flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <nav className={`mb-2 text-gray-400 ${type.bodySm} flex items-center gap-2`}>
             <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             <span>/</span>
             <span className="text-gray-900 font-medium">Wishlist</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
+          <h1 className={`${type.h1} text-gray-900 flex items-center gap-3`}>
             <span className="text-red-500">♥</span> My Wishlist
           </h1>
-          <p className="mt-1 text-gray-500 text-sm">{items.length} saved item{items.length !== 1 ? 's' : ''}</p>
+          <p className={`mt-1 text-gray-500 ${type.bodySm}`}>{items.length} saved item{items.length !== 1 ? 's' : ''}</p>
         </div>
       </section>
 
       <section className="py-8">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           {items.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -256,7 +257,7 @@ const WishlistPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Your wishlist is empty</h3>
+              <h3 className={`${type.h3} text-gray-800 mb-2`}>Your wishlist is empty</h3>
               <p className="text-gray-500 mb-6">Browse our collection and add products you love!</p>
               <Link to="/" className="inline-block bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all">
                 Explore Products

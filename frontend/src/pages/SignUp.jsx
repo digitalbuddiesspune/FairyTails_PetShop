@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -202,13 +203,13 @@ const SignUp = () => {
         {/* Logo/Header */}
         <div className="text-center mb-6">
           
-          <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
+          <h2 className={`${type.h2} text-gray-900`}>Create Account</h2>
         
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm mb-4">
+          <div className={`bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl ${type.bodySm} mb-4`}>
             {error}
           </div>
         )}
@@ -217,21 +218,21 @@ const SignUp = () => {
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+              <label className={`block ${type.label} text-gray-700 mb-1`}>Full Name *</label>
               <input
                 name="name"
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.name ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm`}
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.name ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all ${type.input}`}
                 placeholder="Name Surname"
               />
               {fieldErrors.name && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.name}</p>
+                <p className={`text-red-500 ${type.caption} mt-1`}>{fieldErrors.name}</p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+              <label className={`block ${type.label} text-gray-700 mb-1`}>Phone *</label>
               <input
                 name="phone"
                 type="tel"
@@ -245,39 +246,39 @@ const SignUp = () => {
                     setFieldErrors(prev => ({ ...prev, phone: '' }));
                   }
                 }}
-                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.phone ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm`}
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.phone ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all ${type.input}`}
                 placeholder="9876543210"
               />
               {fieldErrors.phone && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>
+                <p className={`text-red-500 ${type.caption} mt-1`}>{fieldErrors.phone}</p>
               )}
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+            <label className={`block ${type.label} text-gray-700 mb-1`}>Email Address *</label>
             <input
               name="email"
               type="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.email ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm`}
+              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.email ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all ${type.input}`}
               placeholder="Enter your email"
             />
             {fieldErrors.email && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
+              <p className={`text-red-500 ${type.caption} mt-1`}>{fieldErrors.email}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+            <label className={`block ${type.label} text-gray-700 mb-1`}>Password *</label>
             <div className="relative">
               <input
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
-                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.password ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm pr-12`}
+                className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.password ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all pr-12 ${type.input}`}
                 placeholder="Create password"
               />
               <button
@@ -289,30 +290,30 @@ const SignUp = () => {
               </button>
             </div>
             {fieldErrors.password && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
+              <p className={`text-red-500 ${type.caption} mt-1`}>{fieldErrors.password}</p>
             )}
             <PasswordStrengthBar />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password *</label>
+            <label className={`block ${type.label} text-gray-700 mb-1`}>Confirm Password *</label>
             <input
               name="confirmPassword"
               type={showPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onChange={handleChange}
-              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.confirmPassword ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all text-sm`}
+              className={`w-full px-4 py-2.5 bg-gray-50 border ${fieldErrors.confirmPassword ? 'border-red-400' : 'border-gray-300'} rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all ${type.input}`}
               placeholder="Confirm password"
             />
             {fieldErrors.confirmPassword && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.confirmPassword}</p>
+              <p className={`text-red-500 ${type.caption} mt-1`}>{fieldErrors.confirmPassword}</p>
             )}
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#205EA9] hover:bg-[#1d4f8f] text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mt-2"
+            className={`w-full py-3 bg-[#205EA9] hover:bg-[#1d4f8f] text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl mt-2 ${type.button}`}
           >
             {loading ? (
               <>
@@ -326,9 +327,9 @@ const SignUp = () => {
         </form>
 
         {/* Sign In Link */}
-        <p className="text-center text-gray-600 mt-5">
+        <p className={`text-center text-gray-600 mt-5 ${type.body}`}>
           Already have an account?{' '}
-          <Link to="/signin" className="font-semibold text-[#205EA9] hover:text-[#1d4f8f]">
+          <Link to="/signin" className={`${type.button} text-[#205EA9] hover:text-[#1d4f8f]`}>
             Sign In
           </Link>
         </p>
@@ -338,7 +339,7 @@ const SignUp = () => {
 };
 
 const CheckItem = ({ label, passed }) => (
-  <div className={`flex items-center gap-1 text-xs ${passed ? 'text-blue-600' : 'text-gray-400'}`}>
+  <div className={`flex items-center gap-1 ${type.caption} ${passed ? 'text-blue-600' : 'text-gray-400'}`}>
     <span>{passed ? '✓' : '○'}</span>
     <span>{label}</span>
   </div>

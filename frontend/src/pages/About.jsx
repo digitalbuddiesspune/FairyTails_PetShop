@@ -1,3 +1,5 @@
+import { type } from '../styles/typography';
+
 const About = () => {
   const team = [
     { name: 'Dr. Priya Sharma', role: 'Founder & Chief Vet', emoji: '👩‍⚕️' },
@@ -17,32 +19,32 @@ const About = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-[#205EA9] to-[#205EA9] py-12 md:py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl md:text-5xl font-bold text-white mb-4">About FairyTails</h1>
-          <p className="text-white/90 text-lg max-w-2xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className={`${type.hero} text-white mb-4`}>About FairyTails</h1>
+          <p className={`text-white/90 ${type.body} max-w-2xl mx-auto`}>
             Your trusted partner in pet care since 2020. We believe every pet deserves the best!
           </p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="container mx-auto px-4 -mt-8">
+      <div className="max-w-7xl mx-auto px-4 -mt-8">
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
-              <div className="text-2xl md:text-4xl font-bold text-[#205ea9]">{stat.number}</div>
-              <div className="text-gray-600 text-sm md:text-base">{stat.label}</div>
+              <div className={`${type.h1} text-[#205ea9]`}>{stat.number}</div>
+              <div className={`text-gray-600 ${type.bodySm}`}>{stat.label}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Our Story */}
-      <div className="container mx-auto px-4 py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
         <div className="grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Our Story</h2>
-            <div className="space-y-4 text-gray-600">
+            <h2 className={`${type.h2} text-gray-900 mb-4`}>Our Story</h2>
+            <div className={`space-y-4 text-gray-600 ${type.body}`}>
               <p>
                 FairyTails was born from a simple idea – pets are family, and they deserve the very best care. 
                 Founded in 2020 by Dr. Priya Sharma, a passionate veterinarian, we started as a small pet clinic 
@@ -67,7 +69,7 @@ const About = () => {
                 alt="Where Pets Come First" 
                 className="w-56 h-56 md:w-72 md:h-72 rounded-2xl object-cover mb-4 mx-auto"
               />
-              <p className="text-[#205ea9] font-bold text-xl mt-4">Where Pets Come First</p>
+              <p className={`text-[#205ea9] ${type.h4} mt-4`}>Where Pets Come First</p>
             </div>
           </div>
         </div>
@@ -75,8 +77,8 @@ const About = () => {
 
       {/* Our Values */}
       <div className="bg-white py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8">Our Values</h2>
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className={`${type.h2} text-gray-900 text-center mb-8`}>Our Values</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { icon: '❤️', title: 'Love for Pets', desc: 'Every decision we make is guided by what\'s best for pets.' },
@@ -87,8 +89,8 @@ const About = () => {
                 <div className="w-16 h-16 bg-[#dbeafe] rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">{value.icon}</span>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{value.title}</h3>
-                <p className="text-gray-600 text-sm">{value.desc}</p>
+                <h3 className={`${type.h4} text-gray-900 mb-2`}>{value.title}</h3>
+                <p className={`text-gray-600 ${type.small}`}>{value.desc}</p>
               </div>
             ))}
           </div>
@@ -96,16 +98,16 @@ const About = () => {
       </div>
 
       {/* Team */}
-      <div className="container mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-8">Meet Our Team</h2>
+      <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
+        <h2 className={`${type.h2} text-gray-900 text-center mb-8`}>Meet Our Team</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {team.map((member, index) => (
             <div key={index} className="bg-white rounded-2xl p-4 md:p-6 text-center shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
               <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-[#205ea9]/20 to-[#205ea9]/40 rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-3xl md:text-4xl">{member.emoji}</span>
               </div>
-              <h3 className="font-bold text-gray-900 text-sm md:text-base">{member.name}</h3>
-              <p className="text-gray-500 text-xs md:text-sm">{member.role}</p>
+              <h3 className={`${type.cardTitle} text-gray-900`}>{member.name}</h3>
+              <p className={`text-gray-500 ${type.small}`}>{member.role}</p>
             </div>
           ))}
         </div>
@@ -113,14 +115,14 @@ const About = () => {
 
       {/* CTA */}
       <div className="bg-black py-12 md:py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Ready to give your pet the best?</h2>
-          <p className="text-gray-400 mb-6 max-w-xl mx-auto">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className={`${type.h2} text-white mb-4`}>Ready to give your pet the best?</h2>
+          <p className={`text-gray-400 mb-6 max-w-xl mx-auto ${type.body}`}>
             Join thousands of happy pet parents who trust FairyTails for all their pet needs.
           </p>
           <a 
             href="/" 
-            className="inline-block bg-[#205EA9] hover:bg-[#205EA9] text-white font-bold px-8 py-3 rounded-xl transition-colors"
+            className={`inline-block bg-[#205EA9] hover:bg-[#205EA9] text-white px-8 py-3 rounded-xl transition-colors ${type.button}`}
           >
             Start Shopping 🛒
           </a>

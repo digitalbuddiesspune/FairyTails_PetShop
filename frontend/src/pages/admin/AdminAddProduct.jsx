@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import ProductForm from './ProductForm';
 import { getCategoryDataByKey } from './adminProductConfig';
+import { type } from '../../styles/typography';
 
 const AdminAddProduct = () => {
   const { categoryKey } = useParams();
@@ -31,7 +32,7 @@ const AdminAddProduct = () => {
       <button
         type="button"
         onClick={() => navigate('/admin/products')}
-        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-6"
+        className={`${type.bodySm} inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6`}
       >
         <ArrowLeft size={16} />
         Back to Categories

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -55,8 +56,8 @@ const CatalogPage = () => {
                     </svg>
                 </button>
                 <div>
-                    <h1 className="text-xl font-bold text-gray-900">Catalog</h1>
-                    <p className="text-xs text-gray-500">All Categories</p>
+                    <h1 className={`${type.h3} text-gray-900`}>Catalog</h1>
+                    <p className={`${type.caption} text-gray-500`}>All Categories</p>
                 </div>
             </div>
 
@@ -77,10 +78,10 @@ const CatalogPage = () => {
                                                 className="w-full h-full object-contain"
                                             />
                                         ) : (
-                                            <span className="text-xl">📦</span>
+                                            <span className={`${type.bodySm}`}>📦</span>
                                         )}
                                     </div>
-                                    <span className="font-semibold text-gray-800 text-lg">{category.name}</span>
+                                    <span className={`${type.body} text-gray-800`}>{category.name}</span>
                                 </div>
                                 {category.subcategories?.length > 0 ? (
                                     <svg
@@ -108,7 +109,7 @@ const CatalogPage = () => {
                                     <li>
                                         <button
                                             onClick={() => handleNavigate(`/category/${category.slug}`)}
-                                            className="w-full flex items-center gap-3 py-2 text-sm text-gray-600 hover:text-[#205EA9] text-left transition-colors font-medium border-b border-gray-100 last:border-0"
+                                            className={`${type.bodySm} w-full flex items-center gap-3 py-2 text-gray-600 hover:text-[#205EA9] text-left transition-colors border-b border-gray-100 last:border-0`}
                                         >
                                             <span className="w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
                                             All {category.name}
@@ -118,7 +119,7 @@ const CatalogPage = () => {
                                         <li key={sIdx}>
                                             <button
                                                 onClick={() => handleNavigate(`/category/${category.slug}?subCategory=${encodeURIComponent(sub.name)}`)}
-                                                className="w-full flex items-center gap-3 py-2 text-sm text-gray-600 hover:text-[#205EA9] text-left transition-colors font-medium border-b border-gray-100 last:border-0"
+                                                className={`${type.bodySm} w-full flex items-center gap-3 py-2 text-gray-600 hover:text-[#205EA9] text-left transition-colors border-b border-gray-100 last:border-0`}
                                             >
                                                 <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
                                                 {sub.name}

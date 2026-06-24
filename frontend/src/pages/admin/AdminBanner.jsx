@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Plus, Edit2, X, Check } from 'lucide-react';
 import AdminImageUrlField from '../../components/admin/AdminImageUrlField';
+import { type } from '../../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -147,9 +148,9 @@ const AdminBanner = () => {
 
             {/* Desktop Banners */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mb-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Desktop Banners</h3>
+                <h3 className={`${type.h4} text-gray-900 mb-4`}>Desktop Banners</h3>
                 {desktopBanners.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No desktop banners yet. Add one to get started.</p>
+                    <p className={`${type.bodySm} text-gray-500`}>No desktop banners yet. Add one to get started.</p>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {desktopBanners.map((banner) => (
@@ -162,13 +163,13 @@ const AdminBanner = () => {
                                     />
                                     {!banner.isActive && (
                                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                            <span className="text-white font-bold">Inactive</span>
+                                            <span className={`${type.button} text-white`}>Inactive</span>
                                         </div>
                                     )}
                                 </div>
                                 <div className="p-3 space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs text-gray-500">Order: {banner.order}</span>
+                                        <span className={`${type.caption} text-gray-500`}>Order: {banner.order}</span>
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                                             banner.isActive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
                                         }`}>
@@ -178,14 +179,14 @@ const AdminBanner = () => {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleEdit(banner)}
-                                            className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                                            className={`${type.bodySm} flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors`}
                                         >
                                             <Edit2 size={14} />
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => setDeleteConfirm(banner)}
-                                            className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm"
+                                            className={`${type.bodySm} flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors`}
                                         >
                                             <Trash2 size={14} />
                                             Delete
@@ -200,9 +201,9 @@ const AdminBanner = () => {
 
             {/* Mobile Banners */}
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Mobile Banners</h3>
+                <h3 className={`${type.h4} text-gray-900 mb-4`}>Mobile Banners</h3>
                 {mobileBanners.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No mobile banners yet. Add one to get started.</p>
+                    <p className={`${type.bodySm} text-gray-500`}>No mobile banners yet. Add one to get started.</p>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {mobileBanners.map((banner) => (
@@ -215,13 +216,13 @@ const AdminBanner = () => {
                                     />
                                     {!banner.isActive && (
                                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                            <span className="text-white font-bold">Inactive</span>
+                                            <span className={`${type.button} text-white`}>Inactive</span>
                                         </div>
                                     )}
                                 </div>
                                 <div className="p-3 space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-xs text-gray-500">Order: {banner.order}</span>
+                                        <span className={`${type.caption} text-gray-500`}>Order: {banner.order}</span>
                                         <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                                             banner.isActive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
                                         }`}>
@@ -231,14 +232,14 @@ const AdminBanner = () => {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleEdit(banner)}
-                                            className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                                            className={`${type.bodySm} flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors`}
                                         >
                                             <Edit2 size={14} />
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => setDeleteConfirm(banner)}
-                                            className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm"
+                                            className={`${type.bodySm} flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors`}
                                         >
                                             <Trash2 size={14} />
                                             Delete
@@ -256,7 +257,7 @@ const AdminBanner = () => {
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => { setShowModal(false); resetForm(); }}>
                     <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-gray-900">
+                            <h3 className={`${type.h3} text-gray-900`}>
                                 {editingBanner ? 'Edit Banner' : 'Add Banner'}
                             </h3>
                             <button
@@ -268,7 +269,7 @@ const AdminBanner = () => {
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             {formError && (
-                                <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100">{formError}</p>
+                                <p className={`${type.bodySm} text-red-600 bg-red-50 px-3 py-2 rounded-lg border border-red-100`}>{formError}</p>
                             )}
                             <AdminImageUrlField
                                 label="Banner Image URL"
@@ -284,7 +285,7 @@ const AdminBanner = () => {
                                 }
                             />
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                                     Category *
                                 </label>
                                 <select
@@ -326,20 +327,20 @@ const AdminBanner = () => {
                             <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Trash2 className="w-7 h-7 text-red-500" />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Banner?</h3>
-                            <p className="text-sm text-gray-500 mb-6">
+                            <h3 className={`${type.h4} text-gray-900 mb-2`}>Delete Banner?</h3>
+                            <p className={`${type.bodySm} text-gray-500 mb-6`}>
                                 This will permanently delete this banner. This action cannot be undone.
                             </p>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setDeleteConfirm(null)}
-                                    className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors"
+                                    className={`${type.bodySm} flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors`}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={() => handleDelete(deleteConfirm._id)}
-                                    className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-sm transition-colors"
+                                    className={`${type.bodySm} flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors`}
                                 >
                                     Delete
                                 </button>

@@ -3,6 +3,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import dogImage from '../assets/dog.png';
 import { formatRupee } from '../utils/formatPrice';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -145,7 +146,7 @@ const Profile = () => {
       case 'orders':
         return (
           <div className="animate-fadeIn h-full flex flex-col">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">Your Orders</h2>
+            <h2 className={`${type.hero} sm:text-4xl text-gray-900 text-center mb-8`}>Your Orders</h2>
             {ordersLoading ? (
               <div className="flex-1 flex items-center justify-center">
                 <div className="w-10 h-10 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin" />
@@ -154,10 +155,10 @@ const Profile = () => {
               <div className="flex-1 flex items-center justify-center">
                 <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 text-center max-w-lg w-full shadow-sm">
                   <div className="w-24 h-24 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-5">
-                    <span className="text-5xl">📦</span>
+                    <span className={`${type.hero}`}>📦</span>
                   </div>
-                  <p className="text-blue-600 font-bold mb-5 text-lg">No orders yet</p>
-                  <Link to="/" className="inline-block bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-7 py-3 rounded-xl transition-colors font-semibold shadow-lg">
+                  <p className={`${type.body} text-blue-600 mb-5`}>No orders yet</p>
+                  <Link to="/" className={`${type.label} inline-block bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-7 py-3 rounded-xl transition-colors shadow-lg`}>
                     Start Shopping
                   </Link>
                 </div>
@@ -177,28 +178,28 @@ const Profile = () => {
                     <div key={order._id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
                       <div className="flex items-center justify-between mb-3">
                         <div>
-                          <p className="text-[10px] text-gray-400 uppercase">Order #{order._id.slice(-8).toUpperCase()}</p>
-                          <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                          <p className={`${type.bodySm} text-gray-400 uppercase`}>Order #{order._id.slice(-8).toUpperCase()}</p>
+                          <p className={`${type.caption} text-gray-500`}>{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${st.color}`}>{st.label}</span>
-                          <span className="font-bold text-gray-900">{formatRupee(order.total)}</span>
+                          <span className={`px-2.5 py-0.5 rounded-full ${type.caption} font-bold ${st.color}`}>{st.label}</span>
+                          <span className={`${type.button} text-gray-900`}>{formatRupee(order.total)}</span>
                         </div>
                       </div>
                       <div className="space-y-2">
                         {order.items.map((item, i) => (
                           <div key={i} className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 shrink-0 overflow-hidden">
-                              {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className="flex items-center justify-center h-full text-sm">🐾</span>}
+                              {item.productImage ? <img src={item.productImage} alt="" className="w-full h-full object-contain p-0.5" /> : <span className={`${type.bodySm} flex items-center justify-center h-full`}>🐾</span>}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-900 truncate">{item.productName}</p>
-                              <p className="text-[10px] text-gray-400">Qty: {item.quantity} × {formatRupee(item.price)}</p>
+                              <p className={`${type.nav} text-gray-900 truncate`}>{item.productName}</p>
+                              <p className={`${type.bodySm} text-gray-400`}>Qty: {item.quantity} × {formatRupee(item.price)}</p>
                             </div>
                           </div>
                         ))}
                       </div>
-                      <div className="mt-3 pt-2 border-t border-gray-50 text-[10px] text-gray-400">
+                      <div className={`${type.bodySm} mt-3 pt-2 border-t border-gray-50 text-gray-400`}>
                         {order.paymentMethod === 'cash_on_delivery' ? '💵 Cash on Delivery' : '💳 Online'} · {order.shippingAddress.city}, {order.shippingAddress.state}
                       </div>
                     </div>
@@ -211,7 +212,7 @@ const Profile = () => {
       case 'address':
         return (
           <div className="animate-fadeIn h-full flex flex-col">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-8">Your Addresses</h2>
+            <h2 className={`${type.hero} sm:text-4xl text-gray-900 text-center mb-8`}>Your Addresses</h2>
             {addressesLoading ? (
               <div className="flex-1 flex items-center justify-center">
                 <div className="w-10 h-10 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin" />
@@ -220,10 +221,10 @@ const Profile = () => {
               <div className="flex-1 flex items-center justify-center">
                 <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 text-center max-w-lg w-full shadow-sm">
                   <div className="w-24 h-24 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-5">
-                    <span className="text-5xl">📍</span>
+                    <span className={`${type.hero}`}>📍</span>
                   </div>
-                  <p className="text-gray-500 font-medium mb-5 text-lg">No addresses saved</p>
-                  <Link to="/checkout" className="inline-block bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-7 py-3 rounded-xl transition-colors font-semibold shadow-lg">
+                  <p className={`${type.body} text-gray-500 mb-5`}>No addresses saved</p>
+                  <Link to="/checkout" className={`${type.label} inline-block bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-7 py-3 rounded-xl transition-colors shadow-lg`}>
                     + Add New Address
                   </Link>
                 </div>
@@ -233,14 +234,14 @@ const Profile = () => {
                 {addresses.map((addr) => (
                   <div key={addr._id} className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${addr.addressType === 'home' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
+                      <span className={`${type.caption} font-bold uppercase px-2 py-0.5 rounded-full ${addr.addressType === 'home' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
                         {addr.addressType === 'home' ? '🏠' : '🏢'} {addr.addressType}
                       </span>
-                      <span className="font-semibold text-gray-900 text-sm">{addr.firstName} {addr.lastName}</span>
+                      <span className={`${type.bodySm} text-gray-900`}>{addr.firstName} {addr.lastName}</span>
                     </div>
-                    <p className="text-sm text-gray-600">{addr.streetAddress}</p>
-                    <p className="text-sm text-gray-600">{addr.city}, {addr.state} — {addr.pincode}</p>
-                    <p className="text-xs text-gray-400 mt-1">📞 {addr.phone}</p>
+                    <p className={`${type.bodySm} text-gray-600`}>{addr.streetAddress}</p>
+                    <p className={`${type.bodySm} text-gray-600`}>{addr.city}, {addr.state} — {addr.pincode}</p>
+                    <p className={`${type.caption} text-gray-400 mt-1`}>📞 {addr.phone}</p>
                   </div>
                 ))}
               </div>
@@ -251,15 +252,15 @@ const Profile = () => {
       case 'subscription':
         return (
           <div className="animate-fadeIn h-full flex flex-col">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10">Subscriptions</h2>
+            <h2 className={`${type.hero} sm:text-4xl text-gray-900 text-center mb-10`}>Subscriptions</h2>
             <div className="flex-1 flex items-center justify-center">
               <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 sm:p-12 text-center max-w-lg w-full shadow-sm">
                 <div className="w-28 h-28 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-6xl">🔄</span>
+                  <span className={`${type.hero}`}>🔄</span>
                 </div>
-                <p className="text-blue-600 font-bold mb-2 text-xl">No active subscriptions</p>
-                <p className="text-gray-500 text-sm mb-6">Subscribe for regular pet essentials delivery</p>
-                <button className="bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <p className={`${type.button} text-blue-600 mb-2`}>No active subscriptions</p>
+                <p className={`${type.bodySm} text-gray-500 mb-6`}>Subscribe for regular pet essentials delivery</p>
+                <button className={`${type.body} bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-8 py-3.5 rounded-xl transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}>
                   Browse Plans
                 </button>
               </div>
@@ -269,19 +270,19 @@ const Profile = () => {
       case 'invite':
         return (
           <div className="animate-fadeIn h-full flex flex-col">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 text-center mb-10">Invite Friends</h2>
+            <h2 className={`${type.hero} sm:text-4xl text-gray-900 text-center mb-10`}>Invite Friends</h2>
             <div className="flex-1 flex items-center justify-center">
               <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-10 sm:p-12 text-center max-w-lg w-full shadow-sm">
                 <div className="w-28 h-28 bg-blue-100/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-6xl">🎁</span>
+                  <span className={`${type.hero}`}>🎁</span>
                 </div>
-                <p className="text-gray-700 font-medium mb-4 text-lg">Share your referral code and earn rewards!</p>
+                <p className={`${type.body} text-gray-700 mb-4`}>Share your referral code and earn rewards!</p>
                 <div className="bg-white p-4 rounded-xl flex items-center justify-center border border-blue-200 mb-6">
-                  <span className="font-mono text-2xl font-bold text-[#205EA9]">
+                  <span className={`${type.h2} font-mono`}>
                     {user?.name?.toUpperCase().replace(/\s/g, '')?.slice(0, 6) || 'FAIRY'}2024
                   </span>
                 </div>
-                <button className="bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-8 py-3.5 rounded-xl transition-colors font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                <button className={`${type.body} bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-8 py-3.5 rounded-xl transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`}>
                   Copy Code
                 </button>
               </div>
@@ -293,13 +294,13 @@ const Profile = () => {
           <div className="animate-fadeIn h-full flex flex-col justify-center items-center py-4">
 
             {updateSuccess && (
-              <div className="bg-blue-50 border border-blue-200 text-blue-600 px-4 py-2 rounded-xl mb-4 flex items-center justify-center gap-2 text-base max-w-lg mx-auto w-full">
+              <div className={`${type.input} bg-blue-50 border border-blue-200 text-blue-600 px-4 py-2 rounded-xl mb-4 flex items-center justify-center gap-2 max-w-lg mx-auto w-full`}>
                 <span>✓</span> {updateSuccess}
               </div>
             )}
 
             {updateError && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-xl mb-4 flex items-center justify-center gap-2 text-base max-w-lg mx-auto w-full">
+              <div className={`${type.input} bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-xl mb-4 flex items-center justify-center gap-2 max-w-lg mx-auto w-full`}>
                 <span>✕</span> {updateError}
               </div>
             )}
@@ -309,21 +310,21 @@ const Profile = () => {
                 {!isEditing ? (
                   <div className="space-y-4">
                     <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                      <label className="text-xs text-gray-500 uppercase font-bold tracking-wide">Full Name</label>
-                      <p className="text-gray-900 font-bold text-lg mt-0.5">{user?.name || 'Not set'}</p>
+                      <label className={`${type.caption} text-gray-500 uppercase tracking-wide`}>Full Name</label>
+                      <p className={`${type.body} text-gray-900 mt-0.5`}>{user?.name || 'Not set'}</p>
                     </div>
                     <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                      <label className="text-xs text-gray-500 uppercase font-bold tracking-wide">Email Address</label>
-                      <p className="text-gray-900 font-bold text-lg mt-0.5 break-all">{user?.email || 'Not set'}</p>
+                      <label className={`${type.caption} text-gray-500 uppercase tracking-wide`}>Email Address</label>
+                      <p className={`${type.body} text-gray-900 mt-0.5 break-all`}>{user?.email || 'Not set'}</p>
                     </div>
                     <div className="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                      <label className="text-xs text-gray-500 uppercase font-bold tracking-wide">Phone Number</label>
-                      <p className="text-gray-900 font-bold text-lg mt-0.5">{user?.phone || 'Not set'}</p>
+                      <label className={`${type.caption} text-gray-500 uppercase tracking-wide`}>Phone Number</label>
+                      <p className={`${type.body} text-gray-900 mt-0.5`}>{user?.phone || 'Not set'}</p>
                     </div>
                     <div className="text-center pt-2">
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="bg-[#205ea9] hover:bg-[#1d4f8f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        className={`${type.input} bg-[#205ea9] hover:bg-[#1d4f8f] text-white px-6 py-2 rounded-xl transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5`}
                       >
                         Edit Profile
                       </button>
@@ -332,36 +333,36 @@ const Profile = () => {
                 ) : (
                   <form onSubmit={handleUpdateProfile} className="space-y-3">
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">Full Name</label>
+                      <label className={`${type.caption} block text-gray-700 mb-1`}>Full Name</label>
                       <input
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none text-base transition-all"
+                        className={`${type.input} w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all`}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">Email Address</label>
+                      <label className={`${type.caption} block text-gray-700 mb-1`}>Email Address</label>
                       <input
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none text-base transition-all"
+                        className={`${type.input} w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all`}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-1">Phone Number</label>
+                      <label className={`${type.caption} block text-gray-700 mb-1`}>Phone Number</label>
                       <input
                         type="tel"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none text-base transition-all"
+                        className={`${type.input} w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all`}
                       />
                     </div>
                     <div className="flex flex-col sm:flex-row gap-3 pt-3 justify-center">
                       <button
                         type="submit"
-                        className="bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-6 py-2 rounded-xl transition-colors font-bold text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                        className={`${type.input} bg-[#205EA9] hover:bg-[#1d4f8f] text-white px-6 py-2 rounded-xl transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5`}
                       >
                         Save
                       </button>
@@ -371,7 +372,7 @@ const Profile = () => {
                           setIsEditing(false);
                           setUpdateError('');
                         }}
-                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl transition-colors font-bold text-base"
+                        className={`${type.input} bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-xl transition-colors`}
                       >
                         Cancel
                       </button>
@@ -403,13 +404,13 @@ const Profile = () => {
               <div className="p-5 text-center bg-gradient-to-b from-white to-[#fefce8]">
                 <div className="w-16 h-16 mx-auto mb-3 relative">
                   <div className="absolute inset-0 bg-[#fcd34d] rounded-full blur-md opacity-50"></div>
-                  <div className="relative bg-white rounded-full w-full h-full flex items-center justify-center border-2 border-[#fff7ed] shadow-inner text-2xl">
+                  <div className={`${type.bodySm} relative bg-white rounded-full w-full h-full flex items-center justify-center border-2 border-[#fff7ed] shadow-inner`}>
                     {user.name ? user.name.charAt(0).toUpperCase() : '👤'}
                   </div>
                   <div className="absolute bottom-0 right-0 bg-[#205EA9] w-4 h-4 rounded-full border border-white"></div>
                 </div>
-                <h1 className="text-lg font-bold text-gray-800 mb-0.5">Hi, {getFirstName(user.name)}</h1>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Pet Lover</p>
+                <h1 className={`${type.h4} text-gray-800 mb-0.5`}>Hi, {getFirstName(user.name)}</h1>
+                <p className={`${type.label} text-gray-500 uppercase tracking-wider`}>Pet Lover</p>
               </div>
 
               {/* Navigation Menu */}
@@ -426,7 +427,7 @@ const Profile = () => {
                     <span className={`p-2 rounded-xl ${activeTab === item.id ? 'bg-white/20' : 'bg-transparent'}`}>
                       {item.icon}
                     </span>
-                    <span className="font-semibold text-sm">{item.label}</span>
+                    <span className={`${type.bodySm}`}>{item.label}</span>
                     {activeTab === item.id && <ChevronRightIcon className="ml-auto w-4 h-4 text-white/80" />}
                   </button>
                 ))}
@@ -444,9 +445,9 @@ const Profile = () => {
                 <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-[#205EA9]/20 to-transparent rounded-full blur-3xl -ml-20 -mb-20" />
 
                 {/* Floating Paw Prints (Moved Inside) */}
-                <PawPrint className="absolute top-10 right-10 text-[#fcd34d]/30 w-14 h-14 rotate-12 animate-float" />
-                <PawPrint className="absolute bottom-20 left-10 text-[#205EA9]/30 w-20 h-20 -rotate-12 animate-float-delayed" />
-                <BoneIcon className="absolute top-1/2 left-[10%] text-[#fdba74]/20 w-10 h-10 rotate-45 animate-pulse-slow" />
+                <PawPrint className={`${type.bodySm} absolute top-10 right-10 w-14 h-14 rotate-12 animate-float`} />
+                <PawPrint className={`${type.bodySm} absolute bottom-20 left-10 w-20 h-20 -rotate-12 animate-float-delayed`} />
+                <BoneIcon className={`${type.bodySm} absolute top-1/2 left-[10%] w-10 h-10 rotate-45 animate-pulse-slow`} />
               </div>
               {/* Content Header Image/Banner */}
               <div className="h-32 bg-gradient-to-r from-[#fefce8] to-[#fff7ed] relative overflow-hidden">
@@ -454,7 +455,7 @@ const Profile = () => {
                 <div className="absolute top-0 left-0 w-full h-full opacity-30" style={{ backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%23fcd34d\" fill-opacity=\"0.4\" fill-rule=\"evenodd\"%3E%3Ccircle cx=\"3\" cy=\"3\" r=\"3\"/%3E%3Ccircle cx=\"13\" cy=\"13\" r=\"3\"/%3E%3C/g%3E%3C/svg%3E')" }}></div>
                 {/* Dynamic Header Title based on Tab */}
                 <div className="absolute bottom-0 left-0 p-8">
-                  <h2 className="text-3xl font-bold text-gray-800 capitalize tracking-tight">
+                  <h2 className={`${type.h1} text-gray-800 capitalize tracking-tight`}>
                     {menuItems.find(m => m.id === activeTab)?.label}
                   </h2>
                 </div>

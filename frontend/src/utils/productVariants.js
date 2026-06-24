@@ -64,6 +64,18 @@ export const getStartingVariant = (product) => {
   );
 };
 
+export const getDiscountPercent = (mrp, discountedPrice, productDiscountPercentage) => {
+  if (productDiscountPercentage) return Math.round(Number(productDiscountPercentage));
+  if (!mrp || mrp <= discountedPrice) return 0;
+  return Math.round(((mrp - discountedPrice) / mrp) * 100);
+};
+
+export const getProductDiscountPercent = (product, variant = null) => {
+  const row = variant || getStartingVariant(product);
+  if (!row) return 0;
+  return getDiscountPercent(row.mrp, row.discountedPrice, product?.discountPercentage);
+};
+
 export const getVariantKindLabel = (product) => {
   const variants = getProductVariants(product);
   if (!variants.length) return 'options';

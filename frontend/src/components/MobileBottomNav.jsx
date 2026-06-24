@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import type from '../styles/typography';
 
 const NAV_ITEMS = [
   { path: '/', label: 'Home', icon: HomeIcon },
@@ -47,7 +48,7 @@ export default function MobileBottomNav({ cartCount = 0, isLoggedIn = false, onC
                 className={linkClassName}
               >
                 <item.icon active={active} />
-                <span className="text-[11px] font-medium">{label}</span>
+                <span className={`${type.captionMedium} leading-normal`}>{label}</span>
               </button>
             );
           }
@@ -61,14 +62,14 @@ export default function MobileBottomNav({ cartCount = 0, isLoggedIn = false, onC
               {item.label === 'Cart' && cartCount > 0 ? (
                 <span className="relative inline-block">
                   <item.icon active={active} />
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                  <span className={`absolute -top-2 -right-2 bg-red-500 text-white ${type.captionMedium} w-4 h-4 rounded-full flex items-center justify-center leading-none`}>
                     {cartCount > 99 ? '99+' : cartCount}
                   </span>
                 </span>
               ) : (
                 <item.icon active={active} />
               )}
-              <span className="text-[11px] font-medium">{label}</span>
+              <span className={`${type.captionMedium} leading-normal`}>{label}</span>
             </Link>
           );
         })}

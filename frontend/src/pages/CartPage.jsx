@@ -5,6 +5,7 @@ import { getGuestCart, updateGuestCartItem, removeFromGuestCart, clearGuestCart,
 import { getApiBearerToken } from '../auth/session';
 import { formatRupee } from '../utils/formatPrice';
 import LoginRequiredModal from '../components/LoginRequiredModal';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -269,7 +270,7 @@ const CartPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#203D5B] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500 text-lg">Loading your cart...</p>
+          <p className={`text-gray-500 ${type.body}`}>Loading your cart...</p>
         </div>
       </div>
     );
@@ -280,7 +281,7 @@ const CartPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center">
           <p className="text-5xl mb-4">⚠️</p>
-          <h3 className="text-xl font-bold text-gray-800 mb-2">Something went wrong</h3>
+          <h3 className={`${type.h3} text-gray-800 mb-2`}>Something went wrong</h3>
           <p className="text-gray-500 mb-6">{error}</p>
           <button onClick={fetchCart} className="bg-[#203D5B] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-[#1a3149]">
             Try Again
@@ -294,21 +295,21 @@ const CartPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <section className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-6">
-          <nav className="mb-2 text-gray-400 text-sm flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <nav className={`mb-2 text-gray-400 ${type.bodySm} flex items-center gap-2`}>
             <Link to="/" className="hover:text-gray-700 transition-colors">Home</Link>
             <span>/</span>
             <span className="text-gray-900 font-medium">Cart</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3">
+          <h1 className={`${type.h1} text-gray-900 flex items-center gap-3`}>
             Shopping Cart
           </h1>
-          <p className="mt-1 text-gray-500 text-sm">{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart</p>
+          <p className={`mt-1 text-gray-500 ${type.bodySm}`}>{cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart</p>
         </div>
       </section>
 
       <section className="py-8">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           {cartItems.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -316,7 +317,7 @@ const CartPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Your cart is empty</h3>
+              <h3 className={`${type.h3} text-gray-800 mb-2`}>Your cart is empty</h3>
               <p className="text-gray-500 mb-6">Start adding products for your beloved pets!</p>
               <Link to="/" className="inline-block bg-gradient-to-r from-[#203D5B] to-[#1a3149] text-white font-bold py-3 px-8 rounded-xl hover:from-[#1a3149] hover:to-[#152639] transition-all">
                 Browse Products
@@ -327,10 +328,10 @@ const CartPage = () => {
               {/* Cart Items */}
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">Cart Items</h2>
+                  <h2 className={`${type.h2} text-gray-900`}>Cart Items</h2>
                   <button
                     onClick={clearCart}
-                    className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors"
+                    className={`${type.bodySm} text-red-500 hover:text-red-700 font-medium transition-colors`}
                   >
                     Clear Cart
                   </button>
@@ -368,19 +369,19 @@ const CartPage = () => {
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                                 {product.brand && (
-                                  <p className="text-xs font-semibold text-[#203D5B] uppercase tracking-wide">{product.brand}</p>
+                                  <p className={`${type.captionMedium} text-[#203D5B] uppercase tracking-wide`}>{product.brand}</p>
                                 )}
-                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${badge.color}`}>
+                                <span className={`${type.captionMedium} px-2 py-0.5 rounded-full border ${badge.color}`}>
                                   {badge.label}
                                 </span>
                               </div>
                               <Link to={`/product/${product._id}`}>
-                                <h3 className="font-bold text-gray-900 text-sm md:text-base leading-tight hover:text-[#203D5B] transition-colors line-clamp-2">
+                                <h3 className={`${type.cardTitle} text-gray-900 hover:text-[#203D5B] transition-colors line-clamp-2`}>
                                   {displayName}
                                 </h3>
                               </Link>
                               {pricing.label && (
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className={`${type.caption} text-gray-500 mt-1`}>
                                   {product.prices ? 'Size' : product.sizes ? 'Size' : product.variants ? 'Volume' : 'Size'}: {pricing.label}
                                 </p>
                               )}
@@ -419,11 +420,11 @@ const CartPage = () => {
                             </div>
 
                             <div className="text-right">
-                              <p className="text-lg font-bold text-gray-900">
+                              <p className={`${type.priceSm} text-gray-900`}>
                                 {formatRupee(pricing.discountedPrice * item.quantity)}
                               </p>
                               {pricing.mrp > pricing.discountedPrice && (
-                                <p className="text-xs text-gray-400 line-through">
+                                <p className={`${type.caption} text-gray-400 line-through`}>
                                   {formatRupee(pricing.mrp * item.quantity)}
                                 </p>
                               )}
@@ -439,9 +440,9 @@ const CartPage = () => {
               {/* Order Summary */}
               <div className="lg:w-96">
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm sticky top-24">
-                  <h3 className="text-lg font-bold text-gray-900 mb-5">Order Summary</h3>
+                  <h3 className={`${type.h3} text-gray-900 mb-5`}>Order Summary</h3>
 
-                  <div className="space-y-3 text-sm">
+                  <div className={`space-y-3 ${type.bodySm}`}>
                     
                     {savings > 0 && (
                       <div className="flex justify-between text-[#203D5B]">
@@ -455,14 +456,14 @@ const CartPage = () => {
                     </div>
                     <div className="flex justify-between text-gray-600">
                       <span>18% GST</span>
-                      <span className="text-gray-500 text-xs">Included</span>
+                      <span className={`text-gray-500 ${type.caption}`}>Included</span>
                     </div>
                     <div className="flex justify-between text-gray-600">
                       <span>Delivery Charges</span>
                       <div className="flex items-center gap-2">
                         {subtotal >= 500 ? (
                           <>
-                            <span className="text-gray-400 line-through text-xs">₹50</span>
+                            <span className={`text-gray-400 line-through ${type.caption}`}>₹50</span>
                             <span className="text-blue-600 font-medium">Free</span>
                           </>
                         ) : (
@@ -473,12 +474,12 @@ const CartPage = () => {
                   </div>
 
                   <div className="border-t border-gray-100 mt-4 pt-4">
-                    <div className="flex justify-between text-lg font-bold text-gray-900">
+                    <div className={`flex justify-between ${type.priceSm} text-gray-900`}>
                       <span>Total</span>
                       <span>{formatRupee(total)}</span>
                     </div>
                     {savings > 0 && (
-                      <p className="text-xs text-[#203D5B] mt-1">You're saving {formatRupee(savings)} on this order!</p>
+                      <p className={`${type.caption} text-[#203D5B] mt-1`}>You're saving {formatRupee(savings)} on this order!</p>
                     )}
                   </div>
 
@@ -490,14 +491,14 @@ const CartPage = () => {
                         navigate('/checkout');
                       }
                     }}
-                    className="w-full mt-6 bg-[#2f5a87] text-white font-bold py-3.5 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] active:scale-[0.98] transition-all text-sm"
+                    className={`w-full mt-6 bg-[#2f5a87] text-white font-bold py-3.5 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] active:scale-[0.98] transition-all ${type.button}`}
                   >
                     Proceed to Checkout
                   </button>
 
                   <Link
                     to="/"
-                    className="block w-full mt-3 text-center text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                    className={`block w-full mt-3 text-center ${type.bodySm} text-gray-500 hover:text-gray-700 font-medium transition-colors`}
                   >
                     Continue Shopping
                   </Link>

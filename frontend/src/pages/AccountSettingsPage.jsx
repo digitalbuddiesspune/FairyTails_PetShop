@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { clearUserSession } from '../auth/session';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -188,15 +189,15 @@ const AccountSettingsPage = () => {
           <div className="flex items-center gap-4">
             <img src={'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770976442/catt_na3yls.png'} alt="Cat" className="w-14 h-14 object-contain" />
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Account Settings</h1>
-              <p className="text-sm text-gray-400 mt-0.5">Manage your profile & addresses</p>
+              <h1 className={`${type.hero} md:text-3xl text-gray-900`}>Account Settings</h1>
+              <p className={`${type.bodySm} text-gray-400 mt-0.5`}>Manage your profile & addresses</p>
             </div>
           </div>
           <div>
             <button
               type="button"
               onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+              className={`${type.bodySm} bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors`}
             >
               Log Out
             </button>
@@ -210,13 +211,13 @@ const AccountSettingsPage = () => {
 
           {/* Success / Error Messages */}
           {updateSuccess && (
-            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl flex items-center gap-2 text-sm font-medium">
+            <div className={`${type.nav} bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl flex items-center gap-2`}>
               <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
               {updateSuccess}
             </div>
           )}
           {updateError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2 text-sm font-medium">
+            <div className={`${type.nav} bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2`}>
               <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               {updateError}
             </div>
@@ -226,12 +227,12 @@ const AccountSettingsPage = () => {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             {/* Avatar & Name Header */}
             <div className="bg-gradient-to-r from-[#fefce8] to-[#fff7ed] p-6 flex items-center gap-4 border-b border-gray-100">
-              <div className="w-16 h-16 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center text-2xl font-bold text-[#205EA9] shadow-sm">
+              <div className={`${type.h2} w-16 h-16 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center shadow-sm`}>
                 {user.name ? user.name.charAt(0).toUpperCase() : '👤'}
               </div>
               <div>
-                <h2 className="text-lg font-bold text-gray-900">{user.name || 'User'}</h2>
-                <p className="text-sm text-gray-500">{user.email}</p>
+                <h2 className={`${type.h4} text-gray-900`}>{user.name || 'User'}</h2>
+                <p className={`${type.bodySm} text-gray-500`}>{user.email}</p>
               </div>
             </div>
 
@@ -239,21 +240,21 @@ const AccountSettingsPage = () => {
               {!isEditing ? (
                 <div className="space-y-5">
                   <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Full Name</label>
-                    <p className="text-gray-900 font-semibold text-base mt-1">{user.name || 'Not set'}</p>
+                    <label className={`${type.caption} text-gray-400 uppercase tracking-wider`}>Full Name</label>
+                    <p className={`${type.input} text-gray-900 mt-1`}>{user.name || 'Not set'}</p>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
-                    <p className="text-gray-900 font-semibold text-base mt-1 break-all">{user.email || 'Not set'}</p>
+                    <label className={`${type.caption} text-gray-400 uppercase tracking-wider`}>Email Address</label>
+                    <p className={`${type.input} text-gray-900 mt-1 break-all`}>{user.email || 'Not set'}</p>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Phone Number</label>
-                    <p className="text-gray-900 font-semibold text-base mt-1">{user.phone || 'Not set'}</p>
+                    <label className={`${type.caption} text-gray-400 uppercase tracking-wider`}>Phone Number</label>
+                    <p className={`${type.input} text-gray-900 mt-1`}>{user.phone || 'Not set'}</p>
                   </div>
                   <div className="pt-3">
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="bg-[#2f5a87] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all shadow-md hover:shadow-lg"
+                      className={`${type.bodySm} bg-[#2f5a87] text-white px-6 py-2.5 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all shadow-md hover:shadow-lg`}
                     >
                       ✏️ Edit Profile
                     </button>
@@ -262,26 +263,26 @@ const AccountSettingsPage = () => {
               ) : (
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Full Name</label>
+                    <label className={`${type.caption} block text-gray-700 mb-1.5`}>Full Name</label>
                     <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all" />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Email Address</label>
+                    <label className={`${type.caption} block text-gray-700 mb-1.5`}>Email Address</label>
                     <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all" />
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Phone Number</label>
+                    <label className={`${type.caption} block text-gray-700 mb-1.5`}>Phone Number</label>
                     <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 focus:ring-4 focus:ring-[#205EA9]/20 focus:border-[#205EA9] outline-none transition-all" />
                   </div>
                   <div className="flex gap-3 pt-3">
-                    <button type="submit" className="bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all shadow-md hover:shadow-lg">
+                    <button type="submit" className={`${type.bodySm} bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white px-6 py-2.5 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all shadow-md hover:shadow-lg`}>
                       Save Changes
                     </button>
                     <button type="button" onClick={() => { setIsEditing(false); setUpdateError(''); }}
-                      className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-xl font-bold text-sm transition-colors">
+                      className={`${type.bodySm} bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2.5 rounded-xl transition-colors`}>
                       Cancel
                     </button>
                   </div>
@@ -294,26 +295,26 @@ const AccountSettingsPage = () => {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-gray-900">My Addresses</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{addresses.length} saved address{addresses.length !== 1 ? 'es' : ''}</p>
+                <h2 className={`${type.h4} text-gray-900`}>My Addresses</h2>
+                <p className={`${type.caption} text-gray-400 mt-0.5`}>{addresses.length} saved address{addresses.length !== 1 ? 'es' : ''}</p>
               </div>
               <button onClick={openAddAddr}
-                className="bg-[#2f5a87] text-white px-4 py-2 rounded-lg font-bold text-xs hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all">
+                className={`${type.caption} bg-[#2f5a87] text-white px-4 py-2 rounded-lg hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all`}>
                 + Add Address
               </button>
             </div>
 
             {addrMsg && (
-              <div className="mx-6 mt-4 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-lg text-xs font-medium">
+              <div className={`${type.captionMedium} mx-6 mt-4 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-2 rounded-lg`}>
                 {addrMsg}
               </div>
             )}
 
             <div className="p-6">
               {addrLoading ? (
-                <p className="text-gray-400 text-sm text-center py-4">Loading...</p>
+                <p className={`${type.bodySm} text-gray-400 text-center py-4`}>Loading...</p>
               ) : addresses.length === 0 ? (
-                <p className="text-gray-400 text-sm text-center py-6">No addresses saved yet.</p>
+                <p className={`${type.bodySm} text-gray-400 text-center py-6`}>No addresses saved yet.</p>
               ) : (
                 <div className="space-y-4">
                   {addresses.map((addr) => (
@@ -325,10 +326,10 @@ const AccountSettingsPage = () => {
                       }`}>
                         {addr.addressType === 'home' ? '🏠 Home' : '🏢 Work'}
                       </span>
-                      <h3 className="font-bold text-gray-900 text-sm">{addr.firstName} {addr.lastName}</h3>
-                      <p className="text-xs text-gray-600 leading-relaxed mt-1">{addr.streetAddress}</p>
-                      <p className="text-xs text-gray-600">{addr.city}, {addr.state} — {addr.pincode}</p>
-                      <p className="text-xs text-gray-400 mt-1.5">📞 {addr.phone}</p>
+                      <h3 className={`${type.bodySm} text-gray-900`}>{addr.firstName} {addr.lastName}</h3>
+                      <p className={`${type.body} text-gray-600 mt-1`}>{addr.streetAddress}</p>
+                      <p className={`${type.caption} text-gray-600`}>{addr.city}, {addr.state} — {addr.pincode}</p>
+                      <p className={`${type.caption} text-gray-400 mt-1.5`}>📞 {addr.phone}</p>
 
                       {/* Edit / Delete */}
                       <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -353,7 +354,7 @@ const AccountSettingsPage = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="font-bold text-gray-900">{editingAddrId ? 'Edit Address' : 'Add New Address'}</h3>
+              <h3 className={`${type.button} text-gray-900`}>{editingAddrId ? 'Edit Address' : 'Add New Address'}</h3>
               <button onClick={() => setShowAddrForm(false)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -370,48 +371,48 @@ const AccountSettingsPage = () => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1">First Name</label>
+                  <label className={`${type.caption} block text-gray-500 mb-1`}>First Name</label>
                   <input type="text" required value={addrForm.firstName} onChange={(e) => setAddrForm({ ...addrForm, firstName: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
+                    className={`${type.bodySm} w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-[#205EA9]`} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1">Last Name</label>
+                  <label className={`${type.caption} block text-gray-500 mb-1`}>Last Name</label>
                   <input type="text" required value={addrForm.lastName} onChange={(e) => setAddrForm({ ...addrForm, lastName: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
+                    className={`${type.bodySm} w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-[#205EA9]`} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1">Phone</label>
+                <label className={`${type.caption} block text-gray-500 mb-1`}>Phone</label>
                 <input type="tel" required value={addrForm.phone} onChange={(e) => setAddrForm({ ...addrForm, phone: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
+                  className={`${type.bodySm} w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-[#205EA9]`} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 mb-1">Street Address</label>
+                <label className={`${type.caption} block text-gray-500 mb-1`}>Street Address</label>
                 <input type="text" required value={addrForm.streetAddress} onChange={(e) => setAddrForm({ ...addrForm, streetAddress: e.target.value })}
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
+                  className={`${type.bodySm} w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-[#205EA9]`} />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1">City</label>
+                  <label className={`${type.caption} block text-gray-500 mb-1`}>City</label>
                   <input type="text" required value={addrForm.city} onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
+                    className={`${type.bodySm} w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-[#205EA9]`} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1">State</label>
+                  <label className={`${type.caption} block text-gray-500 mb-1`}>State</label>
                   <input type="text" required value={addrForm.state} onChange={(e) => setAddrForm({ ...addrForm, state: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
+                    className={`${type.bodySm} w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-[#205EA9]`} />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-500 mb-1">Pincode</label>
+                  <label className={`${type.caption} block text-gray-500 mb-1`}>Pincode</label>
                   <input type="text" required value={addrForm.pincode} onChange={(e) => setAddrForm({ ...addrForm, pincode: e.target.value })}
-                    className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg text-sm outline-none focus:border-[#205EA9]" />
+                    className={`${type.bodySm} w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg outline-none focus:border-[#205EA9]`} />
                 </div>
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="submit" className="flex-1 bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white py-2.5 rounded-lg font-bold text-sm">
+                <button type="submit" className={`${type.bodySm} flex-1 bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white py-2.5 rounded-lg`}>
                   {editingAddrId ? 'Update Address' : 'Save Address'}
                 </button>
-                <button type="button" onClick={() => setShowAddrForm(false)} className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-bold text-sm">
+                <button type="button" onClick={() => setShowAddrForm(false)} className={`${type.bodySm} px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg`}>
                   Cancel
                 </button>
               </div>

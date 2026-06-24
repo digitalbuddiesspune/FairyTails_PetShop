@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Plus, Edit2, X, Check, Star } from 'lucide-react';
+import { type } from '../../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -151,8 +152,8 @@ const AdminTestimonials = () => {
 
             {testimonials.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
-                    <span className="text-5xl mb-4 block">💬</span>
-                    <p className="text-gray-500 text-lg font-medium">No testimonials yet. Add one to get started.</p>
+                    <span className={`${type.hero} mb-4 block`}>💬</span>
+                    <p className={`${type.body} text-gray-500`}>No testimonials yet. Add one to get started.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -160,7 +161,7 @@ const AdminTestimonials = () => {
                         <div key={testimonial._id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex-1">
-                                    <h3 className="font-bold text-gray-900 text-sm mb-1">{testimonial.name}</h3>
+                                    <h3 className={`${type.bodySm} text-gray-900 mb-1`}>{testimonial.name}</h3>
                                     <div className="flex items-center gap-1 mb-2">
                                         {renderStars(testimonial.rating)}
                                     </div>
@@ -171,21 +172,21 @@ const AdminTestimonials = () => {
                                     {testimonial.isActive ? 'Active' : 'Inactive'}
                                 </span>
                             </div>
-                            <p className="text-sm text-gray-600 mb-3 line-clamp-4">{testimonial.comment}</p>
-                            <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                            <p className={`${type.bodySm} text-gray-600 mb-3 line-clamp-4`}>{testimonial.comment}</p>
+                            <div className={`${type.caption} flex items-center justify-between text-gray-500 mb-3`}>
                                 <span>Order: {testimonial.order}</span>
                             </div>
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => handleEdit(testimonial)}
-                                    className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm"
+                                    className={`${type.bodySm} flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors`}
                                 >
                                     <Edit2 size={14} />
                                     Edit
                                 </button>
                                 <button
                                     onClick={() => setDeleteConfirm(testimonial)}
-                                    className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-sm"
+                                    className={`${type.bodySm} flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors`}
                                 >
                                     <Trash2 size={14} />
                                     Delete
@@ -201,7 +202,7 @@ const AdminTestimonials = () => {
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => { setShowModal(false); resetForm(); }}>
                     <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                            <h3 className="text-xl font-bold text-gray-900">
+                            <h3 className={`${type.h3} text-gray-900`}>
                                 {editingTestimonial ? 'Edit Testimonial' : 'Add Testimonial'}
                             </h3>
                             <button
@@ -213,7 +214,7 @@ const AdminTestimonials = () => {
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                                     Customer Name *
                                 </label>
                                 <input
@@ -226,7 +227,7 @@ const AdminTestimonials = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                                     Comment/Testimonial *
                                 </label>
                                 <textarea
@@ -239,7 +240,7 @@ const AdminTestimonials = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                                     Rating (Stars) *
                                 </label>
                                 <div className="flex items-center gap-2">
@@ -256,12 +257,12 @@ const AdminTestimonials = () => {
                                             />
                                         </button>
                                     ))}
-                                    <span className="ml-2 text-sm text-gray-600">({formData.rating} stars)</span>
+                                    <span className={`${type.bodySm} ml-2 text-gray-600`}>({formData.rating} stars)</span>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                                         Display Order
                                     </label>
                                     <input
@@ -273,7 +274,7 @@ const AdminTestimonials = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    <label className={`${type.bodySm} block text-gray-700 mb-2`}>
                                         Status
                                     </label>
                                     <select
@@ -315,20 +316,20 @@ const AdminTestimonials = () => {
                             <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Trash2 className="w-7 h-7 text-red-500" />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Testimonial?</h3>
-                            <p className="text-sm text-gray-500 mb-6">
+                            <h3 className={`${type.h4} text-gray-900 mb-2`}>Delete Testimonial?</h3>
+                            <p className={`${type.bodySm} text-gray-500 mb-6`}>
                                 This will permanently delete this testimonial. This action cannot be undone.
                             </p>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setDeleteConfirm(null)}
-                                    className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors"
+                                    className={`${type.bodySm} flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors`}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={() => handleDelete(deleteConfirm._id)}
-                                    className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-sm transition-colors"
+                                    className={`${type.bodySm} flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors`}
                                 >
                                     Delete
                                 </button>

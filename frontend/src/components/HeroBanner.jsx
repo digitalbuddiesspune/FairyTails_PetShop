@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -66,7 +67,7 @@ const HeroBanner = () => {
     return (
       <section className="relative w-full overflow-hidden">
         <div className="w-full aspect-[1920/600] bg-gray-200 animate-pulse flex items-center justify-center">
-          <span className="text-gray-400">Loading banners...</span>
+          <span className={`${type.bodySm} text-gray-400`}>Loading banners...</span>
         </div>
       </section>
     );

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatRupee } from '../../utils/formatPrice';
+import { type } from '../../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -451,8 +452,8 @@ const AdminMyProducts = () => {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input type="text" placeholder="Search products..." value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-8 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm" />
-          {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">✕</button>}
+            className={`${type.bodySm} w-full pl-9 pr-8 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm`} />
+          {searchQuery && <button onClick={() => setSearchQuery('')} className={`${type.caption} absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600`}>✕</button>}
         </div>
 
         {/* ─── Pet Category + Sub Category Filters ─── */}
@@ -463,7 +464,7 @@ const AdminMyProducts = () => {
               setSelectedPetCategory(e.target.value);
               setSelectedSubCategory('all');
             }}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm"
+            className={`${type.bodySm} w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm`}
           >
             <option value="all">Select Pet Category (All)</option>
             {petCategoryOptions.map((pet) => (
@@ -478,7 +479,7 @@ const AdminMyProducts = () => {
               value={selectedSubCategory}
               onChange={(e) => setSelectedSubCategory(e.target.value)}
               disabled={selectedPetCategory === 'all'}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+              className={`${type.bodySm} w-full px-3 py-2 border border-gray-200 rounded-lg bg-white focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none shadow-sm disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed`}
             >
               <option value="all">
                 {selectedPetCategory === 'all' ? 'Select pet category first' : 'Select Sub Category (All)'}
@@ -523,15 +524,15 @@ const AdminMyProducts = () => {
 
         {/* Count + pagination (70 per page) */}
         <div className="mb-2 space-y-2">
-          <p className="text-xs text-gray-500">
+          <p className={`${type.caption} text-gray-500`}>
             {filtered.length === 0 ? (
               <>No products in this view</>
             ) : (
               <>
-                Showing <span className="font-semibold text-gray-800">{listRangeStart}</span>
+                Showing <span className={`${type.label} text-gray-800`}>{listRangeStart}</span>
                 –
-                <span className="font-semibold text-gray-800">{listRangeEnd}</span>
-                {' '}of <span className="font-semibold text-gray-800">{filtered.length}</span>
+                <span className={`${type.label} text-gray-800`}>{listRangeEnd}</span>
+                {' '}of <span className={`${type.label} text-gray-800`}>{filtered.length}</span>
                 {' '}(page {effectiveListPage} of {totalListPages}, {PRODUCTS_TABLE_PAGE_SIZE} per page)
                 {searchQuery && <span className="text-purple-600"> matching &ldquo;{searchQuery}&rdquo;</span>}
               </>
@@ -539,15 +540,15 @@ const AdminMyProducts = () => {
           </p>
           {filtered.length > PRODUCTS_TABLE_PAGE_SIZE && (
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm">
-              <span className="text-[11px] text-gray-500">
-                Page <span className="font-semibold text-gray-800">{effectiveListPage}</span> / {totalListPages}
+              <span className={`${type.bodySm} text-gray-500`}>
+                Page <span className={`${type.label} text-gray-800`}>{effectiveListPage}</span> / {totalListPages}
               </span>
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   disabled={effectiveListPage <= 1}
                   onClick={() => setListPage(1)}
-                  className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className={`${type.label} px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed`}
                 >
                   First
                 </button>
@@ -573,7 +574,7 @@ const AdminMyProducts = () => {
                   type="button"
                   disabled={effectiveListPage >= totalListPages}
                   onClick={() => setListPage(totalListPages)}
-                  className="px-2 py-1 rounded-md text-[11px] font-semibold border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className={`${type.label} px-2 py-1 rounded-md border border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed`}
                 >
                   Last
                 </button>
@@ -589,9 +590,9 @@ const AdminMyProducts = () => {
           <div className="flex justify-center py-16 sm:py-20"><div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin" /></div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12 sm:py-16 bg-white rounded-2xl border border-gray-200">
-            <span className="text-4xl sm:text-5xl block mb-3">📦</span>
-            <p className="text-gray-500 font-semibold text-base sm:text-lg">{searchQuery ? `No results for "${searchQuery}"` : 'No products found'}</p>
-            <p className="text-gray-400 text-xs sm:text-sm mt-1">{searchQuery ? 'Try different keywords' : 'Add products via the Add Product section'}</p>
+            <span className={`${type.hero} sm:text-5xl block mb-3`}>📦</span>
+            <p className={`${type.input} text-gray-500 sm:text-lg`}>{searchQuery ? `No results for "${searchQuery}"` : 'No products found'}</p>
+            <p className={`${type.bodySm} text-gray-400 sm:text-sm mt-1`}>{searchQuery ? 'Try different keywords' : 'Add products via the Add Product section'}</p>
           </div>
         ) : (
           <>
@@ -610,15 +611,15 @@ const AdminMyProducts = () => {
                     </div>
                     {/* Info */}
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 text-sm leading-tight truncate">{getName(product)}</p>
+                      <p className={`${type.bodySm} text-gray-900 truncate`}>{getName(product)}</p>
                       <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                        {getBrand(product) && <span className="text-[11px] text-gray-500">{getBrand(product)}</span>}
-                        {getPetCategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[#205EA9]/10 text-[#205EA9]">Category: {getPetCategory(product)}</span>}
-                        {getProductSubcategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-600">Sub: {getProductSubcategory(product)}</span>}
-                        {selectedKey === 'all' && <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">{product._catLabel}</span>}
+                        {getBrand(product) && <span className={`${type.bodySm} text-gray-500`}>{getBrand(product)}</span>}
+                        {getPetCategory(product) && <span className={`${type.nav} px-1.5 py-0.5 rounded-full bg-[#205EA9]/10`}>Category: {getPetCategory(product)}</span>}
+                        {getProductSubcategory(product) && <span className={`${type.nav} px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600`}>Sub: {getProductSubcategory(product)}</span>}
+                        {selectedKey === 'all' && <span className={`${type.label} px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600`}>{product._catLabel}</span>}
                       </div>
                       <div className="flex items-center gap-2 mt-1.5">
-                        <span className="font-bold text-gray-900 text-sm">{formatRupee(price.sale)}</span>
+                        <span className={`${type.bodySm} text-gray-900`}>{formatRupee(price.sale)}</span>
                         
                        
                       </div>
@@ -632,8 +633,8 @@ const AdminMyProducts = () => {
                         <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${stock > 10 ? 'bg-blue-50 text-blue-700' : stock > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
                           {stock} {stock === 0 ? '(Out)' : 'in stock'}
                         </span>
-                      ) : <span className="text-xs text-gray-400">—</span>}
-                      {getExpiry(product) !== '—' && <span className="text-[11px] text-gray-400">Exp: {getExpiry(product)}</span>}
+                      ) : <span className={`${type.caption} text-gray-400`}>—</span>}
+                      {getExpiry(product) !== '—' && <span className={`${type.bodySm} text-gray-400`}>Exp: {getExpiry(product)}</span>}
                     </div>
                     <div className="flex gap-1.5">
                       <button onClick={() => setDetailProduct(product)} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Details">
@@ -658,12 +659,12 @@ const AdminMyProducts = () => {
               <table className="w-full text-left">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Product</th>
-                    {selectedKey === 'all' && <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Type</th>}
-                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Price</th>
-                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Expiry</th>
-                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide">Stock</th>
-                    <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase tracking-wide text-center">Actions</th>
+                    <th className={`${type.label} px-3 py-2 text-gray-500 uppercase tracking-wide`}>Product</th>
+                    {selectedKey === 'all' && <th className={`${type.label} px-3 py-2 text-gray-500 uppercase tracking-wide`}>Type</th>}
+                    <th className={`${type.label} px-3 py-2 text-gray-500 uppercase tracking-wide`}>Price</th>
+                    <th className={`${type.label} px-3 py-2 text-gray-500 uppercase tracking-wide`}>Expiry</th>
+                    <th className={`${type.label} px-3 py-2 text-gray-500 uppercase tracking-wide`}>Stock</th>
+                    <th className={`${type.label} px-3 py-2 text-gray-500 uppercase tracking-wide text-center`}>Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -679,26 +680,26 @@ const AdminMyProducts = () => {
                               <img src={getImage(product)} alt="" className="w-full h-full object-contain" />
                             </div>
                             <div className="min-w-0">
-                              <p className="font-semibold text-gray-900 text-xs truncate max-w-[200px]">{getName(product)}</p>
+                              <p className={`${type.caption} text-gray-900 truncate max-w-[200px]`}>{getName(product)}</p>
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                {getBrand(product) && <span className="text-[10px] text-gray-500">{getBrand(product)}</span>}
-                                {getPetCategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-[#205EA9]/10 text-[#205EA9]">Category: {getPetCategory(product)}</span>}
-                                {getProductSubcategory(product) && <span className="px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-blue-50 text-blue-600">Sub: {getProductSubcategory(product)}</span>}
+                                {getBrand(product) && <span className={`${type.bodySm} text-gray-500`}>{getBrand(product)}</span>}
+                                {getPetCategory(product) && <span className={`${type.nav} px-1.5 py-0.5 rounded-full bg-[#205EA9]/10`}>Category: {getPetCategory(product)}</span>}
+                                {getProductSubcategory(product) && <span className={`${type.nav} px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600`}>Sub: {getProductSubcategory(product)}</span>}
                               </div>
                             </div>
                           </div>
                         </td>
                         {selectedKey === 'all' && (
                           <td className="px-3 py-2">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-gray-100 text-gray-600">{product._catLabel}</span>
+                            <span className={`${type.label} px-2 py-0.5 rounded-full bg-gray-100 text-gray-600`}>{product._catLabel}</span>
                           </td>
                         )}
                         <td className="px-3 py-2">
-                          <p className="font-bold text-gray-900 text-xs">{formatRupee(price.sale)}</p>
+                          <p className={`${type.caption} text-gray-900`}>{formatRupee(price.sale)}</p>
                         </td>
-                        <td className="px-3 py-2"><p className="text-xs text-gray-600">{getExpiry(product)}</p></td>
+                        <td className="px-3 py-2"><p className={`${type.caption} text-gray-600`}>{getExpiry(product)}</p></td>
                         <td className="px-3 py-2">
-                          {stock === '—' ? <span className="text-xs text-gray-400">—</span> : (
+                          {stock === '—' ? <span className={`${type.caption} text-gray-400`}>—</span> : (
                             <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${stock > 10 ? 'bg-blue-50 text-blue-700' : stock > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>
                               {stock} {stock === 0 ? '(Out)' : 'in stock'}
                             </span>
@@ -735,16 +736,16 @@ const AdminMyProducts = () => {
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Permanently Delete?</h3>
-            <p className="text-sm sm:text-base text-gray-500 mb-2">This action cannot be undone.</p>
-            <p className="text-sm text-gray-600 mb-6 bg-gray-50 rounded-lg py-2 px-3 border border-gray-200 truncate font-medium">{getName(deleteConfirm)}</p>
+            <h3 className={`${type.h3} sm:text-xl text-gray-900 mb-2`}>Permanently Delete?</h3>
+            <p className={`${type.bodySm} sm:text-base text-gray-500 mb-2`}>This action cannot be undone.</p>
+            <p className={`${type.bodySm} text-gray-600 mb-6 bg-gray-50 rounded-lg py-2 px-3 border border-gray-200 truncate`}>{getName(deleteConfirm)}</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteConfirm(null)} disabled={deleting}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors disabled:opacity-50">
+                className={`${type.bodySm} flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50`}>
                 Cancel
               </button>
               <button onClick={() => handleDelete(deleteConfirm)} disabled={deleting}
-                className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold text-sm transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                className={`${type.bodySm} flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2`}>
                 {deleting ? (
                   <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Deleting...</>
                 ) : (
@@ -759,7 +760,7 @@ const AdminMyProducts = () => {
       {/* Delete Success Toast */}
       {deleteSuccess && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[80] animate-slideDown">
-          <div className="bg-blue-600 text-white px-6 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 font-semibold text-sm">
+          <div className={`${type.bodySm} bg-blue-600 text-white px-6 py-3.5 rounded-xl shadow-2xl flex items-center gap-3`}>
             <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center shrink-0">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
             </div>
@@ -816,10 +817,10 @@ const ProductDetailModal = ({ product, onClose }) => {
       return (
         <div className="space-y-2 mt-1">
           {val.map((item, i) => (
-            <div key={i} className="bg-gray-50 rounded-lg p-3 border border-gray-200 text-sm">
+            <div key={i} className={`${type.bodySm} bg-gray-50 rounded-lg p-3 border border-gray-200`}>
               <div className="flex flex-wrap gap-x-4 gap-y-1">
                 {Object.entries(item).filter(([k]) => k !== '_id').map(([k, v]) => (
-                  <span key={k}><span className="font-medium text-gray-600">{formatKey(k)}:</span> <span className="text-gray-900">{String(v)}</span></span>
+                  <span key={k}><span className={`${type.nav} text-gray-600`}>{formatKey(k)}:</span> <span className="text-gray-900">{String(v)}</span></span>
                 ))}
               </div>
             </div>
@@ -835,7 +836,7 @@ const ProductDetailModal = ({ product, onClose }) => {
       return (
         <div className="flex flex-wrap gap-1.5 mt-1">
           {filtered.map((v, i) => (
-            <span key={i} className="inline-block px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium border border-purple-100">{String(v)}</span>
+            <span key={i} className={`${type.captionMedium} inline-block px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg border border-purple-100`}>{String(v)}</span>
           ))}
         </div>
       );
@@ -845,9 +846,9 @@ const ProductDetailModal = ({ product, onClose }) => {
     if (typeof val === 'object') {
       return (
         <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 mt-1">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
+          <div className={`${type.bodySm} grid grid-cols-2 sm:grid-cols-3 gap-2`}>
             {Object.entries(val).filter(([k]) => k !== '_id').map(([k, v]) => (
-              <div key={k}><span className="text-gray-500 text-xs">{formatKey(k)}</span><p className="font-medium text-gray-900">{String(v || '—')}</p></div>
+              <div key={k}><span className={`${type.caption} text-gray-500`}>{formatKey(k)}</span><p className={`${type.nav} text-gray-900`}>{String(v || '—')}</p></div>
             ))}
           </div>
         </div>
@@ -859,7 +860,7 @@ const ProductDetailModal = ({ product, onClose }) => {
 
     // Number
     if (typeof val === 'number') {
-      if (key.toLowerCase().includes('price') || key.toLowerCase().includes('mrp')) return <span className="font-semibold text-gray-900">{formatRupee(val)}</span>;
+      if (key.toLowerCase().includes('price') || key.toLowerCase().includes('mrp')) return <span className={`${type.label} text-gray-900`}>{formatRupee(val)}</span>;
       if (key.toLowerCase().includes('stock')) return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${val > 10 ? 'bg-blue-50 text-blue-700' : val > 0 ? 'bg-yellow-50 text-yellow-700' : 'bg-red-50 text-red-700'}`}>{val} {val === 0 ? '(Out of stock)' : 'in stock'}</span>;
       return <span>{val}</span>;
     }
@@ -881,9 +882,9 @@ const ProductDetailModal = ({ product, onClose }) => {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 sm:px-6 sm:py-4 border-b border-gray-200 shrink-0">
           <div className="min-w-0 flex-1 flex items-center gap-3">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{getName(product)}</h2>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-100 shrink-0">{catLabel}</span>
-            {getBrand(product) && <span className="text-sm text-gray-400 hidden sm:inline">by {getBrand(product)}</span>}
+            <h2 className={`${type.h3} sm:text-xl text-gray-900 truncate`}>{getName(product)}</h2>
+            <span className={`${type.captionMedium} px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-100 shrink-0`}>{catLabel}</span>
+            {getBrand(product) && <span className={`${type.bodySm} text-gray-400 hidden sm:inline`}>by {getBrand(product)}</span>}
           </div>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg shrink-0 ml-3 transition-colors">
             <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -895,7 +896,7 @@ const ProductDetailModal = ({ product, onClose }) => {
           {/* Images Gallery */}
           {images.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <h3 className={`${type.bodySm} text-gray-700 mb-2 flex items-center gap-2`}>
                 <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                 Images ({images.length})
               </h3>
@@ -917,17 +918,17 @@ const ProductDetailModal = ({ product, onClose }) => {
               return (
                 <div key={key} className={isWide ? 'sm:col-span-2 lg:col-span-3' : ''}>
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide shrink-0">{formatKey(key)}</label>
-                    {!isWide && <span className="text-sm font-medium">{renderValue(key, val)}</span>}
+                    <label className={`${type.captionMedium} text-gray-500 uppercase tracking-wide shrink-0`}>{formatKey(key)}</label>
+                    {!isWide && <span className={`${type.nav}`}>{renderValue(key, val)}</span>}
                   </div>
-                  {isWide && <div className="mt-1 text-sm">{renderValue(key, val)}</div>}
+                  {isWide && <div className={`${type.bodySm} mt-1`}>{renderValue(key, val)}</div>}
                 </div>
               );
             })}
           </div>
 
           {/* Timestamps */}
-          <div className="border-t border-gray-200 pt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-gray-400">
+          <div className={`${type.caption} border-t border-gray-200 pt-3 flex flex-wrap gap-x-6 gap-y-1 text-gray-400`}>
             {product.createdAt && <span>Created: {formatDate(product.createdAt)}</span>}
             {product.updatedAt && <span>Updated: {formatDate(product.updatedAt)}</span>}
             {product._id && <span>ID: {product._id}</span>}

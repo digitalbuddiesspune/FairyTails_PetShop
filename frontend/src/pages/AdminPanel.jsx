@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminMyProducts from './admin/AdminMyProducts';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -431,26 +432,26 @@ const AdminPanel = () => {
     <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center overflow-y-auto py-6 px-4">
       <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl relative">
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+          <h2 className={`${type.h3} text-gray-900`}>{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
           <button onClick={() => { setShowAddForm(false); setEditingProduct(null); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
         <form onSubmit={handleSubmitProduct} className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-          {formError && <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm font-medium border border-red-200">{formError}</div>}
-          {formSuccess && <div className="bg-blue-50 text-blue-600 px-4 py-3 rounded-xl text-sm font-medium border border-blue-200">{formSuccess}</div>}
+          {formError && <div className={`${type.nav} bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-200`}>{formError}</div>}
+          {formSuccess && <div className={`${type.nav} bg-blue-50 text-blue-600 px-4 py-3 rounded-xl border border-blue-200`}>{formSuccess}</div>}
 
           {/* Category selector (only when adding new) */}
           {!editingProduct && (
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Product Type *</label>
+              <label className={`${type.bodySm} block text-gray-700 mb-2`}>Product Type *</label>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                 {PRODUCT_CATEGORIES.map(cat => (
                   <button key={cat.key} type="button"
                     onClick={() => { setAddCategory(cat.key); setProductForm(getEmptyForm(cat.key)); }}
                     className={`px-3 py-2.5 rounded-xl text-xs font-semibold border-2 transition-all ${addCategory === cat.key ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'}`}>
-                    <span className="text-base block mb-0.5">{cat.icon}</span>
+                    <span className={`${type.input} block mb-0.5`}>{cat.icon}</span>
                     {cat.label}
                   </button>
                 ))}
@@ -463,9 +464,9 @@ const AdminPanel = () => {
 
         <div className="p-6 border-t border-gray-200 flex gap-3 justify-end">
           <button type="button" onClick={() => { setShowAddForm(false); setEditingProduct(null); }}
-            className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors">Cancel</button>
+            className={`${type.bodySm} px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors`}>Cancel</button>
           <button onClick={handleSubmitProduct}
-            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-medium text-sm transition-colors shadow-lg">
+            className={`${type.bodySm} px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl transition-colors shadow-lg`}>
             {editingProduct ? 'Update Product' : 'Add Product'}
           </button>
         </div>
@@ -482,11 +483,11 @@ const AdminPanel = () => {
         <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
         </div>
-        <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Product?</h3>
-        <p className="text-sm text-gray-500 mb-6">This will permanently delete <span className="font-semibold text-gray-700">"{deleteConfirm?._name}"</span>.</p>
+        <h3 className={`${type.h4} text-gray-900 mb-2`}>Delete Product?</h3>
+        <p className={`${type.bodySm} text-gray-500 mb-6`}>This will permanently delete <span className={`${type.label} text-gray-700`}>"{deleteConfirm?._name}"</span>.</p>
         <div className="flex gap-3">
-          <button onClick={() => setDeleteConfirm(null)} className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors">Cancel</button>
-          <button onClick={() => handleDeleteProduct(deleteConfirm)} className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-sm transition-colors">Delete</button>
+          <button onClick={() => setDeleteConfirm(null)} className={`${type.bodySm} flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors`}>Cancel</button>
+          <button onClick={() => handleDeleteProduct(deleteConfirm)} className={`${type.bodySm} flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors`}>Delete</button>
         </div>
       </div>
     </div>
@@ -500,7 +501,7 @@ const AdminPanel = () => {
       case 'dashboard':
         return (
           <div className="animate-fadeIn">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Dashboard Overview</h2>
+            <h2 className={`${type.h2} text-gray-900 mb-6`}>Dashboard Overview</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <StatCard title="Total Users" value={stats.totalUsers} icon="👥" color="bg-blue-50 border-blue-200" textColor="text-blue-600" />
               <StatCard title="Total Orders" value={stats.totalOrders} icon="📦" color="bg-blue-50 border-blue-200" textColor="text-blue-600" />
@@ -508,11 +509,11 @@ const AdminPanel = () => {
               <StatCard title="Revenue" value={`₹${stats.totalRevenue}`} icon="💰" color="bg-amber-50 border-amber-200" textColor="text-amber-600" />
             </div>
             <div className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
+              <h3 className={`${type.h4} text-gray-800 mb-4`}>Recent Activity</h3>
               <div className="text-center py-12 text-gray-400">
-                <span className="text-5xl mb-4 block">📊</span>
-                <p className="text-lg font-medium">No recent activity</p>
-                <p className="text-sm mt-1">Activity will appear here as your store grows</p>
+                <span className={`${type.hero} mb-4 block`}>📊</span>
+                <p className={`${type.body}`}>No recent activity</p>
+                <p className={`${type.bodySm} mt-1`}>Activity will appear here as your store grows</p>
               </div>
             </div>
           </div>
@@ -527,45 +528,45 @@ const AdminPanel = () => {
       case 'categories':
         return (
           <div className="animate-fadeIn">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Categories</h2>
+            <h2 className={`${type.h2} text-gray-900 mb-6`}>Categories</h2>
             <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-              <span className="text-5xl mb-4 block">📂</span>
-              <p className="text-gray-500 text-lg font-medium">No categories yet</p>
-              <p className="text-gray-400 text-sm mt-1">Organize your products into categories</p>
+              <span className={`${type.hero} mb-4 block`}>📂</span>
+              <p className={`${type.body} text-gray-500`}>No categories yet</p>
+              <p className={`${type.bodySm} text-gray-400 mt-1`}>Organize your products into categories</p>
             </div>
           </div>
         );
       case 'orders':
         return (
           <div className="animate-fadeIn">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Orders</h2>
+            <h2 className={`${type.h2} text-gray-900 mb-6`}>Orders</h2>
             <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-              <span className="text-5xl mb-4 block">📦</span>
-              <p className="text-gray-500 text-lg font-medium">No orders yet</p>
-              <p className="text-gray-400 text-sm mt-1">Orders will appear here when customers place them</p>
+              <span className={`${type.hero} mb-4 block`}>📦</span>
+              <p className={`${type.body} text-gray-500`}>No orders yet</p>
+              <p className={`${type.bodySm} text-gray-400 mt-1`}>Orders will appear here when customers place them</p>
             </div>
           </div>
         );
       case 'users':
         return (
           <div className="animate-fadeIn">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Users</h2>
+            <h2 className={`${type.h2} text-gray-900 mb-6`}>Users</h2>
             <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-              <span className="text-5xl mb-4 block">👥</span>
-              <p className="text-gray-500 text-lg font-medium">User management</p>
-              <p className="text-gray-400 text-sm mt-1">View and manage registered users</p>
+              <span className={`${type.hero} mb-4 block`}>👥</span>
+              <p className={`${type.body} text-gray-500`}>User management</p>
+              <p className={`${type.bodySm} text-gray-400 mt-1`}>View and manage registered users</p>
             </div>
           </div>
         );
       case 'settings':
         return (
           <div className="animate-fadeIn">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Settings</h2>
+            <h2 className={`${type.h2} text-gray-900 mb-6`}>Settings</h2>
             <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-lg">
-              <h3 className="font-semibold text-gray-800 mb-4">Admin Profile</h3>
+              <h3 className={`${type.label} text-gray-800 mb-4`}>Admin Profile</h3>
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <label className="text-xs text-gray-500 uppercase font-bold">Email</label>
-                <p className="text-gray-900 font-semibold">{admin?.email || 'N/A'}</p>
+                <label className={`${type.caption} text-gray-500 uppercase`}>Email</label>
+                <p className={`${type.label} text-gray-900`}>{admin?.email || 'N/A'}</p>
               </div>
             </div>
           </div>
@@ -586,15 +587,15 @@ const AdminPanel = () => {
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 flex flex-col h-screen lg:h-full shrink-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-5 border-b border-slate-700/50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center font-bold text-lg">🐾</div>
-            <div><h1 className="font-bold text-sm">FairyTails</h1><p className="text-xs text-slate-400">Admin Panel</p></div>
+            <div className={`${type.body} w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center`}>🐾</div>
+            <div><h1 className={`${type.bodySm}`}>FairyTails</h1><p className={`${type.caption} text-slate-400`}>Admin Panel</p></div>
           </div>
         </div>
 
         <div className="p-4 border-b border-slate-700/50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-purple-500/20 border border-purple-500/30 rounded-full flex items-center justify-center text-purple-300 font-bold text-sm">{admin.email?.charAt(0).toUpperCase()}</div>
-            <div className="flex-1 min-w-0"><p className="text-sm font-medium truncate">{admin.email}</p></div>
+            <div className={`${type.bodySm} w-9 h-9 bg-purple-500/20 border border-purple-500/30 rounded-full flex items-center justify-center text-purple-300`}>{admin.email?.charAt(0).toUpperCase()}</div>
+            <div className="flex-1 min-w-0"><p className={`${type.nav} truncate`}>{admin.email}</p></div>
           </div>
         </div>
 
@@ -643,7 +644,7 @@ const AdminPanel = () => {
         </nav>
 
         <div className="p-3 border-t border-slate-700/50">
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all">
+          <button onClick={handleLogout} className={`${type.nav} w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all`}>
             <LogoutIcon /> Log Out
           </button>
         </div>
@@ -656,11 +657,11 @@ const AdminPanel = () => {
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-gray-100">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
             </button>
-            <h1 className="text-lg font-bold text-gray-900 capitalize">{activeTab === 'myProducts' ? 'My Products' : activeTab}</h1>
+            <h1 className={`${type.h4} text-gray-900 capitalize`}>{activeTab === 'myProducts' ? 'My Products' : activeTab}</h1>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500 hidden sm:inline">Welcome, <span className="font-semibold text-gray-700">Admin</span></span>
-            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm">{admin.email?.charAt(0).toUpperCase()}</div>
+            <span className={`${type.bodySm} text-gray-500 hidden sm:inline`}>Welcome, <span className={`${type.label} text-gray-700`}>Admin</span></span>
+            <div className={`${type.bodySm} w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600`}>{admin.email?.charAt(0).toUpperCase()}</div>
           </div>
         </header>
         <main className={`flex-1 min-h-0 p-4 sm:p-6 ${activeTab === 'myProducts' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>{renderContent()}</main>
@@ -681,15 +682,15 @@ const AdminPanel = () => {
 
 const InputField = ({ label, required, ...props }) => (
   <div>
-    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}{required && ' *'}</label>
-    <input {...props} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm" />
+    <label className={`${type.bodySm} block text-gray-700 mb-1.5`}>{label}{required && ' *'}</label>
+    <input {...props} className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none`} />
   </div>
 );
 
 const SelectField = ({ label, required, options, ...props }) => (
   <div>
-    <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}{required && ' *'}</label>
-    <select {...props} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-sm bg-white">
+    <label className={`${type.bodySm} block text-gray-700 mb-1.5`}>{label}{required && ' *'}</label>
+    <select {...props} className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none bg-white`}>
       {options.map(o => <option key={o.value || o} value={o.value || o}>{o.label || o}</option>)}
     </select>
   </div>
@@ -698,14 +699,14 @@ const SelectField = ({ label, required, options, ...props }) => (
 const ArrayField = ({ label, field, values, onChange, onAdd, onRemove, placeholder }) => (
   <div>
     <div className="flex items-center justify-between mb-2">
-      <label className="text-sm font-semibold text-gray-700">{label}</label>
-      <button type="button" onClick={() => onAdd(field)} className="text-xs font-semibold text-purple-600 hover:text-purple-700">+ Add</button>
+      <label className={`${type.bodySm} text-gray-700`}>{label}</label>
+      <button type="button" onClick={() => onAdd(field)} className={`${type.captionMedium} text-purple-600 hover:text-purple-700`}>+ Add</button>
     </div>
     <div className="space-y-2">
       {values.map((val, i) => (
         <div key={i} className="flex gap-2 items-center">
           <input type="text" value={val} onChange={(e) => onChange(field, i, e.target.value)} placeholder={placeholder}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none" />
+            className={`${type.bodySm} flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none`} />
           {values.length > 1 && <button type="button" onClick={() => onRemove(field, i)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><XIcon /></button>}
         </div>
       ))}
@@ -727,12 +728,12 @@ const FoodForm = ({ form, onChange, onArrayChange, addItem, removeItem, onSizeCh
     <InputField label="Expiry Date" required type="date" value={form.expiryDate} onChange={e => onChange('expiryDate', e.target.value)} />
     {/* Prices */}
     <div>
-      <div className="flex items-center justify-between mb-2"><label className="text-sm font-semibold text-gray-700">Prices *</label><button type="button" onClick={() => addSizeRow('prices', { capacity: '', mrp: '', discountedPrice: '' })} className="text-xs font-semibold text-purple-600">+ Add Price</button></div>
+      <div className="flex items-center justify-between mb-2"><label className={`${type.bodySm} text-gray-700`}>Prices *</label><button type="button" onClick={() => addSizeRow('prices', { capacity: '', mrp: '', discountedPrice: '' })} className={`${type.captionMedium} text-purple-600`}>+ Add Price</button></div>
       {form.prices.map((p, i) => (
         <div key={i} className="flex gap-2 mb-2 items-center">
-          <input type="text" placeholder="Capacity" value={p.capacity} onChange={e => onSizeChange('prices', i, 'capacity', e.target.value)} className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
-          <input type="number" placeholder="MRP" value={p.mrp} onChange={e => onSizeChange('prices', i, 'mrp', e.target.value)} className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
-          <input type="number" placeholder="Sale Price" value={p.discountedPrice} onChange={e => onSizeChange('prices', i, 'discountedPrice', e.target.value)} className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-purple-500 outline-none" />
+          <input type="text" placeholder="Capacity" value={p.capacity} onChange={e => onSizeChange('prices', i, 'capacity', e.target.value)} className={`${type.bodySm} flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none`} />
+          <input type="number" placeholder="MRP" value={p.mrp} onChange={e => onSizeChange('prices', i, 'mrp', e.target.value)} className={`${type.bodySm} w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none`} />
+          <input type="number" placeholder="Sale Price" value={p.discountedPrice} onChange={e => onSizeChange('prices', i, 'discountedPrice', e.target.value)} className={`${type.bodySm} w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none`} />
           {form.prices.length > 1 && <button type="button" onClick={() => removeSizeRow('prices', i)} className="p-1 text-red-400 hover:text-red-600"><XIcon /></button>}
         </div>
       ))}
@@ -759,13 +760,13 @@ const ClothesForm = ({ form, onChange, onArrayChange, addItem, removeItem, onSiz
     </div>
     <InputField label="Material" type="text" value={form.material} onChange={e => onChange('material', e.target.value)} placeholder="e.g. Cotton" />
     <div>
-      <div className="flex items-center justify-between mb-2"><label className="text-sm font-semibold text-gray-700">Sizes *</label><button type="button" onClick={() => addSizeRow('sizes', { size: 'M', mrp: '', discountedPrice: '', availableStock: '' })} className="text-xs font-semibold text-purple-600">+ Add Size</button></div>
+      <div className="flex items-center justify-between mb-2"><label className={`${type.bodySm} text-gray-700`}>Sizes *</label><button type="button" onClick={() => addSizeRow('sizes', { size: 'M', mrp: '', discountedPrice: '', availableStock: '' })} className={`${type.captionMedium} text-purple-600`}>+ Add Size</button></div>
       {form.sizes.map((s, i) => (
         <div key={i} className="flex gap-2 mb-2 items-center">
-          <select value={s.size} onChange={e => onSizeChange('sizes', i, 'size', e.target.value)} className="w-20 px-2 py-2 border border-gray-300 rounded-lg text-sm bg-white"><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option></select>
-          <input type="number" placeholder="MRP" value={s.mrp} onChange={e => onSizeChange('sizes', i, 'mrp', e.target.value)} className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-          <input type="number" placeholder="Sale" value={s.discountedPrice} onChange={e => onSizeChange('sizes', i, 'discountedPrice', e.target.value)} className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-          <input type="number" placeholder="Stock" value={s.availableStock} onChange={e => onSizeChange('sizes', i, 'availableStock', e.target.value)} className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
+          <select value={s.size} onChange={e => onSizeChange('sizes', i, 'size', e.target.value)} className={`${type.bodySm} w-20 px-2 py-2 border border-gray-300 rounded-lg bg-white`}><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option></select>
+          <input type="number" placeholder="MRP" value={s.mrp} onChange={e => onSizeChange('sizes', i, 'mrp', e.target.value)} className={`${type.bodySm} w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+          <input type="number" placeholder="Sale" value={s.discountedPrice} onChange={e => onSizeChange('sizes', i, 'discountedPrice', e.target.value)} className={`${type.bodySm} w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+          <input type="number" placeholder="Stock" value={s.availableStock} onChange={e => onSizeChange('sizes', i, 'availableStock', e.target.value)} className={`${type.bodySm} w-20 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
           {form.sizes.length > 1 && <button type="button" onClick={() => removeSizeRow('sizes', i)} className="p-1 text-red-400"><XIcon /></button>}
         </div>
       ))}
@@ -815,16 +816,16 @@ const HouseForm = ({ form, onChange, onNestedChange, onArrayChange, addItem, rem
       <InputField label="Stock" required type="number" value={form.availableStock} onChange={e => onChange('availableStock', e.target.value)} />
     </div>
     <div>
-      <label className="text-sm font-semibold text-gray-700 mb-2 block">Dimensions</label>
+      <label className={`${type.bodySm} text-gray-700 mb-2 block`}>Dimensions</label>
       <div className="grid grid-cols-4 gap-2">
-        <input type="text" placeholder="Height" value={form.dimensions.height} onChange={e => onNestedChange('dimensions', 'height', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-        <input type="text" placeholder="Width" value={form.dimensions.width} onChange={e => onNestedChange('dimensions', 'width', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-        <input type="text" placeholder="Depth" value={form.dimensions.depth} onChange={e => onNestedChange('dimensions', 'depth', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-        <input type="text" placeholder="Weight" value={form.dimensions.weight} onChange={e => onNestedChange('dimensions', 'weight', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
+        <input type="text" placeholder="Height" value={form.dimensions.height} onChange={e => onNestedChange('dimensions', 'height', e.target.value)} className={`${type.bodySm} px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+        <input type="text" placeholder="Width" value={form.dimensions.width} onChange={e => onNestedChange('dimensions', 'width', e.target.value)} className={`${type.bodySm} px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+        <input type="text" placeholder="Depth" value={form.dimensions.depth} onChange={e => onNestedChange('dimensions', 'depth', e.target.value)} className={`${type.bodySm} px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+        <input type="text" placeholder="Weight" value={form.dimensions.weight} onChange={e => onNestedChange('dimensions', 'weight', e.target.value)} className={`${type.bodySm} px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
       </div>
     </div>
-    <div><label className="block text-sm font-semibold text-gray-700 mb-1.5">Description *</label>
-      <textarea value={form.description} onChange={e => onChange('description', e.target.value)} rows={3} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-500" /></div>
+    <div><label className={`${type.bodySm} block text-gray-700 mb-1.5`}>Description *</label>
+      <textarea value={form.description} onChange={e => onChange('description', e.target.value)} rows={3} className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500`} /></div>
     <InputField label="Image URL *" type="text" value={form.image} onChange={e => onChange('image', e.target.value)} placeholder="https://..." />
     <ArrayField label="Highlights" field="highlights" values={form.highlights} onChange={onArrayChange} onAdd={addItem} onRemove={removeItem} placeholder="Highlight..." />
   </div>
@@ -840,13 +841,13 @@ const AccessoryForm = ({ form, onChange, onArrayChange, addItem, removeItem, onS
     <SelectField label="For" required value={form.subCategory} onChange={e => onChange('subCategory', e.target.value)} options={['dog', 'cat']} />
     <InputField label="Material" type="text" value={form.material} onChange={e => onChange('material', e.target.value)} />
     <div>
-      <div className="flex items-center justify-between mb-2"><label className="text-sm font-semibold text-gray-700">Sizes *</label><button type="button" onClick={() => addSizeRow('sizes', { size: 'One Size', mrp: '', discountedPrice: '', availableStock: '' })} className="text-xs font-semibold text-purple-600">+ Add Size</button></div>
+      <div className="flex items-center justify-between mb-2"><label className={`${type.bodySm} text-gray-700`}>Sizes *</label><button type="button" onClick={() => addSizeRow('sizes', { size: 'One Size', mrp: '', discountedPrice: '', availableStock: '' })} className={`${type.captionMedium} text-purple-600`}>+ Add Size</button></div>
       {form.sizes.map((s, i) => (
         <div key={i} className="flex gap-2 mb-2 items-center">
-          <select value={s.size} onChange={e => onSizeChange('sizes', i, 'size', e.target.value)} className="w-24 px-2 py-2 border border-gray-300 rounded-lg text-sm bg-white"><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>One Size</option></select>
-          <input type="number" placeholder="MRP" value={s.mrp} onChange={e => onSizeChange('sizes', i, 'mrp', e.target.value)} className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-          <input type="number" placeholder="Sale" value={s.discountedPrice} onChange={e => onSizeChange('sizes', i, 'discountedPrice', e.target.value)} className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-          <input type="number" placeholder="Stock" value={s.availableStock} onChange={e => onSizeChange('sizes', i, 'availableStock', e.target.value)} className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
+          <select value={s.size} onChange={e => onSizeChange('sizes', i, 'size', e.target.value)} className={`${type.bodySm} w-24 px-2 py-2 border border-gray-300 rounded-lg bg-white`}><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>One Size</option></select>
+          <input type="number" placeholder="MRP" value={s.mrp} onChange={e => onSizeChange('sizes', i, 'mrp', e.target.value)} className={`${type.bodySm} w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+          <input type="number" placeholder="Sale" value={s.discountedPrice} onChange={e => onSizeChange('sizes', i, 'discountedPrice', e.target.value)} className={`${type.bodySm} w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+          <input type="number" placeholder="Stock" value={s.availableStock} onChange={e => onSizeChange('sizes', i, 'availableStock', e.target.value)} className={`${type.bodySm} w-20 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
           {form.sizes.length > 1 && <button type="button" onClick={() => removeSizeRow('sizes', i)} className="p-1 text-red-400"><XIcon /></button>}
         </div>
       ))}
@@ -869,16 +870,16 @@ const GroomingForm = ({ form, onChange, onArrayChange, addItem, removeItem, onSi
       <SelectField label="For" required value={form.subCategory} onChange={e => onChange('subCategory', e.target.value)} options={['dog', 'cat']} />
       <SelectField label="Suitable For" value={form.suitableFor} onChange={e => onChange('suitableFor', e.target.value)} options={['Dogs', 'Cats', 'Both']} />
     </div>
-    <div><label className="block text-sm font-semibold text-gray-700 mb-1.5">Description *</label>
-      <textarea value={form.description} onChange={e => onChange('description', e.target.value)} rows={3} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-500" /></div>
+    <div><label className={`${type.bodySm} block text-gray-700 mb-1.5`}>Description *</label>
+      <textarea value={form.description} onChange={e => onChange('description', e.target.value)} rows={3} className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500`} /></div>
     <div>
-      <div className="flex items-center justify-between mb-2"><label className="text-sm font-semibold text-gray-700">Variants *</label><button type="button" onClick={() => addSizeRow('variants', { volume: '', mrp: '', discountedPrice: '', discountPercentage: '', availableStock: '' })} className="text-xs font-semibold text-purple-600">+ Add Variant</button></div>
+      <div className="flex items-center justify-between mb-2"><label className={`${type.bodySm} text-gray-700`}>Variants *</label><button type="button" onClick={() => addSizeRow('variants', { volume: '', mrp: '', discountedPrice: '', discountPercentage: '', availableStock: '' })} className={`${type.captionMedium} text-purple-600`}>+ Add Variant</button></div>
       {form.variants.map((v, i) => (
         <div key={i} className="flex gap-2 mb-2 items-center flex-wrap">
-          <input type="text" placeholder="Volume" value={v.volume} onChange={e => onSizeChange('variants', i, 'volume', e.target.value)} className="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-          <input type="number" placeholder="MRP" value={v.mrp} onChange={e => onSizeChange('variants', i, 'mrp', e.target.value)} className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-          <input type="number" placeholder="Sale" value={v.discountedPrice} onChange={e => onSizeChange('variants', i, 'discountedPrice', e.target.value)} className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-          <input type="number" placeholder="Stock" value={v.availableStock} onChange={e => onSizeChange('variants', i, 'availableStock', e.target.value)} className="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
+          <input type="text" placeholder="Volume" value={v.volume} onChange={e => onSizeChange('variants', i, 'volume', e.target.value)} className={`${type.bodySm} w-24 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+          <input type="number" placeholder="MRP" value={v.mrp} onChange={e => onSizeChange('variants', i, 'mrp', e.target.value)} className={`${type.bodySm} w-20 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+          <input type="number" placeholder="Sale" value={v.discountedPrice} onChange={e => onSizeChange('variants', i, 'discountedPrice', e.target.value)} className={`${type.bodySm} w-20 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+          <input type="number" placeholder="Stock" value={v.availableStock} onChange={e => onSizeChange('variants', i, 'availableStock', e.target.value)} className={`${type.bodySm} w-20 px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
           {form.variants.length > 1 && <button type="button" onClick={() => removeSizeRow('variants', i)} className="p-1 text-red-400"><XIcon /></button>}
         </div>
       ))}
@@ -902,13 +903,13 @@ const EssentialForm = ({ form, onChange, onNestedChange, onArrayChange, addItem,
       <InputField label="Stock" required type="number" value={form.availableStock} onChange={e => onChange('availableStock', e.target.value)} />
     </div>
     <InputField label="Expiry Date" required type="date" value={form.expiryDate} onChange={e => onChange('expiryDate', e.target.value)} />
-    <div><label className="block text-sm font-semibold text-gray-700 mb-1.5">Description *</label>
-      <textarea value={form.description} onChange={e => onChange('description', e.target.value)} rows={3} className="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-500" /></div>
+    <div><label className={`${type.bodySm} block text-gray-700 mb-1.5`}>Description *</label>
+      <textarea value={form.description} onChange={e => onChange('description', e.target.value)} rows={3} className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-300 rounded-xl outline-none focus:ring-2 focus:ring-purple-500`} /></div>
     <div>
-      <label className="text-sm font-semibold text-gray-700 mb-2 block">Usage</label>
+      <label className={`${type.bodySm} text-gray-700 mb-2 block`}>Usage</label>
       <div className="grid grid-cols-2 gap-2">
-        <input type="text" placeholder="Dosage" value={form.usage.dosage} onChange={e => onNestedChange('usage', 'dosage', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
-        <input type="text" placeholder="Age Group" value={form.usage.ageGroup} onChange={e => onNestedChange('usage', 'ageGroup', e.target.value)} className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none" />
+        <input type="text" placeholder="Dosage" value={form.usage.dosage} onChange={e => onNestedChange('usage', 'dosage', e.target.value)} className={`${type.bodySm} px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
+        <input type="text" placeholder="Age Group" value={form.usage.ageGroup} onChange={e => onNestedChange('usage', 'ageGroup', e.target.value)} className={`${type.bodySm} px-3 py-2 border border-gray-300 rounded-lg outline-none`} />
       </div>
     </div>
     <InputField label="Image URL *" type="text" value={form.image} onChange={e => onChange('image', e.target.value)} placeholder="https://..." />
@@ -922,8 +923,8 @@ const EssentialForm = ({ form, onChange, onNestedChange, onArrayChange, addItem,
 
 const StatCard = ({ title, value, icon, color, textColor }) => (
   <div className={`${color} border rounded-2xl p-5`}>
-    <div className="flex items-center justify-between mb-3"><span className="text-3xl">{icon}</span><span className={`text-2xl font-bold ${textColor}`}>{value}</span></div>
-    <p className="text-gray-600 text-sm font-medium">{title}</p>
+    <div className="flex items-center justify-between mb-3"><span className={`${type.bodySm}`}>{icon}</span><span className={`text-2xl font-bold ${textColor}`}>{value}</span></div>
+    <p className={`${type.nav} text-gray-600`}>{title}</p>
   </div>
 );
 

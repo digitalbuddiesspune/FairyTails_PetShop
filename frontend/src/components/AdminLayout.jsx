@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { type } from '../styles/typography';
 import {
     LayoutDashboard,
     Package,
@@ -174,8 +175,8 @@ const AdminLayout = () => {
                             <PawPrint size={24} />
                         </div>
                         <div>
-                            <h1 className="font-bold text-sm">FairyTails</h1>
-                            <p className="text-xs text-slate-400">Admin Panel</p>
+                            <h1 className={`${type.bodySm}`}>FairyTails</h1>
+                            <p className={`${type.caption} text-slate-400`}>Admin Panel</p>
                         </div>
                     </div>
                 </div>
@@ -188,7 +189,7 @@ const AdminLayout = () => {
                         {/* Dashboard */}
                         <button
                             onClick={() => { navigate('/admin/dashboard'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${type.nav} transition-all ${
                                 location.pathname === '/admin/dashboard'
                                     ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -202,7 +203,7 @@ const AdminLayout = () => {
                         <div>
                             <button
                                 onClick={() => setProductsOpen(!productsOpen)}
-                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl ${type.nav} transition-all ${
                                     isProductPage
                                         ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                         : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -220,7 +221,7 @@ const AdminLayout = () => {
                                 <div className="ml-4 space-y-1">
                                     <button
                                         onClick={() => { navigate('/admin/my-products'); setSidebarOpen(false); }}
-                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl ${type.nav} transition-all ${
                                             location.pathname === '/admin/my-products'
                                                 ? 'bg-purple-500/10 text-purple-300'
                                                 : 'text-slate-500 hover:bg-slate-800 hover:text-white'
@@ -231,7 +232,7 @@ const AdminLayout = () => {
                                     </button>
                                     <button
                                         onClick={() => { navigate('/admin/products'); setSidebarOpen(false); }}
-                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl ${type.nav} transition-all ${
                                             location.pathname === '/admin/products'
                                                 ? 'bg-purple-500/10 text-purple-300'
                                                 : 'text-slate-500 hover:bg-slate-800 hover:text-white'
@@ -247,7 +248,7 @@ const AdminLayout = () => {
                         {/* Categories */}
                         <button
                             onClick={() => { navigate('/admin/categories'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${type.nav} transition-all ${
                                 location.pathname === '/admin/categories'
                                     ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -260,7 +261,7 @@ const AdminLayout = () => {
                         {/* Orders */}
                         <button
                             onClick={() => { navigate('/admin/orders'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${type.nav} transition-all ${
                                 location.pathname === '/admin/orders'
                                     ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -273,7 +274,7 @@ const AdminLayout = () => {
                         {/* Payments */}
                         <button
                             onClick={() => { navigate('/admin/payments'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${type.nav} transition-all ${
                                 location.pathname === '/admin/payments'
                                     ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -288,7 +289,7 @@ const AdminLayout = () => {
                         {/* Users */}
                         <button
                             onClick={() => { navigate('/admin/users'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${type.nav} transition-all ${
                                 location.pathname === '/admin/users'
                                     ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -301,7 +302,7 @@ const AdminLayout = () => {
                         {/* Banner */}
                         <button
                             onClick={() => { navigate('/admin/banner'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${type.nav} transition-all ${
                                 location.pathname === '/admin/banner'
                                     ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -314,7 +315,7 @@ const AdminLayout = () => {
                         {/* Testimonials */}
                         <button
                             onClick={() => { navigate('/admin/testimonials'); setSidebarOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl ${type.nav} transition-all ${
                                 location.pathname === '/admin/testimonials'
                                     ? 'bg-purple-500/20 text-purple-300 border border-purple-500/20'
                                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
@@ -330,7 +331,7 @@ const AdminLayout = () => {
                         {/* Visit Site */}
                         <button
                             onClick={() => { window.open('/', '_blank'); }}
-                            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-all"
+                            className={`${type.nav} w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white transition-all`}
                         >
                             <ExternalLink size={20} />
                             Visit Site
@@ -342,7 +343,7 @@ const AdminLayout = () => {
                 <div className="p-3 border-t border-slate-700/50">
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all"
+                        className={`${type.nav} w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all`}
                     >
                         <LogOut size={20} />
                         Log Out
@@ -363,7 +364,7 @@ const AdminLayout = () => {
                             <Menu size={20} className="text-gray-600" />
                         </button>
                         {!hideTopTitleAndProfile && (
-                            <h1 className="text-lg font-bold text-gray-900 truncate">
+                            <h1 className={`${type.h4} text-gray-900 truncate`}>
                                 {getPageTitle()}
                             </h1>
                         )}
@@ -373,7 +374,7 @@ const AdminLayout = () => {
                             <button
                                 type="button"
                                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                                className="w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-sm hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer"
+                                className={`${type.bodySm} w-9 h-9 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 hover:ring-2 hover:ring-purple-300 transition-all cursor-pointer`}
                             >
                                 {admin.email?.charAt(0).toUpperCase()}
                             </button>
@@ -383,19 +384,19 @@ const AdminLayout = () => {
                                 <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50 animate-fadeIn">
                                     <div className="px-4 py-3 border-b border-gray-100">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-lg">
+                                            <div className={`${type.body} w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600`}>
                                                 {admin.email?.charAt(0).toUpperCase()}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <p className="text-sm font-semibold text-gray-800">Admin</p>
-                                                <p className="text-xs text-gray-500 truncate">{admin.email}</p>
+                                                <p className={`${type.bodySm} text-gray-800`}>Admin</p>
+                                                <p className={`${type.caption} text-gray-500 truncate`}>{admin.email}</p>
                                             </div>
                                         </div>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => { setProfileDropdownOpen(false); setShowPasswordModal(true); setPwError(''); setPwSuccess(''); }}
-                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                        className={`${type.bodySm} w-full flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:bg-gray-50 transition-colors`}
                                     >
                                         <Lock size={16} className="text-gray-400" />
                                         Change Password
@@ -404,7 +405,7 @@ const AdminLayout = () => {
                                         <button
                                             type="button"
                                             onClick={handleLogout}
-                                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                            className={`${type.bodySm} w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors`}
                                         >
                                             <LogOut size={16} />
                                             Log Out
@@ -424,18 +425,18 @@ const AdminLayout = () => {
                                 <div className="p-2 bg-purple-100 rounded-xl">
                                     <Lock size={20} className="text-purple-600" />
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-800">Change Password</h3>
+                                <h3 className={`${type.h4} text-gray-800`}>Change Password</h3>
                             </div>
 
                             <div className="space-y-4">
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Current Password</label>
+                                    <label className={`${type.captionMedium} text-gray-500 uppercase mb-1 block`}>Current Password</label>
                                     <div className="relative">
                                         <input
                                             type={showCurrentPw ? 'text' : 'password'}
                                             value={currentPassword}
                                             onChange={(e) => setCurrentPassword(e.target.value)}
-                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10"
+                                            className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10`}
                                             placeholder="Enter current password"
                                         />
                                         <button type="button" onClick={() => setShowCurrentPw(!showCurrentPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -444,13 +445,13 @@ const AdminLayout = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">New Password</label>
+                                    <label className={`${type.captionMedium} text-gray-500 uppercase mb-1 block`}>New Password</label>
                                     <div className="relative">
                                         <input
                                             type={showNewPw ? 'text' : 'password'}
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
-                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10"
+                                            className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10`}
                                             placeholder="Enter new password"
                                         />
                                         <button type="button" onClick={() => setShowNewPw(!showNewPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -459,13 +460,13 @@ const AdminLayout = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-semibold text-gray-500 uppercase mb-1 block">Confirm New Password</label>
+                                    <label className={`${type.captionMedium} text-gray-500 uppercase mb-1 block`}>Confirm New Password</label>
                                     <div className="relative">
                                         <input
                                             type={showConfirmPw ? 'text' : 'password'}
                                             value={confirmPassword}
                                             onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10"
+                                            className={`${type.bodySm} w-full px-4 py-2.5 border border-gray-200 rounded-xl outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-100 pr-10`}
                                             placeholder="Confirm new password"
                                         />
                                         <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -474,21 +475,21 @@ const AdminLayout = () => {
                                     </div>
                                 </div>
 
-                                {pwError && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{pwError}</p>}
-                                {pwSuccess && <p className="text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">{pwSuccess}</p>}
+                                {pwError && <p className={`${type.bodySm} text-red-600 bg-red-50 px-3 py-2 rounded-lg`}>{pwError}</p>}
+                                {pwSuccess && <p className={`${type.bodySm} text-blue-600 bg-blue-50 px-3 py-2 rounded-lg`}>{pwSuccess}</p>}
                             </div>
 
                             <div className="flex gap-3 mt-6">
                                 <button
                                     onClick={() => { setShowPasswordModal(false); setCurrentPassword(''); setNewPassword(''); setConfirmPassword(''); setPwError(''); setPwSuccess(''); }}
-                                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                                    className={`${type.nav} flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors`}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleChangePassword}
                                     disabled={pwLoading}
-                                    className="flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+                                    className={`${type.nav} flex-1 px-4 py-2.5 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors disabled:opacity-50`}
                                 >
                                     {pwLoading ? 'Updating...' : 'Update Password'}
                                 </button>

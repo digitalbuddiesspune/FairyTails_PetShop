@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -72,15 +73,15 @@ const AdminSignIn = () => {
       <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8 animate-fadeInDown">
           <div className="inline-block p-4 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 mb-4 shadow-2xl">
-            <span className="text-4xl">🐾</span>
+            <span className={`${type.hero}`}>🐾</span>
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">Welcome Back</h2>
+          <h2 className={`${type.h1} text-white tracking-tight`}>Welcome Back</h2>
           <p className="text-slate-400 mt-2">Sign in to manage FairyTails</p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-2xl rounded-3xl shadow-2xl p-8 border border-white/10 animate-fadeInUp">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-3 rounded-xl text-sm mb-6 flex items-center gap-2">
+            <div className={`${type.bodySm} bg-red-500/10 border border-red-500/20 text-red-200 px-4 py-3 rounded-xl mb-6 flex items-center gap-2`}>
               <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               {error}
             </div>
@@ -88,7 +89,7 @@ const AdminSignIn = () => {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2 ml-1">Email Address</label>
+              <label className={`${type.label} block text-slate-300 mb-2 ml-1`}>Email Address</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
@@ -106,7 +107,7 @@ const AdminSignIn = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2 ml-1">Password</label>
+              <label className={`${type.label} block text-slate-300 mb-2 ml-1`}>Password</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <svg className="h-5 w-5 text-slate-500 group-focus-within:text-purple-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
@@ -137,7 +138,7 @@ const AdminSignIn = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-lg shadow-purple-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className={`${type.button} w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl shadow-lg shadow-purple-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
             >
               {loading ? (
                 <><svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Signing In...</>
@@ -149,13 +150,13 @@ const AdminSignIn = () => {
         </div>
 
         <div className="mt-6 text-center animate-fadeInUp delay-200">
-          <p className="text-slate-500 text-xs max-w-sm mx-auto">
+          <p className={`${type.caption} text-slate-500 max-w-sm mx-auto`}>
             If you get &quot;Invalid email or password&quot;, use an existing admin account or create one via{' '}
             <code className="bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">POST /api/v1/admin/signup</code> (e.g. Postman).
           </p>
         </div>
         <div className="mt-6 text-center animate-fadeInUp delay-200">
-          <p className="text-slate-500 text-sm">
+          <p className={`${type.bodySm} text-slate-500`}>
             &copy; {new Date().getFullYear()} FairyTails. All rights reserved.
           </p>
         </div>

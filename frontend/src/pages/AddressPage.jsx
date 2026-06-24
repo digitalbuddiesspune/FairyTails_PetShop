@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import cattImage from '../assets/catt.png';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -64,7 +65,7 @@ const AddressPage = () => {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-lg">Loading your addresses...</p>
+          <p className={`${type.body} text-gray-500`}>Loading your addresses...</p>
         </div>
       </div>
     );
@@ -94,8 +95,8 @@ const AddressPage = () => {
         <div className="flex items-center gap-4">
           <img src={cattImage} alt="Cat" className="w-14 h-14 object-contain" />
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Addresses</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{addresses.length} saved address{addresses.length !== 1 ? 'es' : ''}</p>
+            <h1 className={`${type.hero} md:text-3xl text-gray-900`}>My Addresses</h1>
+            <p className={`${type.bodySm} text-gray-400 mt-0.5`}>{addresses.length} saved address{addresses.length !== 1 ? 'es' : ''}</p>
           </div>
         </div>
       </div>
@@ -106,11 +107,11 @@ const AddressPage = () => {
           {addresses.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-4xl">📍</span>
+                <span className={`${type.hero}`}>📍</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">No addresses saved</h3>
+              <h3 className={`${type.h3} text-gray-800 mb-2`}>No addresses saved</h3>
               <p className="text-gray-500 mb-6">Add an address during checkout to see it here.</p>
-              <Link to="/checkout" className="inline-block bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white font-bold py-3 px-8 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all">
+              <Link to="/checkout" className={`${type.button} inline-block bg-gradient-to-r from-[#205EA9] to-[#1d4f8f] text-white py-3 px-8 rounded-xl hover:from-[#1d4f8f] hover:to-[#203D5B] transition-all`}>
                 + Add New Address
               </Link>
             </div>
@@ -127,10 +128,10 @@ const AddressPage = () => {
                     {addr.addressType === 'home' ? '🏠 Home' : '🏢 Work'}
                   </span>
 
-                  <h3 className="font-bold text-gray-900 text-base mb-1">{addr.firstName} {addr.lastName}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{addr.streetAddress}</p>
-                  <p className="text-sm text-gray-600">{addr.city}, {addr.state} — {addr.pincode}</p>
-                  <p className="text-sm text-gray-400 mt-2 flex items-center gap-1.5">
+                  <h3 className={`${type.input} text-gray-900 mb-1`}>{addr.firstName} {addr.lastName}</h3>
+                  <p className={`${type.body} text-gray-600`}>{addr.streetAddress}</p>
+                  <p className={`${type.bodySm} text-gray-600`}>{addr.city}, {addr.state} — {addr.pincode}</p>
+                  <p className={`${type.bodySm} text-gray-400 mt-2 flex items-center gap-1.5`}>
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                     {addr.phone}
                   </p>

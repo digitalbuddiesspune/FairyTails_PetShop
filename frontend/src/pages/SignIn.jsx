@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -91,13 +92,13 @@ const SignIn = () => {
         {/* Logo/Header */}
         <div className="text-center mb-8">
 
-          <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+          <h2 className={`${type.h2} text-gray-900`}>Welcome Back</h2>
 
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm mb-4">
+          <div className={`bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl ${type.bodySm} mb-4`}>
             {error}
           </div>
         )}
@@ -105,20 +106,20 @@ const SignIn = () => {
         {/* Form */}
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+            <label className={`block ${type.label} text-gray-700 mb-2`}>Email Address</label>
             <input
               name="email"
               type="email"
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all"
+              className={`w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all ${type.input}`}
               placeholder="Enter your email"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <label className={`block ${type.label} text-gray-700 mb-2`}>Password</label>
             <div className="relative">
               <input
                 name="password"
@@ -126,7 +127,7 @@ const SignIn = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all pr-12"
+                className={`w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-[#205EA9] focus:border-transparent outline-none transition-all pr-12 ${type.input}`}
                 placeholder="Enter your password"
               />
               <button
@@ -142,7 +143,7 @@ const SignIn = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#205EA9] hover:bg-[#1d4f8f] text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+            className={`w-full py-3 bg-[#205EA9] hover:bg-[#1d4f8f] text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-xl ${type.button}`}
           >
             {loading ? (
               <>
@@ -160,15 +161,15 @@ const SignIn = () => {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-200"></div>
           </div>
-          <div className="relative flex justify-center text-sm">
+          <div className={`relative flex justify-center ${type.bodySm}`}>
             <span className="px-3 bg-white text-gray-500">or</span>
           </div>
         </div>
 
         {/* Sign Up Link */}
-        <p className="text-center text-gray-600">
+        <p className={`text-center text-gray-600 ${type.body}`}>
           Don't have an account?{' '}
-          <Link to="/signup" className="font-semibold text-[#205EA9] hover:text-[#1d4f8f]">
+          <Link to="/signup" className={`${type.button} text-[#205EA9] hover:text-[#1d4f8f]`}>
             Sign Up
           </Link>
         </p>

@@ -8,11 +8,10 @@ import { getProductVariants } from '../utils/productVariants';
 import { useCartQuantity } from '../hooks/useCartQuantity';
 import CartQuantityControl from '../components/CartQuantityControl';
 import LoginRequiredModal from '../components/LoginRequiredModal';
+import ProductCard from '../components/ProductCard';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
-
-const DOG_ICON = 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457891/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_vzgzug.svg';
-const CAT_ICON = 'https://res.cloudinary.com/dfhjtmvrz/image/upload/v1770457890/Untitled_900_x_600_px_900_x_600_px_1040_x_1100_px_1_q3xxat.svg';
 
 // All product API endpoints to search across
 const PRODUCT_ENDPOINTS = [
@@ -36,15 +35,30 @@ const ENDPOINT_TO_MODEL = {
   '/houses': 'House',
 };
 
-// Map product category → category page slug for breadcrumbs
-const categoryToSlug = {
-  'Dog': 'dogs',
-  'Cat': 'cats',
-  'Toy': 'toys',
-  'accessories': 'accessories',
-  'grooming-essentials': 'grooming-and-essential',
-  'health-supplement': 'health-and-supplement',
-  'house': 'beds-and-house',
+const SIMILAR_PRODUCT_LIMIT = 10;
+
+const buildSimilarQueryParams = (product, endpoint) => {
+  const params = { limit: 20, page: 1 };
+  if (!product) return params;
+
+  if (endpoint === '/food' || endpoint === '/clothes') {
+    if (product.category) params.category = product.category;
+    if (product.subCategory) params.subCategory = product.subCategory;
+  } else if (endpoint === '/toys') {
+    const sub = product.subCategory || product.category;
+    if (sub) params.subCategory = sub;
+  } else if (endpoint === '/accessories') {
+    if (product.subCategory) params.subCategory = product.subCategory;
+    if (product.productType) params.productType = product.productType;
+  } else if (
+    endpoint === '/grooming-essentials' ||
+    endpoint === '/health-supplements' ||
+    endpoint === '/houses'
+  ) {
+    if (product.subCategory) params.subCategory = product.subCategory;
+  }
+
+  return params;
 };
 
 const ProductDetail = () => {
@@ -61,6 +75,11 @@ const ProductDetail = () => {
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [authEpoch, setAuthEpoch] = useState(0);
+  const [similarProducts, setSimilarProducts] = useState([]);
+  const [similarLoading, setSimilarLoading] = useState(false);
+  const [wishlistIds, setWishlistIds] = useState([]);
+  const [sharing, setSharing] = useState(false);
+  const [shareFeedback, setShareFeedback] = useState('');
 
   useEffect(() => {
     const onAuth = () => setAuthEpoch((e) => e + 1);
@@ -186,6 +205,39 @@ const ProductDetail = () => {
     }
   };
 
+  const handleShareProduct = async () => {
+    if (!product) return;
+    const name = product.productName || product.name || 'Product';
+    const url = window.location.href;
+
+    setSharing(true);
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: name,
+          text: `Check out ${name} on FairyTails Pet Shop`,
+          url,
+        });
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareFeedback('Link copied!');
+        setTimeout(() => setShareFeedback(''), 2000);
+      }
+    } catch (err) {
+      if (err?.name === 'AbortError') return;
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareFeedback('Link copied!');
+        setTimeout(() => setShareFeedback(''), 2000);
+      } catch {
+        setShareFeedback('Unable to share');
+        setTimeout(() => setShareFeedback(''), 2000);
+      }
+    } finally {
+      setSharing(false);
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
@@ -234,6 +286,91 @@ const ProductDetail = () => {
     };
     fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    if (!product || !productType || !id) {
+      setSimilarProducts([]);
+      return;
+    }
+
+    const pickSimilar = (items) =>
+      items
+        .filter((p) => String(p._id) !== String(id))
+        .slice(0, SIMILAR_PRODUCT_LIMIT);
+
+    const fetchSimilar = async () => {
+      setSimilarLoading(true);
+      try {
+        const params = buildSimilarQueryParams(product, productType);
+        let res = await axios.get(`${API_BASE}${productType}`, { params });
+        let similar = pickSimilar(res.data?.data || []);
+
+        if (similar.length < 4 && (params.category || params.subCategory || params.productType)) {
+          const broader = { limit: 20, page: 1 };
+          if (product.category && (productType === '/food' || productType === '/clothes')) {
+            broader.category = product.category;
+          } else if (product.subCategory) {
+            broader.subCategory = product.subCategory;
+          }
+          res = await axios.get(`${API_BASE}${productType}`, { params: broader });
+          similar = pickSimilar(res.data?.data || []);
+        }
+
+        if (similar.length < 4) {
+          res = await axios.get(`${API_BASE}${productType}`, { params: { limit: 20, page: 1 } });
+          similar = pickSimilar(res.data?.data || []);
+        }
+
+        setSimilarProducts(similar);
+      } catch (err) {
+        console.error('Fetch similar products error:', err);
+        setSimilarProducts([]);
+      } finally {
+        setSimilarLoading(false);
+      }
+    };
+
+    fetchSimilar();
+  }, [product, productType, id]);
+
+  useEffect(() => {
+    const token = getApiBearerToken();
+    if (!token) {
+      setWishlistIds([]);
+      return;
+    }
+    const fetchWishlist = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/wishlist`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.success) {
+          setWishlistIds((res.data.data.items || []).map((i) => i._id || i));
+        }
+      } catch {
+        /* silent */
+      }
+    };
+    fetchWishlist();
+  }, [authEpoch]);
+
+  const handleSimilarWishlistToggle = async (productId) => {
+    const token = getApiBearerToken();
+    if (!token) return;
+    try {
+      const res = await axios.post(
+        `${API_BASE}/wishlist`,
+        { productId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.data.success) {
+        setWishlistIds((res.data.data.items || []).map((i) => i._id || i));
+        window.dispatchEvent(new Event('cart-wishlist-update'));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     setSelectedSize(0);
@@ -293,42 +430,13 @@ const ProductDetail = () => {
     return (sum / product.reviews.length).toFixed(1);
   }, [product]);
 
-  // Build breadcrumb links
-  const breadcrumb = useMemo(() => {
-    if (!product) return { categoryLink: '/', categoryLabel: '', subCategoryLink: null, subCategoryLabel: '' };
-
-    let slug = categoryToSlug[category] || '';
-    let catLabel = category;
-
-    // For products where category is "Toy"/"accessories"/"grooming-essentials"/"health-supplement"/"house"
-    // the category page slug maps directly
-    if (['Toy', 'accessories', 'grooming-essentials', 'health-supplement', 'house'].includes(category)) {
-      catLabel = {
-        'Toy': 'Toys',
-        'accessories': 'Accessories',
-        'grooming-essentials': 'Grooming & Essential',
-        'health-supplement': 'Health & Supplement',
-        'house': 'Beds & House',
-      }[category];
-    } else {
-      // Dog/Cat food & clothes
-      catLabel = category + 's';
-    }
-
-    const categoryLink = slug ? `/category/${slug}` : '/';
-    const subCategoryLink = slug ? `/category/${slug}?subCategory=${encodeURIComponent(subCategory)}` : null;
-    const subCategoryLabel = subCategory ? (subCategory.charAt(0).toUpperCase() + subCategory.slice(1)) : '';
-
-    return { categoryLink, categoryLabel: catLabel, subCategoryLink, subCategoryLabel };
-  }, [product, category, subCategory]);
-
   // ─── Loading / Error states ───────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500 text-lg">Loading product...</p>
+          <p className={`text-gray-500 ${type.body}`}>Loading product...</p>
         </div>
       </div>
     );
@@ -339,7 +447,7 @@ const ProductDetail = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <p className="text-6xl mb-4">😿</p>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Product Not Found</h2>
+          <h2 className={`${type.h3} text-gray-800 mb-2`}>Product Not Found</h2>
           <p className="text-gray-500 mb-6">{error || 'This product does not exist.'}</p>
           <Link
             to="/"
@@ -352,43 +460,15 @@ const ProductDetail = () => {
     );
   }
 
-  // Determine pet icon
-  const petSub = subCategory.toLowerCase();
-  const showDogIcon = category === 'Dog' || petSub === 'dog';
-  const showCatIcon = category === 'Cat' || petSub === 'cat';
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="container mx-auto px-4 sm:px-6 py-3">
-          <nav className="text-xs sm:text-sm text-gray-500 flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
-            <Link to="/" className="hover:text-[#205EA9] transition-colors">Home</Link>
-            <span>/</span>
-            <Link to={breadcrumb.categoryLink} className="hover:text-[#205EA9] transition-colors">
-              {breadcrumb.categoryLabel}
-            </Link>
-            {breadcrumb.subCategoryLink && (
-              <>
-                <span>/</span>
-                <Link to={breadcrumb.subCategoryLink} className="hover:text-[#205EA9] transition-colors">
-                  {breadcrumb.subCategoryLabel}
-                </Link>
-              </>
-            )}
-            <span>/</span>
-            <span className="text-gray-800 font-medium truncate max-w-[140px] sm:max-w-[200px]">{displayName}</span>
-          </nav>
-        </div>
-      </div>
-
       {/* Two-Column Layout: Image + Product Info */}
-      <section className="py-4 sm:py-6 md:py-12">
-        <div className="container mx-auto px-4 sm:px-6">
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row">
+      <section className="py-3 sm:py-6 md:py-10">
+        <div className="max-w-7xl mx-auto px-0 sm:px-4 md:px-6">
+          <div className="bg-white sm:rounded-xl md:rounded-2xl shadow-sm border-y sm:border border-gray-100 overflow-hidden flex flex-col md:flex-row">
 
-            {/* Image */}
-            <div className="w-full md:w-[45%] lg:w-[40%] flex-shrink-0 bg-gray-50 md:sticky md:top-24 md:self-start">
+            {/* Image — no padding */}
+            <div className="w-full md:w-[45%] lg:w-[40%] flex-shrink-0 bg-gray-50 md:sticky md:top-24 md:self-start p-0">
               <div className="relative aspect-square flex items-center justify-center overflow-hidden">
                 {images[selectedImage] ? (
                   <img
@@ -398,6 +478,23 @@ const ProductDetail = () => {
                   />
                 ) : (
                   <span className="text-8xl text-gray-300">🐾</span>
+                )}
+                <button
+                  type="button"
+                  onClick={handleShareProduct}
+                  disabled={sharing}
+                  className="absolute top-3 left-3 w-10 h-10 rounded-full bg-white shadow-md flex items-center justify-center z-10 text-gray-600 hover:text-[#205EA9] hover:scale-110 transition-all disabled:opacity-60"
+                  title="Share product"
+                  aria-label="Share product"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                </button>
+                {shareFeedback && (
+                  <span className={`absolute top-14 left-3 z-10 bg-gray-900 text-white ${type.caption} px-2 py-1 rounded-md shadow-lg whitespace-nowrap`}>
+                    {shareFeedback}
+                  </span>
                 )}
                 <button
                   onClick={handleToggleWishlist}
@@ -420,7 +517,7 @@ const ProductDetail = () => {
               </div>
 
               {images.length > 1 && (
-                <div className="flex gap-2 sm:gap-3 justify-center flex-wrap border-t border-gray-100">
+                <div className="flex gap-2 sm:gap-3 justify-center flex-wrap border-t border-gray-100 p-0">
                   {images.map((img, i) => (
                     <button
                       key={i}
@@ -438,39 +535,26 @@ const ProductDetail = () => {
               )}
             </div>
 
-            {/* Product Info */}
-            <div className="w-full md:flex-1 min-w-0 flex flex-col">
+            {/* Product Info — padded text section */}
+            <div className="w-full md:flex-1 min-w-0 flex flex-col p-4 sm:p-5 md:p-6 lg:p-8">
                 {/* Badges */}
+                {subCategory && (
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <span className="bg-[#205EA9]/10 text-[#205EA9] text-xs font-bold px-3 py-1 rounded-full">
-                    {showDogIcon ? (
-                      <img src={DOG_ICON} alt="Dog" className="w-4 h-4 object-contain inline" />
-                    ) : showCatIcon ? (
-                      <img src={CAT_ICON} alt="Cat" className="w-4 h-4 object-contain inline" />
-                    ) : (
-                      <span>🐾</span>
-                    )}{' '}
-                    {showDogIcon ? 'Dog' : showCatIcon ? 'Cat' : category}
-                  </span>
-                  <span className="bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1 rounded-full">
+                  <span className={`bg-gray-100 text-gray-600 ${type.captionMedium} px-3 py-1 rounded-full`}>
                     {subCategory.charAt(0).toUpperCase() + subCategory.slice(1)}
                   </span>
-                  {discountPercent > 0 && (
-                    <span className="bg-red-50 text-red-600 text-xs font-bold px-3 py-1 rounded-full">
-                      {discountPercent}% OFF
-                    </span>
-                  )}
                 </div>
+                )}
 
                 {/* Brand */}
                 {brand && (
-                  <p className="text-sm font-semibold text-[#205EA9] uppercase tracking-wide mb-1">
+                  <p className={`${type.label} text-[#205EA9] uppercase tracking-wide mb-1`}>
                     {brand}
                   </p>
                 )}
 
                 {/* Name */}
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 sm:mb-3">
+                <h1 className={`${type.h3} text-gray-900 mb-2 sm:mb-3`}>
                   {displayName}
                 </h1>
 
@@ -479,12 +563,12 @@ const ProductDetail = () => {
                   <div className="flex items-center gap-2 mb-4">
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <span key={star} className={`text-lg ${star <= Math.round(avgRating) ? 'text-amber-400' : 'text-gray-200'}`}>
+                        <span key={star} className={`text-base ${star <= Math.round(avgRating) ? 'text-amber-400' : 'text-gray-200'}`}>
                           ★
                         </span>
                       ))}
                     </div>
-                    <span className="text-sm text-gray-600 font-medium">
+                    <span className={`${type.bodySm} text-gray-600 font-medium`}>
                       {avgRating} ({product.reviews.length} review{product.reviews.length !== 1 ? 's' : ''})
                     </span>
                   </div>
@@ -494,17 +578,19 @@ const ProductDetail = () => {
                 {currentPrice && (
                   <div className="bg-gray-50 rounded-xl p-3 sm:p-4 mb-4 sm:mb-5">
                     <div className="flex items-end gap-2 sm:gap-3 flex-wrap mb-2">
-                      <span className="text-2xl sm:text-3xl font-bold text-gray-900">
+                      <span className={`${type.price} text-gray-900`}>
                         {formatRupee(currentPrice.discountedPrice)}
                       </span>
                       {currentPrice.mrp > currentPrice.discountedPrice && (
                         <>
-                          <span className="text-lg text-gray-400 line-through pb-0.5">
+                          <span className={`${type.body} text-gray-400 line-through pb-0.5`}>
                             {formatRupee(currentPrice.mrp)}
                           </span>
-                          <span className="text-sm font-semibold text-red-600 bg-red-50 px-2 py-1 rounded">
-                            MRP
-                          </span>
+                          {discountPercent > 0 && (
+                            <span className={`${type.label} text-red-600 bg-red-50 px-2 py-1 rounded`}>
+                              {discountPercent}% off
+                            </span>
+                          )}
                         </>
                       )}
                     </div>
@@ -514,7 +600,7 @@ const ProductDetail = () => {
                 {/* Capacity / size / variant options */}
                 {multiVariants && (
                   <div className="mb-5">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                    <p className={`${type.label} text-gray-700 mb-2`}>
                       {variantKind === 'capacity'
                         ? 'Select Capacity:'
                         : variantKind === 'size'
@@ -532,7 +618,7 @@ const ProductDetail = () => {
                             type="button"
                             onClick={() => !outOfStock && setSelectedSize(i)}
                             disabled={outOfStock}
-                            className={`px-4 py-2.5 rounded-xl text-sm font-medium border-2 transition-all ${
+                            className={`px-4 py-2.5 rounded-xl ${type.button} border-2 transition-all ${
                               outOfStock
                                 ? 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
                                 : selectedSize === i
@@ -544,7 +630,7 @@ const ProductDetail = () => {
                             <span className="mx-1">—</span>
                             <span className="font-bold">{formatRupee(row.discountedPrice)}</span>
                             {optStock !== undefined && (
-                              <span className={`block text-[10px] mt-0.5 ${
+                              <span className={`block ${type.caption} mt-0.5 ${
                                 outOfStock ? 'text-red-400' : optStock <= 5 ? 'text-orange-500' : 'text-gray-400'
                               }`}>
                                 {outOfStock ? 'Out of stock' : `${optStock} in stock`}
@@ -560,10 +646,10 @@ const ProductDetail = () => {
                 {/* Single variant label (when only one capacity/size) */}
                 {!multiVariants && variants[0]?.label && (
                   <div className="mb-5">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">
+                    <p className={`${type.label} text-gray-700 mb-2`}>
                       {variantKind === 'capacity' ? 'Capacity:' : variantKind === 'size' ? 'Size:' : 'Option:'}
                     </p>
-                    <span className="inline-block bg-amber-50 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full border border-amber-200">
+                    <span className={`inline-block bg-amber-50 text-amber-700 ${type.bodySm} font-medium px-3 py-1.5 rounded-full border border-amber-200`}>
                       {variants[0].label}
                     </span>
                   </div>
@@ -572,10 +658,10 @@ const ProductDetail = () => {
                 {/* Flavours (Food) */}
                 {product.flavours?.length > 0 && (
                   <div className="mb-5">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">Flavours:</p>
+                    <p className={`${type.label} text-gray-700 mb-2`}>Flavours:</p>
                     <div className="flex flex-wrap gap-2">
                       {product.flavours.map((f, i) => (
-                        <span key={i} className="bg-amber-50 text-amber-700 text-sm font-medium px-3 py-1.5 rounded-full border border-amber-200">
+                        <span key={i} className={`bg-amber-50 text-amber-700 ${type.bodySm} font-medium px-3 py-1.5 rounded-full border border-amber-200`}>
                           {f}
                         </span>
                       ))}
@@ -586,10 +672,10 @@ const ProductDetail = () => {
                 {/* Colors (Clothes / Accessories / Toys) */}
                 {product.color?.length > 0 && (
                   <div className="mb-5">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">Colors:</p>
+                    <p className={`${type.label} text-gray-700 mb-2`}>Colors:</p>
                     <div className="flex flex-wrap gap-2">
                       {product.color.map((c, i) => (
-                        <span key={i} className="bg-purple-50 text-purple-700 text-sm font-medium px-3 py-1.5 rounded-full border border-purple-200">
+                        <span key={i} className={`bg-purple-50 text-purple-700 ${type.bodySm} font-medium px-3 py-1.5 rounded-full border border-purple-200`}>
                           {c}
                         </span>
                       ))}
@@ -601,7 +687,7 @@ const ProductDetail = () => {
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 mb-5">
                   {/* Material */}
                   {product.material && (
-                    <div className="text-sm">
+                    <div className={type.bodySm}>
                       <span className="font-semibold text-gray-700">Material: </span>
                       <span className="text-gray-600">{product.material}</span>
                     </div>
@@ -609,7 +695,7 @@ const ProductDetail = () => {
 
                   {/* Suitable For */}
                   {product.suitableFor && (
-                    <div className="text-sm">
+                    <div className={type.bodySm}>
                       <span className="font-semibold text-gray-700">Suitable For: </span>
                       <span className="text-gray-600">{product.suitableFor}</span>
                     </div>
@@ -617,7 +703,7 @@ const ProductDetail = () => {
 
                   {/* Size (Toys — single size) */}
                   {typeof product.size === 'string' && product.size && !variants[0]?.label && (
-                    <div className="text-sm">
+                    <div className={type.bodySm}>
                       <span className="font-semibold text-gray-700">Size: </span>
                       <span className="text-gray-600">{product.size}</span>
                     </div>
@@ -625,7 +711,7 @@ const ProductDetail = () => {
 
                   {/* Expiry Date */}
                   {product.expiryDate && (
-                    <div className="text-sm">
+                    <div className={type.bodySm}>
                       <span className="font-semibold text-gray-700">Best Before: </span>
                       <span className="text-gray-600">
                         {new Date(product.expiryDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -635,7 +721,7 @@ const ProductDetail = () => {
 
                   {/* Expected Delivery */}
                   {product.expectedDeliveryDays && (
-                    <div className="text-sm">
+                    <div className={type.bodySm}>
                       <span className="font-semibold text-gray-700">Delivery: </span>
                       <span className="text-gray-600">{product.expectedDeliveryDays} days</span>
                     </div>
@@ -643,7 +729,7 @@ const ProductDetail = () => {
 
                   {/* Returnable */}
                   {product.isReturnable !== undefined && (
-                    <div className="text-sm">
+                    <div className={type.bodySm}>
                       <span className="font-semibold text-gray-700">Returnable: </span>
                       <span className={product.isReturnable ? 'text-blue-600' : 'text-red-500'}>
                         {product.isReturnable ? 'Yes' : 'No'}
@@ -654,7 +740,7 @@ const ProductDetail = () => {
 
                 {/* Stock Info */}
                 {availableStock !== null && (
-                  <div className={`flex items-center gap-2 mb-5 text-sm font-semibold ${
+                  <div className={`flex items-center gap-2 mb-5 ${type.bodySm} font-semibold ${
                     availableStock <= 0
                       ? 'text-red-600'
                       : availableStock <= 10
@@ -678,12 +764,12 @@ const ProductDetail = () => {
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <div className="flex flex-row items-stretch gap-2 sm:gap-3">
                   {availableStock === 0 ? (
                     <button
                       type="button"
                       disabled
-                      className="flex-1 font-bold py-3 sm:py-3.5 rounded-xl text-sm bg-gray-300 text-gray-500 cursor-not-allowed"
+                      className={`flex-1 font-bold py-3 sm:py-3.5 rounded-xl ${type.button} bg-gray-300 text-gray-500 cursor-not-allowed`}
                     >
                       Out of Stock
                     </button>
@@ -704,7 +790,7 @@ const ProductDetail = () => {
                         type="button"
                         onClick={handleBuyNow}
                         disabled={buyingNow}
-                        className="flex-1 h-10 font-bold rounded-md active:scale-[0.98] transition-all text-sm disabled:opacity-60 min-w-0 bg-[#205ea9] text-white hover:bg-[#264a6d] flex items-center justify-center"
+                        className={`flex-1 h-10 font-bold rounded-md active:scale-[0.98] transition-all ${type.button} disabled:opacity-60 min-w-0 bg-[#205ea9] text-white hover:bg-[#264a6d] flex items-center justify-center`}
                       >
                         {buyingNow ? 'Processing...' : '⚡ Buy Now'}
                       </button>
@@ -714,18 +800,18 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
+          <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6 px-4 sm:px-0">
               {/* Key Features */}
               {product.keyFeatures?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-[#205EA9]/10 rounded-lg flex items-center justify-center text-sm">✨</span>
                     Key Features
                   </h3>
                   <ul className="space-y-2.5">
                     {product.keyFeatures.map((f, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
-                        <span className="text-[#205EA9] mt-0.5 text-xs">●</span>
+                      <li key={i} className={`flex items-start gap-3 text-gray-700 ${type.bodySm}`}>
+                        <span className={`text-[#205EA9] mt-0.5 ${type.caption}`}>●</span>
                         {f}
                       </li>
                     ))}
@@ -736,14 +822,14 @@ const ProductDetail = () => {
               {/* Health Benefits (Food) */}
               {product.healthBenefits?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm">💚</span>
                     Health Benefits
                   </h3>
                   <ul className="space-y-2.5">
                     {product.healthBenefits.map((b, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
-                        <span className="text-blue-500 mt-0.5 text-xs">●</span>
+                      <li key={i} className={`flex items-start gap-3 text-gray-700 ${type.bodySm}`}>
+                        <span className={`text-blue-500 mt-0.5 ${type.caption}`}>●</span>
                         {b}
                       </li>
                     ))}
@@ -754,25 +840,25 @@ const ProductDetail = () => {
               {/* Description (string — Health Supplements / Houses / Grooming) */}
               {product.description && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm">📝</span>
                     Description
                   </h3>
-                  <p className="text-gray-700 text-sm leading-relaxed">{product.description}</p>
+                  <p className={`text-gray-700 ${type.bodySm}`}>{product.description}</p>
                 </div>
               )}
 
               {/* Product Details (array — Food / Clothes / Accessories / Toys) */}
               {(product.details?.length > 0 || product.productDetails?.length > 0) && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm">📋</span>
                     Product Details
                   </h3>
                   <ul className="space-y-2.5">
                     {(product.details || product.productDetails).map((d, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
-                        <span className="text-blue-500 mt-0.5 text-xs">●</span>
+                      <li key={i} className={`flex items-start gap-3 text-gray-700 ${type.bodySm}`}>
+                        <span className={`text-blue-500 mt-0.5 ${type.caption}`}>●</span>
                         {d}
                       </li>
                     ))}
@@ -783,14 +869,14 @@ const ProductDetail = () => {
               {/* Highlights (Health Supplements / Houses) */}
               {product.highlights?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center text-sm">⭐</span>
                     Highlights
                   </h3>
                   <ul className="space-y-2.5">
                     {product.highlights.map((h, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
-                        <span className="text-yellow-500 mt-0.5 text-xs">●</span>
+                      <li key={i} className={`flex items-start gap-3 text-gray-700 ${type.bodySm}`}>
+                        <span className={`text-yellow-500 mt-0.5 ${type.caption}`}>●</span>
                         {h}
                       </li>
                     ))}
@@ -801,14 +887,14 @@ const ProductDetail = () => {
               {/* Nutrients (Food) */}
               {product.nutrients?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-sm">🧪</span>
                     Nutritional Info
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     {product.nutrients.map((n, i) => (
                       <div key={i} className="bg-gray-50 rounded-xl px-4 py-3 text-center">
-                        <p className="text-sm font-semibold text-gray-800">{n}</p>
+                        <p className={`${type.bodySm} font-semibold text-gray-800`}>{n}</p>
                       </div>
                     ))}
                   </div>
@@ -818,11 +904,11 @@ const ProductDetail = () => {
               {/* Usage / Dosage (Health Supplements) */}
               {product.usage && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center text-sm">💊</span>
                     Usage
                   </h3>
-                  <div className="space-y-2 text-sm text-gray-700">
+                  <div className={`space-y-2 ${type.bodySm} text-gray-700`}>
                     <p><span className="font-semibold">Dosage:</span> {product.usage.dosage}</p>
                     <p><span className="font-semibold">Age Group:</span> {product.usage.ageGroup}</p>
                   </div>
@@ -832,14 +918,14 @@ const ProductDetail = () => {
               {/* Usage Instructions (Grooming) */}
               {product.usageInstructions?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center text-sm">📝</span>
                     Usage Instructions
                   </h3>
                   <ol className="space-y-2.5">
                     {product.usageInstructions.map((u, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
-                        <span className="text-cyan-600 font-bold text-xs mt-0.5">{i + 1}.</span>
+                      <li key={i} className={`flex items-start gap-3 text-gray-700 ${type.bodySm}`}>
+                        <span className={`text-cyan-600 font-bold ${type.caption} mt-0.5`}>{i + 1}.</span>
                         {u}
                       </li>
                     ))}
@@ -850,14 +936,14 @@ const ProductDetail = () => {
               {/* Care Instructions (Clothes) */}
               {product.careInstructions?.length > 0 && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center text-sm">🧼</span>
                     Care Instructions
                   </h3>
                   <ul className="space-y-2.5">
                     {product.careInstructions.map((c, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-700 text-sm">
-                        <span className="text-pink-500 mt-0.5 text-xs">●</span>
+                      <li key={i} className={`flex items-start gap-3 text-gray-700 ${type.bodySm}`}>
+                        <span className={`text-pink-500 mt-0.5 ${type.caption}`}>●</span>
                         {c}
                       </li>
                     ))}
@@ -868,26 +954,26 @@ const ProductDetail = () => {
               {/* Dimensions (Houses) */}
               {product.dimensions && (
                 <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <h3 className={`${type.h3} text-gray-900 mb-4 flex items-center gap-2`}>
                     <span className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-sm">📐</span>
                     Dimensions
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
-                      <p className="text-xs text-gray-500">Height</p>
-                      <p className="text-sm font-semibold text-gray-800">{product.dimensions.height}</p>
+                      <p className={`${type.caption} text-gray-500`}>Height</p>
+                      <p className={`${type.bodySm} font-semibold text-gray-800`}>{product.dimensions.height}</p>
                     </div>
                     <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
-                      <p className="text-xs text-gray-500">Width</p>
-                      <p className="text-sm font-semibold text-gray-800">{product.dimensions.width}</p>
+                      <p className={`${type.caption} text-gray-500`}>Width</p>
+                      <p className={`${type.bodySm} font-semibold text-gray-800`}>{product.dimensions.width}</p>
                     </div>
                     <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
-                      <p className="text-xs text-gray-500">Depth</p>
-                      <p className="text-sm font-semibold text-gray-800">{product.dimensions.depth}</p>
+                      <p className={`${type.caption} text-gray-500`}>Depth</p>
+                      <p className={`${type.bodySm} font-semibold text-gray-800`}>{product.dimensions.depth}</p>
                     </div>
                     <div className="bg-gray-50 rounded-xl px-4 py-3 text-center">
-                      <p className="text-xs text-gray-500">Weight</p>
-                      <p className="text-sm font-semibold text-gray-800">{product.dimensions.weight}</p>
+                      <p className={`${type.caption} text-gray-500`}>Weight</p>
+                      <p className={`${type.bodySm} font-semibold text-gray-800`}>{product.dimensions.weight}</p>
                     </div>
                   </div>
                 </div>
@@ -896,6 +982,32 @@ const ProductDetail = () => {
           </div>
         </div>
       </section>
+
+      {/* Similar Products */}
+      {(similarLoading || similarProducts.length > 0) && (
+        <section className="py-6 sm:py-8 bg-gray-50 border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <h2 className={`${type.h2} text-gray-900 mb-4`}>Similar Products</h2>
+            {similarLoading ? (
+              <div className="flex justify-center py-10">
+                <div className="w-10 h-10 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
+                {similarProducts.map((item) => (
+                  <ProductCard
+                    key={item._id}
+                    product={item}
+                    apiEndpoint={productType}
+                    wishlistIds={wishlistIds}
+                    onWishlistToggle={handleSimilarWishlistToggle}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Login Required Modal */}
       <LoginRequiredModal

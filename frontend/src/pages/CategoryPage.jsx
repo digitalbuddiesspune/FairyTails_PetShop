@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import axios from 'axios';
 import { getApiBearerToken } from '../auth/session';
 import ProductCard from '../components/ProductCard';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -320,7 +321,7 @@ const CategoryPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500 text-lg">Loading...</p>
+          <p className={`text-gray-500 ${type.body}`}>Loading...</p>
         </div>
       </div>
     );
@@ -332,7 +333,7 @@ const CategoryPage = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <p className="text-6xl mb-4">😿</p>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Category Not Found</h2>
+          <h2 className={`${type.h2} text-gray-800 mb-2`}>Category Not Found</h2>
           <p className="text-gray-500 mb-6">{error || 'The category you are looking for does not exist.'}</p>
           <Link to="/" className="inline-block bg-[#205EA9] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#1d4f8f] transition-colors">
             Back to Home
@@ -361,7 +362,7 @@ const CategoryPage = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Category toolbar: title + filters + sort */}
       <section className={`bg-white border-b border-gray-200 ${subCategories.length > 0 ? 'sticky top-14 md:top-[108px] z-30' : ''}`}>
-        <div className="container mx-auto px-3 sm:px-6 py-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2">
           {subCategories.length > 0 ? (
             <div className="flex flex-col gap-1.5 md:flex-row md:items-center md:gap-3">
               <div className="flex items-center justify-between gap-2 md:justify-start md:shrink-0">
@@ -369,13 +370,13 @@ const CategoryPage = () => {
                   {category.image && (
                     <img src={category.image} alt={category.name} className="w-8 h-8 sm:w-9 sm:h-9 object-contain" />
                   )}
-                  <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{category.name}</h1>
+                  <h1 className={`${type.h3} text-gray-900 truncate`}>{category.name}</h1>
                 </div>
                 <div className="flex items-center shrink-0 md:hidden">
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer max-w-[118px]"
+                    className={`bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-2 py-1 ${type.caption} focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer max-w-[118px]`}
                   >
                     {sortOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -389,7 +390,7 @@ const CategoryPage = () => {
                   <button
                     key={sub}
                     onClick={() => handleSubCategoryChange(sub)}
-                    className={`px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 shrink-0 ${
+                    className={`px-2.5 py-1 rounded-full ${type.captionMedium} whitespace-nowrap transition-all duration-200 shrink-0 ${
                       activeSubCategory === sub
                         ? `${accent.tab} text-white shadow-sm`
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -402,11 +403,11 @@ const CategoryPage = () => {
               </div>
 
               <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto">
-                <label className="hidden lg:inline text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
+                <label className={`hidden lg:inline text-gray-500 ${type.label} whitespace-nowrap`}>Sort by:</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[150px]"
+                  className={`bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 ${type.bodySm} focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[150px]`}
                 >
                   {sortOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -420,14 +421,14 @@ const CategoryPage = () => {
                 {category.image && (
                   <img src={category.image} alt={category.name} className="w-8 h-8 sm:w-9 sm:h-9 object-contain" />
                 )}
-                <h1 className="text-base sm:text-lg font-bold text-gray-900 truncate">{category.name}</h1>
+                <h1 className={`${type.h3} text-gray-900 truncate`}>{category.name}</h1>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <label className="hidden lg:inline text-gray-500 text-sm font-medium whitespace-nowrap">Sort by:</label>
+                <label className={`hidden lg:inline text-gray-500 ${type.label} whitespace-nowrap`}>Sort by:</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[118px] sm:min-w-[150px]"
+                  className={`bg-gray-50 border border-gray-200 text-gray-700 rounded-lg px-2 py-1 sm:px-3 sm:py-1.5 ${type.bodySm} focus:outline-none focus:ring-2 focus:ring-[#2f5a87] cursor-pointer min-w-[118px] sm:min-w-[150px]`}
                 >
                   {sortOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -441,18 +442,18 @@ const CategoryPage = () => {
 
       {/* Products Grid */}
       <section className="py-3 sm:py-6 md:py-8">
-        <div className="container mx-auto px-3 sm:px-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4">
           {productsLoading && (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-16 h-16 border-4 border-[#205EA9] border-t-transparent rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-500 text-lg">Loading products...</p>
+              <p className={`text-gray-500 ${type.body}`}>Loading products...</p>
             </div>
           )}
 
           {!productsLoading && products.length === 0 && (
             <div className="text-center py-20">
               <p className="text-6xl mb-4">🔍</p>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">No Products Found</h3>
+              <h3 className={`${type.h3} text-gray-800 mb-2`}>No Products Found</h3>
               <p className="text-gray-500 mb-6 max-w-md mx-auto">
                 No {activeSubCategory !== 'All' ? activeSubCategory.toLowerCase() + ' ' : ''}products available in {category.name} yet. Check back soon!
               </p>
@@ -490,8 +491,8 @@ const CategoryPage = () => {
 
       {/* Browse More */}
       <section className="py-10 bg-white border-t border-gray-100">
-        <div className="container mx-auto px-4 sm:px-6 text-center">
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Looking for more?</h3>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+          <h3 className={`${type.h3} text-gray-900 mb-2`}>Looking for more?</h3>
           <p className="text-gray-500 mb-6">Explore other categories for your pets</p>
           <div className="flex items-center justify-center gap-3 flex-wrap">
             {category.slug !== 'dogs' && (

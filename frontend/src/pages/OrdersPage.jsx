@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import cattImage from '../assets/catt.png';
 import { formatRupee } from '../utils/formatPrice';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -77,7 +78,7 @@ const OrdersPage = () => {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#203D5B] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-lg">Loading your orders...</p>
+          <p className={`${type.body} text-gray-500`}>Loading your orders...</p>
         </div>
       </div>
     );
@@ -110,8 +111,8 @@ const OrdersPage = () => {
         <div className="flex items-center gap-4">
           <img src={cattImage} alt="Cat" className="w-20 h-20 object-contain" />
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Orders</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{orders.length} order{orders.length !== 1 ? 's' : ''}</p>
+            <h1 className={`${type.hero} md:text-3xl text-gray-900`}>My Orders</h1>
+            <p className={`${type.bodySm} text-gray-400 mt-0.5`}>{orders.length} order{orders.length !== 1 ? 's' : ''}</p>
           </div>
         </div>
       </div>
@@ -122,11 +123,11 @@ const OrdersPage = () => {
           {orders.length === 0 ? (
             <div className="text-center py-20">
               <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-4xl">📦</span>
+                <span className={`${type.hero}`}>📦</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">No orders yet</h3>
+              <h3 className={`${type.h3} text-gray-800 mb-2`}>No orders yet</h3>
               <p className="text-gray-500 mb-6">Once you place an order, it will appear here.</p>
-              <Link to="/" className="inline-block bg-[#205ea9] text-white font-bold py-3 px-8 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] transition-all">
+              <Link to="/" className={`${type.button} inline-block bg-[#205ea9] text-white py-3 px-8 rounded-xl hover:from-[#5ba8d4] hover:to-[#4a8bb8] transition-all`}>
                 Start Shopping
               </Link>
             </div>
@@ -144,22 +145,22 @@ const OrdersPage = () => {
                     {/* Order Header */}
                     <div className="p-5 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs text-gray-400 mb-0.5">Order #{displayOrderId}</p>
-                        <p className="text-sm text-gray-600">
+                        <p className={`${type.caption} text-gray-400 mb-0.5`}>Order #{displayOrderId}</p>
+                        <p className={`${type.bodySm} text-gray-600`}>
                           {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         {isPaymentFailed ? (
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                          <span className={`${type.caption} px-3 py-1 rounded-full bg-red-100 text-red-700`}>
                             ❌ Payment Failed
                           </span>
                         ) : (
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold ${st.color}`}>
+                          <span className={`px-3 py-1 rounded-full ${type.caption} font-bold ${st.color}`}>
                             {st.icon} {st.label}
                           </span>
                         )}
-                        <span className="text-lg font-bold text-gray-900">{formatRupee(order.total)}</span>
+                        <span className={`${type.h4} text-gray-900`}>{formatRupee(order.total)}</span>
                       </div>
                     </div>
 
@@ -172,12 +173,12 @@ const OrdersPage = () => {
                               {item.productImage ? (
                                 <img src={item.productImage} alt="" className="w-full h-full object-contain p-1" />
                               ) : (
-                                <span className="flex items-center justify-center h-full text-xl">🐾</span>
+                                <span className={`${type.bodySm} flex items-center justify-center h-full`}>🐾</span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-gray-900 text-sm line-clamp-1">{item.productName}</p>
-                              <p className="text-xs text-gray-400">Qty: {item.quantity} × {formatRupee(item.price)}</p>
+                              <p className={`${type.bodySm} text-gray-900 line-clamp-1`}>{item.productName}</p>
+                              <p className={`${type.caption} text-gray-400`}>Qty: {item.quantity} × {formatRupee(item.price)}</p>
                             </div>
                            
                           </div>
@@ -188,12 +189,12 @@ const OrdersPage = () => {
                       <div className="mt-5 pt-4 border-t border-gray-100 flex flex-wrap gap-3">
                         {isPaymentFailed ? (
                           <>
-                            <div className="flex-1 text-center py-2 px-5 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed">
+                            <div className={`${type.caption} flex-1 text-center py-2 px-5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed`}>
                               View Details
                             </div>
                             <Link
                               to="/checkout"
-                              className="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all"
+                              className={`${type.caption} px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all`}
                             >
                               Try Again
                             </Link>
@@ -202,7 +203,7 @@ const OrdersPage = () => {
                           <>
                             <Link
                               to={`/order-details/${order._id}`}
-                              className="px-5 py-2 bg-[#205ea9] hover:bg-[#1a4a7a] text-white text-xs font-bold rounded-lg transition-all"
+                              className={`${type.caption} px-5 py-2 bg-[#205ea9] hover:bg-[#1a4a7a] text-white rounded-lg transition-all`}
                             >
                               View Details
                             </Link>
@@ -210,7 +211,7 @@ const OrdersPage = () => {
                               <button
                                 onClick={() => handleCancel(order._id)}
                                 disabled={cancellingId === order._id}
-                                className="px-5 py-2 bg-red-50 text-red-600 border border-red-200 text-xs font-bold rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
+                                className={`${type.caption} px-5 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50`}
                               >
                                 {cancellingId === order._id ? 'Cancelling...' : 'Cancel Order'}
                               </button>

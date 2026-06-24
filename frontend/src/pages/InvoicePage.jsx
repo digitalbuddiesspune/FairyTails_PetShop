@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { formatRupee } from '../utils/formatPrice';
+import { type } from '../styles/typography';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -123,7 +124,7 @@ const InvoicePage = () => {
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-gray-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Loading invoice...</p>
+          <p className={`${type.nav} text-gray-600`}>Loading invoice...</p>
         </div>
       </div>
     );
@@ -158,8 +159,8 @@ const InvoicePage = () => {
                   className="h-16 w-auto object-contain"
                 />
               </div>
-              <h1 className="text-xl font-bold leading-tight">FairyTails Pet Shop</h1>
-              <p className="text-sm text-gray-300">Your Trusted Pet Care Partner | support@fairytails.com | GST: 27DNIPM1264G1ZX | +91 90217 85257</p>
+              <h1 className={`${type.h3}`}>FairyTails Pet Shop</h1>
+              <p className={`${type.bodySm} text-gray-300`}>Your Trusted Pet Care Partner | support@fairytails.com | GST: 27DNIPM1264G1ZX | +91 90217 85257</p>
             </div>
           </div>
 
@@ -167,43 +168,43 @@ const InvoicePage = () => {
             {/* Invoice & Bill To - grey/white */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 break-inside-avoid">
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                <h3 className="font-bold text-gray-700 text-xs uppercase tracking-wide mb-3">Invoice & Order</h3>
-                <dl className="space-y-2.5 text-sm">
-                  <div className="flex justify-between"><dt className="text-gray-600">Invoice Date</dt><dd className="font-medium text-gray-900">{formatDateTime(new Date())}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-600">Order No</dt><dd className="font-medium text-gray-900">#{displayOrderId}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-600">Invoice No.</dt><dd className="font-medium text-gray-900">{invoiceNo}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-600">Order Date</dt><dd className="font-medium text-gray-900">{formatDateTime(order.createdAt)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-600">Order Status</dt><dd className="font-medium capitalize text-gray-900">{order.status}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-600">Payment status</dt><dd className="font-medium capitalize text-gray-900">{order.paymentStatus}</dd></div>
-                  <div className="flex justify-between"><dt className="text-gray-600">Payment Mode</dt><dd className="font-medium text-gray-900">{order.paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' : 'Online'}</dd></div>
+                <h3 className={`${type.caption} text-gray-700 uppercase tracking-wide mb-3`}>Invoice & Order</h3>
+                <dl className={`${type.bodySm} space-y-2.5`}>
+                  <div className="flex justify-between"><dt className="text-gray-600">Invoice Date</dt><dd className={`${type.nav} text-gray-900`}>{formatDateTime(new Date())}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Order No</dt><dd className={`${type.nav} text-gray-900`}>#{displayOrderId}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Invoice No.</dt><dd className={`${type.nav} text-gray-900`}>{invoiceNo}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Order Date</dt><dd className={`${type.nav} text-gray-900`}>{formatDateTime(order.createdAt)}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Order Status</dt><dd className={`${type.nav} capitalize text-gray-900`}>{order.status}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Payment status</dt><dd className={`${type.nav} capitalize text-gray-900`}>{order.paymentStatus}</dd></div>
+                  <div className="flex justify-between"><dt className="text-gray-600">Payment Mode</dt><dd className={`${type.nav} text-gray-900`}>{order.paymentMethod === 'cash_on_delivery' ? 'Cash on Delivery' : 'Online'}</dd></div>
                 </dl>
               </div>
               <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                <h3 className="font-bold text-gray-700 text-xs uppercase tracking-wide mb-3">Bill To</h3>
-                <dl className="space-y-2.5 text-sm">
-                  <div><dt className="text-gray-500 text-xs">Name</dt><dd className="font-medium text-gray-900">{order.shippingAddress?.firstName} {order.shippingAddress?.lastName}</dd></div>
-                  <div><dt className="text-gray-500 text-xs">Email</dt><dd className="text-gray-900">{order.user?.email || '—'}</dd></div>
-                  <div><dt className="text-gray-500 text-xs">Phone</dt><dd className="text-gray-900">{order.shippingAddress?.phone}</dd></div>
-                  <div><dt className="text-gray-500 text-xs">Address</dt><dd className="text-gray-900 leading-snug">{order.shippingAddress?.streetAddress}, {order.shippingAddress?.city}, {order.shippingAddress?.state} — {order.shippingAddress?.pincode}</dd></div>
+                <h3 className={`${type.caption} text-gray-700 uppercase tracking-wide mb-3`}>Bill To</h3>
+                <dl className={`${type.bodySm} space-y-2.5`}>
+                  <div><dt className={`${type.caption} text-gray-500`}>Name</dt><dd className={`${type.nav} text-gray-900`}>{order.shippingAddress?.firstName} {order.shippingAddress?.lastName}</dd></div>
+                  <div><dt className={`${type.caption} text-gray-500`}>Email</dt><dd className="text-gray-900">{order.user?.email || '—'}</dd></div>
+                  <div><dt className={`${type.caption} text-gray-500`}>Phone</dt><dd className="text-gray-900">{order.shippingAddress?.phone}</dd></div>
+                  <div><dt className={`${type.caption} text-gray-500`}>Address</dt><dd className={`${type.bodySm} text-gray-900`}>{order.shippingAddress?.streetAddress}, {order.shippingAddress?.city}, {order.shippingAddress?.state} — {order.shippingAddress?.pincode}</dd></div>
                 </dl>
               </div>
             </div>
 
             {/* Order items table - grey header */}
             <div className="mb-6 break-inside-avoid">
-              <h3 className="font-bold text-gray-700 text-xs uppercase tracking-wide mb-3">Order Details</h3>
+              <h3 className={`${type.caption} text-gray-700 uppercase tracking-wide mb-3`}>Order Details</h3>
               <div className="rounded-xl border border-gray-200 overflow-hidden">
-                <table className="w-full text-sm">
+                <table className={`${type.bodySm} w-full`}>
                   <thead>
                     <tr className="bg-gray-700 text-white">
-                      <th className="py-3 px-3 text-left font-bold">Sr. No.</th>
-                      <th className="py-3 px-3 text-left font-bold">Item Name</th>
-                      <th className="py-3 px-3 text-center font-bold">Category</th>
-                      <th className="py-3 px-3 text-center font-bold">Qty</th>
-                      <th className="py-3 px-3 text-right font-bold">Rate</th>
-                      <th className="py-3 px-3 text-right font-bold">GST %</th>
-                      <th className="py-3 px-3 text-right font-bold">GST Amt</th>
-                      <th className="py-3 px-3 text-right font-bold">Amount</th>
+                      <th className={`${type.button} py-3 px-3 text-left`}>Sr. No.</th>
+                      <th className={`${type.button} py-3 px-3 text-left`}>Item Name</th>
+                      <th className={`${type.button} py-3 px-3 text-center`}>Category</th>
+                      <th className={`${type.button} py-3 px-3 text-center`}>Qty</th>
+                      <th className={`${type.button} py-3 px-3 text-right`}>Rate</th>
+                      <th className={`${type.button} py-3 px-3 text-right`}>GST %</th>
+                      <th className={`${type.button} py-3 px-3 text-right`}>GST Amt</th>
+                      <th className={`${type.button} py-3 px-3 text-right`}>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -218,13 +219,13 @@ const InvoicePage = () => {
                       return (
                         <tr key={index} className="border-t border-gray-100 hover:bg-gray-50">
                           <td className="py-2.5 px-3 text-gray-600">{index + 1}</td>
-                          <td className="py-2.5 px-3 font-medium text-gray-900">{itemName}</td>
+                          <td className={`${type.nav} py-2.5 px-3 text-gray-900`}>{itemName}</td>
                           <td className="py-2.5 px-3 text-center text-gray-600">{category}</td>
-                          <td className="py-2.5 px-3 text-center font-semibold">{item.quantity}</td>
+                          <td className={`${type.label} py-2.5 px-3 text-center`}>{item.quantity}</td>
                           <td className="py-2.5 px-3 text-right">{formatRupee(ratePerUnit)}</td>
                           <td className="py-2.5 px-3 text-right">{gstPercent}%</td>
                           <td className="py-2.5 px-3 text-right">{formatRupee(gstAmount)}</td>
-                          <td className="py-2.5 px-3 text-right font-bold text-gray-900">{formatRupee(totalAmount)}</td>
+                          <td className={`${type.button} py-2.5 px-3 text-right text-gray-900`}>{formatRupee(totalAmount)}</td>
                         </tr>
                       );
                     })}
@@ -240,31 +241,31 @@ const InvoicePage = () => {
               const total = Number(order.total) || subtotal + delivery;
               return (
                 <div className="flex flex-wrap items-start justify-between gap-6 mb-5 break-inside-avoid">
-                  <div className="text-sm text-gray-500">
+                  <div className={`${type.bodySm} text-gray-500`}>
                     <p>
-                      <span className="font-semibold text-gray-600">Amount in words:</span>{' '}
+                      <span className={`${type.label} text-gray-600`}>Amount in words:</span>{' '}
                       Rupees {numberToWords(Math.round(total))} only.
                     </p>
-                    <p className="text-xs italic mt-1">Valid without signature and stamp.</p>
+                    <p className={`${type.caption} italic mt-1`}>Valid without signature and stamp.</p>
                   </div>
                   <div className="rounded-xl border border-gray-200 overflow-hidden shrink-0">
-                    <table className="text-sm min-w-[240px]">
+                    <table className={`${type.bodySm} min-w-[240px]`}>
                       <tbody>
                         <tr className="border-b border-gray-100">
                           <td className="py-2 px-4 text-gray-600">Subtotal</td>
-                          <td className="py-2 px-4 text-right font-medium text-gray-900">{formatRupee(subtotal)}</td>
+                          <td className={`${type.nav} py-2 px-4 text-right text-gray-900`}>{formatRupee(subtotal)}</td>
                         </tr>
                         <tr className="border-b border-gray-100">
                           <td className="py-2 px-4 text-gray-600">18% GST</td>
-                          <td className="py-2 px-4 text-right font-medium text-gray-500 text-xs">Included</td>
+                          <td className={`${type.caption} py-2 px-4 text-right text-gray-500`}>Included</td>
                         </tr>
                         <tr className="border-b border-gray-100">
                           <td className="py-2 px-4 text-gray-600">Delivery Charges</td>
-                          <td className="py-2 px-4 text-right font-medium text-gray-900">
+                          <td className={`${type.nav} py-2 px-4 text-right text-gray-900`}>
                             {subtotal >= 500 ? (
                               <div className="flex items-center justify-end gap-2">
-                                <span className="text-gray-400 line-through text-xs">₹50.00</span>
-                                <span className="text-blue-600 font-medium">Free</span>
+                                <span className={`${type.caption} text-gray-400 line-through`}>₹50.00</span>
+                                <span className={`${type.nav} text-blue-600`}>Free</span>
                               </div>
                             ) : (
                               delivery === 0 ? 'Free' : formatRupee(delivery)
@@ -272,8 +273,8 @@ const InvoicePage = () => {
                           </td>
                         </tr>
                         <tr className="bg-gray-800 text-white">
-                          <td className="py-3 px-4 font-bold">Total Amount</td>
-                          <td className="py-3 px-4 text-right font-bold">{formatRupee(total)}</td>
+                          <td className={`${type.button} py-3 px-4`}>Total Amount</td>
+                          <td className={`${type.button} py-3 px-4 text-right`}>{formatRupee(total)}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -287,14 +288,14 @@ const InvoicePage = () => {
           <div className="no-print px-6 pb-6 flex flex-wrap gap-3 justify-center">
             <button
               onClick={() => window.print()}
-              className="inline-flex items-center gap-2 px-5 py-3 bg-gray-700 text-white font-bold rounded-xl hover:bg-gray-800 shadow-lg transition-all"
+              className={`${type.button} inline-flex items-center gap-2 px-5 py-3 bg-gray-700 text-white rounded-xl hover:bg-gray-800 shadow-lg transition-all`}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2h-2m-4-0H9a2 2 0 00-2 2v4a2 2 0 002 2h2z" /></svg>
               Print / Save PDF
             </button>
             <button
               onClick={() => window.close()}
-              className="inline-flex items-center gap-2 px-5 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+              className={`${type.label} inline-flex items-center gap-2 px-5 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors`}
             >
               Close
             </button>

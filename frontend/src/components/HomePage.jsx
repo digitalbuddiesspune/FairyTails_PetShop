@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HeroBanner from './HeroBanner';
 import ProductCard from './ProductCard';
+import { type } from '../styles/typography';
 
 // Color mapping for category circle backgrounds
 const categoryColors = {
@@ -218,8 +219,8 @@ const HomePage = () => {
 
       {/* Shop by Category */}
       <section className="py-12 md:py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-8">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className={`${type.h2} text-center text-gray-900 mb-8`}>
             Shop by Category
           </h2>
           <div className="grid grid-cols-3 md:grid-cols-7 gap-4">
@@ -245,7 +246,7 @@ const HomePage = () => {
                     </span>
                   )}
                 </div>
-                <span className="font-semibold text-gray-900">{category.name}</span>
+                <span className={`${type.cardTitle} text-gray-900`}>{category.name}</span>
               </Link>
             ))}
           </div>
@@ -254,9 +255,9 @@ const HomePage = () => {
 
       {/* Featured Products */}
       <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h2 className={`${type.h2} text-gray-900`}>
               Featured Products
             </h2>
           </div>
@@ -293,17 +294,17 @@ const HomePage = () => {
           id={section.id}
           className={`py-16 md:py-24 ${section.color}`}
         >
-          <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto px-4">
             <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-8 md:gap-16`}>
               {/* Info Side */}
               <div className="flex-1 space-y-6">
-                <span className={`inline-block px-4 py-1 rounded-full text-sm font-semibold ${section.accentColor} text-white`}>
+                <span className={`inline-block px-4 py-1 rounded-full ${type.bodySm} font-semibold ${section.accentColor} text-white`}>
                   {section.name}
                 </span>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
+                <h2 className={`${type.h2} text-gray-900`}>
                   {section.title}
                 </h2>
-                <p className="text-gray-600 text-base sm:text-lg leading-relaxed">
+                <p className={`text-gray-600 ${type.body}`}>
                   {section.description}
                 </p>
                 <ul className="space-y-3">
@@ -314,13 +315,13 @@ const HomePage = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                         </svg>
                       </span>
-                      <span className="text-gray-700">{feature}</span>
+                      <span className={`text-gray-700 ${type.bodySm}`}>{feature}</span>
                     </li>
                   ))}
                 </ul>
                 <Link
   to={section.Link}
-  className={`inline-block px-8 py-3 rounded-full font-semibold ${section.accentColor} text-white hover:opacity-90 transition-opacity shadow-lg`}
+  className={`inline-block px-8 py-3 rounded-full ${type.button} ${section.accentColor} text-white hover:opacity-90 transition-opacity shadow-lg`}
 >
   Shop {section.name} →
 </Link>
@@ -353,14 +354,14 @@ const HomePage = () => {
 
       {/* Banner Section */}
       <section className="py-12 md:py-16">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-6">
             {/* Vet Consultation Banner */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-8 text-white relative overflow-hidden">
               <div className="relative z-10">
-                <h3 className="text-2xl font-bold mb-2">Consult a Vet Online</h3>
-                <p className="mb-4 opacity-90">Get expert advice from certified veterinarians from the comfort of your home.</p>
-                <a href="#consult" className="inline-block bg-white text-blue-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors">
+                <h3 className={`${type.h3} text-white mb-2`}>Consult a Vet Online</h3>
+                <p className={`mb-4 opacity-90 ${type.bodySm}`}>Get expert advice from certified veterinarians from the comfort of your home.</p>
+                <a href="#consult" className={`inline-block bg-white text-blue-600 px-6 py-2 rounded-full ${type.button} hover:bg-gray-100 transition-colors`}>
                   Book Now
                 </a>
               </div>
@@ -370,9 +371,9 @@ const HomePage = () => {
             {/* Grooming Banner */}
             <div className="bg-gradient-to-r from-pink-500 to-rose-500 rounded-2xl p-8 text-white relative overflow-hidden">
               <div className="relative z-10">
-                <h3 className="text-2xl font-bold mb-2">Pet Grooming Services</h3>
-                <p className="mb-4 opacity-90">Professional grooming to keep your pet looking and feeling their best.</p>
-                <a href="#grooming" className="inline-block bg-white text-pink-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors">
+                <h3 className={`${type.h3} text-white mb-2`}>Pet Grooming Services</h3>
+                <p className={`mb-4 opacity-90 ${type.bodySm}`}>Professional grooming to keep your pet looking and feeling their best.</p>
+                <a href="#grooming" className={`inline-block bg-white text-pink-600 px-6 py-2 rounded-full ${type.button} hover:bg-gray-100 transition-colors`}>
                   Learn More
                 </a>
               </div>
@@ -384,16 +385,16 @@ const HomePage = () => {
 
       {/* Vet Consultation Banner */}
       <section className="bg-[#fff7ed] overflow-hidden">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 py-10 md:py-14">
 
             {/* Left — Text Content */}
             <div className="flex-1 space-y-5">
-              <p className="text-gray-500 text-sm font-medium italic">
+              <p className={`text-gray-500 ${type.bodySm} font-medium italic`}>
                 A healthy pet is a happy pet.
               </p>
 
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+              <h2 className={`${type.h2} text-gray-900`}>
                 Expert <span className="text-[#203D5B]">Vet Consultation</span><br />
                 at Your Fingertips
               </h2>
@@ -407,14 +408,14 @@ const HomePage = () => {
                 ].map((item) => (
                   <div key={item.text} className="flex items-center gap-3">
                     <span className="text-xl">{item.icon}</span>
-                    <span className="text-gray-700 font-medium">{item.text}</span>
+                    <span className={`text-gray-700 ${type.bodySm} font-medium`}>{item.text}</span>
                   </div>
                 ))}
               </div>
 
               <Link
                 to="/contact"
-                className="inline-block mt-4 bg-[#203D5B] hover:bg-[#1a3149] text-white font-bold px-8 py-3 rounded-full transition-colors shadow-lg shadow-[#203D5B]/20"
+                className={`inline-block mt-4 bg-[#203D5B] hover:bg-[#1a3149] text-white ${type.button} px-8 py-3 rounded-full transition-colors shadow-lg shadow-[#203D5B]/20`}
               >
                 Book a Consultation
               </Link>
@@ -436,8 +437,8 @@ const HomePage = () => {
 
       {/* Why Choose Us */}
       <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className={`${type.h2} text-center text-gray-900 mb-12`}>
             Why Choose FairyTails?
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -445,22 +446,22 @@ const HomePage = () => {
               <div className="w-20 h-20 bg-[#205EA9] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-4xl">✓</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Quality Products</h3>
-              <p className="text-gray-600">We source only the best products from trusted brands for your beloved pets.</p>
+              <h3 className={`${type.h4} text-gray-900 mb-2`}>Quality Products</h3>
+              <p className={`text-gray-600 ${type.body}`}>We source only the best products from trusted brands for your beloved pets.</p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-[#205EA9] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-4xl">💚</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Pet-First Approach</h3>
-              <p className="text-gray-600">Every decision we make is guided by what's best for your pet's health and happiness.</p>
+              <h3 className={`${type.h4} text-gray-900 mb-2`}>Pet-First Approach</h3>
+              <p className={`text-gray-600 ${type.body}`}>Every decision we make is guided by what's best for your pet's health and happiness.</p>
             </div>
             <div className="text-center">
               <div className="w-20 h-20 bg-[#205EA9] rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-4xl">🌟</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Expert Support</h3>
-              <p className="text-gray-600">Our team of pet experts and vets are always here to help you make informed decisions.</p>
+              <h3 className={`${type.h4} text-gray-900 mb-2`}>Expert Support</h3>
+              <p className={`text-gray-600 ${type.body}`}>Our team of pet experts and vets are always here to help you make informed decisions.</p>
             </div>
           </div>
         </div>
@@ -468,12 +469,12 @@ const HomePage = () => {
 
       {/* Our Services */}
       <section className="py-16 md:py-20 bg-white">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-2xl md:text-3xl font-bold text-black mb-4">
+            <h2 className={`${type.h2} text-black mb-4`}>
               Our Promise to You
             </h2>
-            <p className="text-black max-w-2xl mx-auto">
+            <p className={`text-black ${type.body} max-w-2xl mx-auto`}>
               We're committed to providing the best shopping experience for you and your furry friends
             </p>
           </div>
@@ -486,8 +487,8 @@ const HomePage = () => {
                 <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:shadow-xl transition-shadow">
                   <span className="text-3xl">{service.icon}</span>
                 </div>
-                <h4 className="font-bold text-black text-lg mb-2">{service.title}</h4>
-                <p className="text-black text-sm">{service.description}</p>
+                <h4 className={`${type.cardTitle} text-black mb-2`}>{service.title}</h4>
+                <p className={`text-black ${type.bodySm}`}>{service.description}</p>
               </div>
             ))}
           </div>
@@ -572,7 +573,7 @@ const TestimonialsSection = () => {
   if (loading) {
     return (
       <section className="py-12 md:py-16 bg-gradient-to-br from-blue-50 to-blue-100">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="text-center">
             <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
           </div>
@@ -587,10 +588,10 @@ const TestimonialsSection = () => {
 
   return (
     <section className="py-12 md:py-16 bg-gradient-to-br from-blue-50 to-blue-100">
-      <div className="container mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">What Our Customers Say</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">Hear from our happy pet parents</p>
+          <h2 className={`${type.h2} text-gray-900 mb-3`}>What Our Customers Say</h2>
+          <p className={`text-gray-600 ${type.body} max-w-2xl mx-auto`}>Hear from our happy pet parents</p>
         </div>
 
         <div className="relative max-w-7xl mx-auto">
@@ -656,7 +657,7 @@ const TestimonialsSection = () => {
       <div className="relative bg-gradient-to-br from-[#F0F8FF] via-[#E6F3FF] to-[#D6EBFF] rounded-3xl px-8 py-6 shadow-lg overflow-visible transform transition-all duration-300 hover:scale-[1.02] flex flex-col h-[240px] w-full">
         
         {/* Avatar initial circle - centered at top */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#2f5a87] text-white flex items-center justify-center font-semibold text-lg shadow-md z-20">
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#2f5a87] text-white flex items-center justify-center ${type.h4} shadow-md z-20`}>
           {(testimonial.name && testimonial.name.charAt(0).toUpperCase()) || 'A'}
         </div>
 
@@ -684,7 +685,7 @@ const TestimonialsSection = () => {
         
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-between items-center h-full">
-          <p className="text-gray-700 text-sm md:text-base mb-3 font-medium text-center px-2 flex-1 overflow-hidden" style={{
+          <p className={`text-gray-700 ${type.body} mb-3 font-medium text-center px-2 flex-1 overflow-hidden`} style={{
             display: '-webkit-box',
             WebkitLineClamp: 4,
             WebkitBoxOrient: 'vertical',
@@ -704,7 +705,7 @@ const TestimonialsSection = () => {
           <div className="w-12 h-0.5 bg-blue-300 rounded-full mb-2 opacity-60 shrink-0" />
 
           {/* Customer Name */}
-          <p className="font-bold text-gray-800 text-sm md:text-base text-center tracking-wide truncate max-w-full shrink-0">
+          <p className={`font-bold text-gray-800 ${type.bodySm} text-center tracking-wide truncate max-w-full shrink-0`}>
             — {testimonial.name}
           </p>
         </div>

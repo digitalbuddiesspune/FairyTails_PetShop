@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { type } from '../styles/typography';
 import { getApiBearerToken } from '../auth/session';
 import { formatRupee } from '../utils/formatPrice';
-import { getStartingVariant, hasMultipleVariants } from '../utils/productVariants';
+import { getStartingVariant, hasMultipleVariants, getProductDiscountPercent } from '../utils/productVariants';
 import { getProductDetailUrl, getProductModelType } from '../utils/productModelType';
 import { useCartQuantity } from '../hooks/useCartQuantity';
 import ProductVariantBadges from './ProductVariantBadges';
@@ -23,6 +24,10 @@ const ProductCard = ({
 
   const startingPrice = useMemo(() => getStartingVariant(product), [product]);
   const multiVariants = hasMultipleVariants(product);
+  const discountPercent = useMemo(
+    () => getProductDiscountPercent(product, startingPrice),
+    [product, startingPrice]
+  );
   const productModelType = useMemo(() => getProductModelType(product), [product]);
 
   const { quantity, updating, addOne, increment, decrement } = useCartQuantity(
@@ -82,7 +87,7 @@ const ProductCard = ({
 
       <div className="flex flex-col flex-1 px-3 pt-2.5 pb-3 gap-2">
         <Link to={productUrl} className="block flex-1">
-          <h3 className="text-sm font-medium text-gray-900 leading-snug line-clamp-2 min-h-[2.5rem] hover:text-[#205EA9] transition-colors">
+          <h3 className={`${type.cardTitle} text-gray-900 line-clamp-2 min-h-[2.5rem] hover:text-[#205EA9] transition-colors`}>
             {displayName}
           </h3>
         </Link>
@@ -90,12 +95,17 @@ const ProductCard = ({
         {startingPrice && (
           <div className="flex items-baseline gap-1.5 flex-wrap">
             {startingPrice.mrp > startingPrice.discountedPrice && (
-              <span className="text-xs text-gray-400 line-through">{formatRupee(startingPrice.mrp)}</span>
+              <span className={`${type.caption} text-gray-400 line-through`}>{formatRupee(startingPrice.mrp)}</span>
             )}
-            <span className="text-base font-bold text-gray-900">
-              {multiVariants && <span className="text-[10px] font-normal text-gray-500 mr-0.5">from</span>}
+            <span className={`${type.priceSm} text-gray-900`}>
+              {multiVariants && <span className={`${type.caption} text-gray-500 mr-0.5`}>from</span>}
               {formatRupee(startingPrice.discountedPrice)}
             </span>
+            {discountPercent > 0 && (
+              <span className={`${type.captionMedium} text-red-600 bg-red-50 px-1.5 py-0.5 rounded`}>
+                {discountPercent}% off
+              </span>
+            )}
           </div>
         )}
 
