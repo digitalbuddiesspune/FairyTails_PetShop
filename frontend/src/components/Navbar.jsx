@@ -4,7 +4,7 @@ import MobileBottomNav from './MobileBottomNav';
 import CatalogMenuContent from './CatalogMenuContent';
 import { clearUserSession, getAuthToken, getStoredUser, isUserAuthenticated } from '../auth/session';
 import { type } from '../styles/typography';
-import logoImage from '../assets/image.png';
+import logoImage from '../assets/LOGO.png';
 
 const subIconMap = {
   'Dry Food': '🥫', 'Wet Food': '🍖', 'Dog Clothes': '👕', 'Cat Clothes': '👗',
