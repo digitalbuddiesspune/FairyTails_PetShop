@@ -9,6 +9,7 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import { getAdminToken } from '../../auth/session';
 import { formatRupee } from '../../utils/formatPrice';
 import { type } from '../../styles/typography';
 import {
@@ -46,7 +47,7 @@ const AdminDashboard = () => {
     const [modalOrders, setModalOrders] = useState([]);
 
     const fetchDashboardData = useCallback(async (showLoader = false) => {
-        const token = localStorage.getItem('adminToken');
+        const token = getAdminToken();
         if (!token) return;
 
         if (showLoader) setLoading(true);
@@ -70,14 +71,10 @@ const AdminDashboard = () => {
                 const usersRes = await fetch(`${API_BASE}/admin/users`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                if (usersRes.status === 401) {
-                    localStorage.removeItem('adminToken');
-                    localStorage.removeItem('admin');
-                    window.location.href = '/admin/signin';
-                    return;
+                if (usersRes.ok) {
+                    const usersData = await usersRes.json();
+                    userCount = usersData.count || 0;
                 }
-                const usersData = await usersRes.json();
-                userCount = usersData.count || 0;
             } catch {}
 
             // Fetch all orders
@@ -86,15 +83,11 @@ const AdminDashboard = () => {
                 const ordersRes = await fetch(`${API_BASE}/admin/orders`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                if (ordersRes.status === 401) {
-                    localStorage.removeItem('adminToken');
-                    localStorage.removeItem('admin');
-                    window.location.href = '/admin/signin';
-                    return;
-                }
-                const ordersData = await ordersRes.json();
-                if (ordersData.success) {
-                    orders = ordersData.data || [];
+                if (ordersRes.ok) {
+                    const ordersData = await ordersRes.json();
+                    if (ordersData.success) {
+                        orders = ordersData.data || [];
+                    }
                 }
             } catch {}
 

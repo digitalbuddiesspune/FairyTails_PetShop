@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HomePage from './components/HomePage';
@@ -38,7 +38,7 @@ import AdminSettings from './pages/admin/AdminSettings';
 import AdminBanner from './pages/admin/AdminBanner';
 import AdminTestimonials from './pages/admin/AdminTestimonials';
 import './App.css';
-import { isAdminAuthenticated } from './auth/session';
+import { ADMIN_AUTH_CHANGED_EVENT, isAdminAuthenticated } from './auth/session';
 
 // Scroll to top on every route change
 const ScrollToTop = () => {
@@ -63,9 +63,23 @@ const MainLayout = ({ children }) => {
 };
 
 const AdminRouteGuard = ({ children }) => {
-  if (!isAdminAuthenticated()) {
+  const [authed, setAuthed] = useState(() => isAdminAuthenticated());
+
+  useEffect(() => {
+    const syncAuth = () => setAuthed(isAdminAuthenticated());
+    syncAuth();
+    window.addEventListener(ADMIN_AUTH_CHANGED_EVENT, syncAuth);
+    window.addEventListener('storage', syncAuth);
+    return () => {
+      window.removeEventListener(ADMIN_AUTH_CHANGED_EVENT, syncAuth);
+      window.removeEventListener('storage', syncAuth);
+    };
+  }, []);
+
+  if (!authed) {
     return <Navigate to="/admin/signin" replace />;
   }
+
   return children;
 };
 

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type } from '../styles/typography';
+import { isAdminAuthenticated, setAdminSession } from '../auth/session';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -10,6 +11,12 @@ const AdminSignIn = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (isAdminAuthenticated()) {
+      navigate('/admin/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -41,9 +48,15 @@ const AdminSignIn = () => {
       }
 
       if (response.ok && data.success) {
-        localStorage.setItem('adminToken', data.data.token);
-        localStorage.setItem('admin', JSON.stringify(data.data));
-        navigate('/admin/dashboard');
+        const token = data?.data?.token;
+        if (!token) {
+          setError('Login succeeded but no session token was returned. Please try again.');
+          return;
+        }
+
+        const { token: _token, ...adminProfile } = data.data;
+        setAdminSession({ token, ...adminProfile });
+        navigate('/admin/dashboard', { replace: true });
         return;
       }
 

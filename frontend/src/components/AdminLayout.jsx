@@ -3,6 +3,11 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { type } from '../styles/typography';
 import {
+    clearAdminSession,
+    getAdminToken,
+    getStoredAdmin,
+} from '../auth/session';
+import {
     LayoutDashboard,
     Package,
     List,
@@ -57,13 +62,40 @@ const AdminLayout = () => {
     const profileRef = useRef(null);
 
     useEffect(() => {
-        const adminData = localStorage.getItem('admin');
-        const adminToken = localStorage.getItem('adminToken');
-        if (!adminData || !adminToken) {
-            navigate('/admin/signin');
+        const token = getAdminToken();
+        const adminData = getStoredAdmin();
+
+        if (!token || !adminData) {
+            navigate('/admin/signin', { replace: true });
             return;
         }
-        setAdmin(JSON.parse(adminData));
+
+        setAdmin(adminData);
+
+        let cancelled = false;
+
+        const verifySession = async () => {
+            try {
+                const res = await fetch(`${API_BASE}/admin/me`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                if (cancelled) return;
+
+                if (res.status === 401) {
+                    clearAdminSession();
+                    navigate('/admin/signin', { replace: true });
+                }
+            } catch (error) {
+                console.error('Admin session verification failed:', error);
+            }
+        };
+
+        verifySession();
+
+        return () => {
+            cancelled = true;
+        };
     }, [navigate]);
 
     // Auto-expand products accordion if on a product page
@@ -89,9 +121,8 @@ const AdminLayout = () => {
     }, [location.pathname]);
 
     const handleLogout = () => {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('admin');
-        navigate('/admin/signin');
+        clearAdminSession();
+        navigate('/admin/signin', { replace: true });
     };
 
     const handleChangePassword = async () => {
@@ -113,7 +144,7 @@ const AdminLayout = () => {
 
         setPwLoading(true);
         try {
-            const token = localStorage.getItem('adminToken');
+            const token = getAdminToken();
             const res = await axios.put(`${API_BASE}/admin/change-password`, {
                 currentPassword,
                 newPassword

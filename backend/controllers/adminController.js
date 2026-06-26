@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 // Generate JWT Token for admin
 const generateAdminToken = (id) => {
   const secret = process.env.JWT_SECRET || 'fairytails_petshop_secret_key_2024';
-  return jwt.sign({ id, role: 'admin' }, secret, {
+  return jwt.sign({ id: String(id), role: 'admin' }, secret, {
     expiresIn: '30d'
   });
 };
@@ -95,8 +95,7 @@ export const adminSignin = async (req, res) => {
 // @access  Private (admin only)
 export const getAdminMe = async (req, res) => {
   try {
-    const admin = await Admin.findById(req.admin.id);
-    res.status(200).json({ success: true, data: admin });
+    res.status(200).json({ success: true, data: req.admin });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
