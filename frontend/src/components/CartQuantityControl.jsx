@@ -17,25 +17,32 @@ const CartQuantityControl = ({
   addLabel = 'Add to Cart',
   className = '',
   compact = false,
+  showCartIcon = true,
+  variant = 'filled',
 }) => {
+  const isOutline = variant === 'outline';
+  const heightClass = isOutline ? 'h-8' : CONTROL_HEIGHT;
+  const borderColor = isOutline ? 'border-[#205EA9]' : 'border-gray-300';
+  const qtyTextClass = isOutline ? type.captionMedium : type.label;
+
   if (quantity > 0) {
     return (
       <div
-        className={`mt-auto w-full ${CONTROL_HEIGHT} grid grid-cols-[1fr_auto_1fr] items-stretch border border-gray-300 rounded-md bg-white overflow-hidden box-border ${className}`}
+        className={`mt-auto w-full ${heightClass} grid grid-cols-[1fr_auto_1fr] items-stretch border ${borderColor} rounded-md bg-white overflow-hidden box-border ${className}`}
       >
         <button
           type="button"
           onClick={onDecrement}
           disabled={updating}
-          className={`h-full w-full flex items-center justify-center ${type.label} text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors`}
+          className={`h-full w-full flex items-center justify-center ${qtyTextClass} ${isOutline ? 'text-[#205EA9]' : 'text-gray-700'} hover:bg-gray-50 disabled:opacity-50 transition-colors`}
           aria-label="Decrease quantity"
         >
           −
         </button>
         <span
-          className={`flex items-center justify-center px-2 font-semibold text-gray-900 border-x border-gray-300 ${type.label} ${
-            compact ? 'min-w-[1.75rem]' : 'min-w-[2rem]'
-          }`}
+          className={`flex items-center justify-center px-1.5 font-semibold border-x ${borderColor} ${qtyTextClass} ${
+            isOutline ? 'text-[#205EA9]' : 'text-gray-900'
+          } ${compact || isOutline ? 'min-w-[1.5rem]' : 'min-w-[2rem]'}`}
         >
           {quantity}
         </span>
@@ -43,7 +50,7 @@ const CartQuantityControl = ({
           type="button"
           onClick={onIncrement}
           disabled={updating}
-          className={`h-full w-full flex items-center justify-center ${type.label} text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors`}
+          className={`h-full w-full flex items-center justify-center ${qtyTextClass} ${isOutline ? 'text-[#205EA9]' : 'text-gray-700'} hover:bg-gray-50 disabled:opacity-50 transition-colors`}
           aria-label="Increase quantity"
         >
           +
@@ -52,14 +59,18 @@ const CartQuantityControl = ({
     );
   }
 
+  const addButtonClass = isOutline
+    ? `mt-auto w-full ${heightClass} box-border bg-white border border-[#205EA9] text-[#205EA9] hover:bg-[#205EA9]/5 ${isOutline ? 'text-[11px] leading-tight font-semibold' : type.captionMedium} rounded-md flex items-center justify-center transition-colors disabled:opacity-60 px-1 text-center`
+    : `mt-auto w-full ${heightClass} box-border bg-[#205EA9] hover:bg-[#1d4f8f] text-white ${type.button} rounded-md flex items-center justify-center gap-2 transition-colors disabled:opacity-60`;
+
   return (
     <button
       type="button"
-      onClick={onAdd}
+      onClick={(e) => onAdd?.(e)}
       disabled={updating}
-      className={`mt-auto w-full ${CONTROL_HEIGHT} box-border bg-[#205EA9] hover:bg-[#1d4f8f] text-white ${type.button} rounded-md flex items-center justify-center gap-2 transition-colors disabled:opacity-60 ${className}`}
+      className={`${addButtonClass} ${className}`}
     >
-      <CartIcon />
+      {showCartIcon && !isOutline && <CartIcon />}
       {updating ? 'Adding...' : addLabel}
     </button>
   );

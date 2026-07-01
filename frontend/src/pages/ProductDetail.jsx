@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { addToGuestWishlist, removeFromGuestWishlist, isInGuestWishlist } from '../utils/guestCart';
@@ -10,6 +10,7 @@ import CartQuantityControl from '../components/CartQuantityControl';
 import LoginRequiredModal from '../components/LoginRequiredModal';
 import ProductCard from '../components/ProductCard';
 import { type } from '../styles/typography';
+import { flyToTarget } from '../utils/flyAnimation';
 
 const API_BASE = import.meta.env.VITE_BACKEND_API;
 
@@ -80,6 +81,12 @@ const ProductDetail = () => {
   const [wishlistIds, setWishlistIds] = useState([]);
   const [sharing, setSharing] = useState(false);
   const [shareFeedback, setShareFeedback] = useState('');
+  const imageRef = useRef(null);
+
+  const getFlyOptions = () => ({
+    imageUrl: product?.images?.[selectedImage] || product?.images?.[0] || product?.image || null,
+    imageEl: imageRef.current,
+  });
 
   useEffect(() => {
     const onAuth = () => setAuthEpoch((e) => e + 1);
@@ -162,7 +169,11 @@ const ProductDetail = () => {
     }
   };
 
-  const handleToggleWishlist = async () => {
+  const handleToggleWishlist = async (e) => {
+    const adding = !isInWishlist;
+    if (adding && e?.currentTarget) {
+      flyToTarget(e.currentTarget, 'wishlist', getFlyOptions());
+    }
     const t = getApiBearerToken();
     if (!t) {
       // Use guest wishlist with full product data
@@ -423,6 +434,13 @@ const ProductDetail = () => {
     decrement: decrementCartQty,
   } = useCartQuantity(id, selectedSize, cartModelType);
 
+  const handleAddToCartFromDetail = (e) => {
+    if (cartQuantity === 0 && e?.currentTarget) {
+      flyToTarget(e.currentTarget, 'cart', getFlyOptions());
+    }
+    addToCartFromDetail();
+  };
+
   // Average rating (only food has reviews)
   const avgRating = useMemo(() => {
     if (!product?.reviews?.length) return 0;
@@ -472,6 +490,7 @@ const ProductDetail = () => {
               <div className="relative aspect-square flex items-center justify-center overflow-hidden">
                 {images[selectedImage] ? (
                   <img
+                    ref={imageRef}
                     src={images[selectedImage]}
                     alt={displayName}
                     className="w-full h-full object-contain"
@@ -779,7 +798,7 @@ const ProductDetail = () => {
                         <CartQuantityControl
                           quantity={cartQuantity}
                           updating={cartUpdating}
-                          onAdd={addToCartFromDetail}
+                          onAdd={handleAddToCartFromDetail}
                           onIncrement={incrementCartQty}
                           onDecrement={decrementCartQty}
                           addLabel="Add to Cart"

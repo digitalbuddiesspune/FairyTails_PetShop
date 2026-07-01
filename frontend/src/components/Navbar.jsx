@@ -261,7 +261,7 @@ const Navbar = () => {
               <Link to="/about" className={`hidden lg:flex items-center text-white hover:text-gray-200 ${type.nav} transition-colors`}>
                 About
               </Link>
-              <Link to="/wishlist" className="text-white hover:text-gray-200 transition-colors relative" title="Wishlist">
+              <Link to="/wishlist" data-fly-target="wishlist-desktop" className="text-white hover:text-gray-200 transition-colors relative" title="Wishlist">
                 <HeartIcon />
                 {wishlistCount > 0 && (
                   <span className={`absolute -top-2 -right-2 bg-red-500 text-white ${type.captionMedium} w-5 h-5 rounded-full flex items-center justify-center leading-none`}>
@@ -269,7 +269,7 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
-              <Link to="/cart" className="text-white hover:text-gray-200 transition-colors relative" title="Cart">
+              <Link to="/cart" data-fly-target="cart-desktop" className="text-white hover:text-gray-200 transition-colors relative" title="Cart">
                 <CartIcon />
                 {cartCount > 0 && (
                   <span className={`absolute -top-2 -right-2 bg-red-500 text-white ${type.captionMedium} w-5 h-5 rounded-full flex items-center justify-center leading-none`}>
@@ -327,6 +327,20 @@ const Navbar = () => {
                   alt="FairyTails Pet Shop" 
                   className="h-14 w-auto object-contain"
                 />
+              </Link>
+              <Link
+                to="/wishlist"
+                data-fly-target="wishlist-mobile"
+                className="relative p-2 text-white hover:text-gray-200 hover:bg-white/10 rounded-lg transition-colors shrink-0"
+                title="Wishlist"
+                aria-label="Wishlist"
+              >
+                <HeartIcon />
+                {wishlistCount > 0 && (
+                  <span className={`absolute top-0.5 right-0.5 bg-red-500 text-white ${type.captionMedium} w-4 h-4 rounded-full flex items-center justify-center leading-none text-[10px]`}>
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </span>
+                )}
               </Link>
               <button
                 onClick={() => {

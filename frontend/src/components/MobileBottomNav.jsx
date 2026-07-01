@@ -26,7 +26,10 @@ export default function MobileBottomNav({ cartCount = 0, isLoggedIn = false, onC
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 safe-area-bottom">
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 safe-area-bottom"
+      data-mobile-bottom-nav
+    >
       <div className="flex items-center justify-around h-16 px-2">
         {NAV_ITEMS.map((item) => {
           const useAlt = item.altPath && isLoggedIn;
@@ -59,13 +62,19 @@ export default function MobileBottomNav({ cartCount = 0, isLoggedIn = false, onC
               to={to}
               className={linkClassName}
             >
-              {item.label === 'Cart' && cartCount > 0 ? (
-                <span className="relative inline-block">
-                  <item.icon active={active} />
-                  <span className={`absolute -top-2 -right-2 bg-red-500 text-white ${type.captionMedium} w-4 h-4 rounded-full flex items-center justify-center leading-none`}>
-                    {cartCount > 99 ? '99+' : cartCount}
+              {item.label === 'Cart' ? (
+                cartCount > 0 ? (
+                  <span className="relative inline-block" data-fly-target="cart-mobile">
+                    <item.icon active={active} />
+                    <span className={`absolute -top-2 -right-2 bg-red-500 text-white ${type.captionMedium} w-4 h-4 rounded-full flex items-center justify-center leading-none`}>
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
                   </span>
-                </span>
+                ) : (
+                  <span data-fly-target="cart-mobile">
+                    <item.icon active={active} />
+                  </span>
+                )
               ) : (
                 <item.icon active={active} />
               )}
