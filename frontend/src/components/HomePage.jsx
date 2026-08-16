@@ -5,15 +5,7 @@ import ProductCard from './ProductCard';
 import { type } from '../styles/typography';
 
 // Color mapping for category circle backgrounds
-const categoryColors = {
-  'dogs': 'bg-amber-100',
-  'cats': 'bg-purple-100',
-  'toys': 'bg-blue-100',
-  'accessories': 'bg-rose-100',
-  'grooming-and-essential': 'bg-cyan-100',
-  'health-and-supplement': 'bg-blue-100',
-  'beds-and-house': 'bg-pink-100',
-};
+
 
 const API = import.meta.env.VITE_BACKEND_API;
 
@@ -232,13 +224,13 @@ const HomePage = () => {
               >
                 <div className="relative flex items-center justify-center mb-4">
                   {/* Circle background */}
-                  <div className={`${categoryColors[category.slug] || 'bg-gray-100'} w-28 h-28 md:w-36 md:h-36 rounded-full shadow-md group-hover:shadow-xl transition-shadow`}></div>
+                  <div className={`w-28 h-28 md:w-36 md:h-36  transition-shadow`}></div>
                   {/* Image from backend API */}
                   {category.image ? (
                     <img
                       src={category.image}
                       alt={category.name}
-                      className="absolute w-32 h-32 md:w-40 md:h-40 object-contain -top-4 group-hover:scale-110 group-hover:-top-6 transition-all duration-300 drop-shadow-lg"
+                      className="absolute rounded-full shadow-md w-32 h-32 md:w-40 md:h-40 object-contain -top-4 group-hover:scale-110 group-hover:-top-6 transition-all duration-300 drop-shadow-lg"
                     />
                   ) : (
                     <span className="absolute text-7xl md:text-8xl -top-2 group-hover:scale-110 group-hover:-top-4 transition-all duration-300 drop-shadow-lg">
